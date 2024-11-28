@@ -20,10 +20,10 @@ func new_Connection(fromNodeID int, toNodeID int, cost float64) *Connection {
 }
 
 type Topology struct {
-	Talker   []*Node
-	Switch   []*Node
-	Listener []*Node
-	Nodes    []*Node
+	Talker   []*Node //SOURCE
+	Switch   []*Node //TSN switch
+	Listener []*Node //destination
+	Nodes    []*Node //Not Use node
 }
 
 func new_Topology() *Topology {

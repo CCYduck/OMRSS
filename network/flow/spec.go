@@ -19,6 +19,21 @@ func AVB_stream() *AVB {
 	return avb
 }
 
+func importantCAN_stream() *importantCAN {
+
+	importantCAN := new_importantCAN()
+
+	return importantCAN
+}
+
+func unimportantCAN_stream() *unimportantCAN {
+	c_period, c_deadline := unimportantCAN_random()
+
+	unimportantCAN := new_unimportantCAN(c_period, c_deadline)
+
+	return unimportantCAN
+}
+
 func tsn_random() (int, float64) {
 	tsn_period_arr := []int{100, 500, 1000, 1500, 2000}
 	tsn_datasize_arr := []float64{30., 40., 50., 60., 70., 80., 90., 100.}
@@ -33,6 +48,15 @@ func avb_random() float64 {
 	datasize_rng, _ := rand.Int(rand.Reader, big.NewInt(int64(len(avb_datasize_arr))))
 
 	return avb_datasize_arr[datasize_rng.Int64()]
+}
+
+func unimportantCAN_random() (int, int) {
+	unimportantCAN_period_arr := []int{50000, 60000, 70000, 80000, 90000, 100000}
+	unimportantCAN_deadline := []int{10000, 12000, 14000, 16000, 18000, 20000}
+	period_rng, _ := rand.Int(rand.Reader, big.NewInt(int64(len(unimportantCAN_period_arr))))
+	deadline_rng, _ := rand.Int(rand.Reader, big.NewInt(int64(len(unimportantCAN_deadline))))
+
+	return unimportantCAN_period_arr[period_rng.Int64()], unimportantCAN_deadline[deadline_rng.Int64()]
 }
 
 func Random_Devices(Nnode int) (int, []int) {

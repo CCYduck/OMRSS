@@ -7,9 +7,9 @@ import (
 	"src/network/topology"
 )
 
-func Generate_Network(topology_name string, bg_tsn int, bg_avb int, input_tsn int, input_avb int, hyperperiod int, bandwidth float64) *Network {
+func Generate_Network(topology_name string, bg_tsn int, bg_avb int, input_tsn int, input_avb int, importantCAN int, unimportantCAN int, hyperperiod int, bandwidth float64) *Network {
 	// 1. Define network parameters
-	Network := new_Network(topology_name, bg_tsn, bg_avb, input_tsn, input_avb, hyperperiod, bandwidth)
+	Network := new_Network(topology_name, bg_tsn, bg_avb, input_tsn, input_avb, importantCAN, unimportantCAN, hyperperiod, bandwidth)
 
 	// 2. Generate topology
 	fmt.Println("Generate Topology")
@@ -21,7 +21,7 @@ func Generate_Network(topology_name string, bg_tsn int, bg_avb int, input_tsn in
 	// 3. Generate flows
 	fmt.Println("Generate Flows")
 	fmt.Println("----------------------------------------")
-	Network.Flow_Set = flow.Generate_Flows(len(Network.Topology.Nodes), Network.BG_TSN, Network.BG_AVB, Network.Input_TSN, Network.Input_AVB, Network.HyperPeriod)
+	Network.Flow_Set = flow.Generate_Flows(len(Network.Topology.Nodes), Network.BG_TSN, Network.BG_AVB, Network.Input_TSN, Network.Input_AVB, Network.ImportantCAN, Network.UnimportantCAN, Network.HyperPeriod)
 	fmt.Println("Complete Generating Flows.")
 	fmt.Println()
 
@@ -35,20 +35,22 @@ func Generate_Network(topology_name string, bg_tsn int, bg_avb int, input_tsn in
 	return Network
 }
 
-func new_Network(topology_name string, bg_tsn int, bg_avb int, input_tsn int, input_avb int, hyperperiod int, bandwidth float64) *Network {
+func new_Network(topology_name string, bg_tsn int, bg_avb int, input_tsn int, input_avb int, importantCAN int, unimportantCAN int, hyperperiod int, bandwidth float64) *Network {
 	bw := (bandwidth / 8) * 1e-6 // bytes/us ==> 125 bytes
 	bytes_rate := 1. / bw        // The number of bytes that can be transmitted in 1us ==> 1/125
 	bw *= float64(hyperperiod)   // The bytes that can be transmitted in 6000us (bytes/us * hyperperiod) ==> 750000 bytes
 
 	Network := &Network{
-		HyperPeriod:  hyperperiod,
-		BytesRate:    bytes_rate,
-		Bandwidth:    bw,
-		TopologyName: topology_name,
-		BG_TSN:       bg_tsn,
-		BG_AVB:       bg_avb,
-		Input_TSN:    input_tsn,
-		Input_AVB:    input_avb,
+		HyperPeriod:    hyperperiod,
+		BytesRate:      bytes_rate,
+		Bandwidth:      bw,
+		TopologyName:   topology_name,
+		BG_TSN:         bg_tsn,
+		BG_AVB:         bg_avb,
+		Input_TSN:      input_tsn,
+		Input_AVB:      input_avb,
+		ImportantCAN:   importantCAN,
+		UnimportantCAN: unimportantCAN,
 	}
 
 	fmt.Println("Define network parameters")
@@ -58,6 +60,7 @@ func new_Network(topology_name string, bg_tsn int, bg_avb int, input_tsn int, in
 	fmt.Printf("BytesRate:  %f BPS \n", Network.BytesRate)
 	fmt.Printf("Topology file name: %s \n", Network.TopologyName)
 	fmt.Printf("TSN flow: %d, AVB flow: %d \n", Network.Input_TSN+Network.BG_TSN, Network.Input_AVB+Network.BG_AVB)
+	fmt.Printf("ImportantCAN flow: %d, UnimportantCAN flow: %d \n", Network.ImportantCAN, Network.UnimportantCAN)
 	fmt.Println()
 
 	return Network

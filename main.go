@@ -1,23 +1,25 @@
 package main
 
 import (
-	"flag"
+	"flag" //package 
 	"fmt"
-	"src/memorizer"
+	"src/memorizer" // 
 	"src/network"
 	"src/plan"
 )
 
 var (
 	// network parameters
-	test_case     int
-	topology_name string
-	input_tsn     int
-	input_avb     int
-	bg_tsn        int
-	bg_avb        int
-	hyperperiod   int
-	bandwidth     float64
+	test_case     	int
+	topology_name 	string
+	input_tsn     	int
+	input_avb     	int
+	bg_tsn        	int
+	bg_avb        	int
+	importantCAN 	int
+	unimportantCAN 	int
+	hyperperiod   	int
+	bandwidth     	float64
 
 	// algo parameters
 	plan_name     string
@@ -37,14 +39,16 @@ func init() {
 	flag.StringVar(&topology_name, "topology_name", "typical_complex", "Topology architecture has typical_complex, typical_simple, ring, layered_ring and industrial.")
 	flag.IntVar(&input_tsn, "input_tsn", 35, "Number of TSN input flows.")
 	flag.IntVar(&input_avb, "input_avb", 15, "Number of AVB input flows.")
+	flag.IntVar(&input_tsn, "importantCAN", 4, "Number of TSN input flows.")
+	flag.IntVar(&input_avb, "unimportantCAN", 16, "Number of AVB input flows.")
 	flag.IntVar(&bg_tsn, "bg_tsn", 35, "Number of TSN bg flows.")
 	flag.IntVar(&bg_avb, "bg_avb", 15, "Number of AVB bg flows.")
 	flag.IntVar(&hyperperiod, "hyperperiod", 6000, "Greatest Common Divisor of Simulated Time LCM.")
-	flag.Float64Var(&bandwidth, "bandwidth", 1e9, "1 Gbps.")
+	flag.Float64Var(&bandwidth, "bandwidth", 1e9, "1 Gbps.") //1e8 100M
 
 	flag.StringVar(&plan_name, "plan_name", "omaco", "The plan comprises OMACO.")
 	flag.IntVar(&osaco_timeout, "osaco_timeout", 200, "Timeout in milliseconds")
-	flag.IntVar(&osaco_K, "osaco_K", 5, "Select K trees with different weights.")
+	flag.IntVar(&osaco_K, "osaco_K", 5, "Select K trees with different weights.") //K path
 	flag.Float64Var(&osaco_P, "osaco_P", 0.6, "The pheromone value of each routing path starts to evaporate, where P is the given evaporation coefficient. (0 <= p <= 1)")
 
 	flag.BoolVar(&show_network, "show_network", false, "Present all network information comprehensively.")
@@ -73,7 +77,7 @@ func main() {
 		fmt.Printf("\nTestCase%d\n", ts+1)
 		fmt.Println("****************************************")
 		// 1. Network (a.Topology b.Flows c.Graphs)
-		Network := network.Generate_Network(topology_name, bg_tsn, bg_avb, input_tsn, input_avb, hyperperiod, bandwidth)
+		Network := network.Generate_Network(topology_name, bg_tsn, bg_avb, input_tsn, input_avb, importantCAN, unimportantCAN, hyperperiod, bandwidth)
 		if show_network {
 			Network.Show_Network()
 		}

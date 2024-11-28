@@ -14,6 +14,34 @@ func new_TSN(t_period int, t_datasize float64) *TSN {
 	}
 }
 
+type importantCAN struct {
+	Period   int
+	Deadline int
+	DataSize float64
+}
+
+func new_importantCAN() *importantCAN {
+	return &importantCAN{
+		Period:   5000, // 5000us
+		Deadline: 5000, // Period = Deadline
+		DataSize: 8,    // 8bytes
+	}
+}
+
+type unimportantCAN struct {
+	Period   int
+	Deadline int
+	DataSize float64
+}
+
+func new_unimportantCAN(c_period int, c_deadline int) *unimportantCAN {
+	return &unimportantCAN{
+		Period:   c_period,   // 50000~100000us up 10000us
+		Deadline: c_deadline, // 10000~20000us up 2000us
+		DataSize: 8,          // 8bytes
+	}
+}
+
 type AVB struct {
 	Period   int     // 125us
 	Deadline int     // 2000us
@@ -65,11 +93,18 @@ func new_Flow(period int, deadline int, datasize float64, HyperPeriod int) *Flow
 	}
 }
 
+// 因為所有的Flow的格式都一樣
 type Flows struct {
-	TSNFlows []*Flow
-	AVBFlows []*Flow
+	TSNFlows            []*Flow
+	AVBFlows            []*Flow
+	importantCANFlows   []*Flow
+	unimportantCANFlows []*Flow
 }
 
 func new_Flows() *Flows {
+	return &Flows{}
+}
+
+func new_CANFlows() *Flows {
 	return &Flows{}
 }
