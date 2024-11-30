@@ -9,7 +9,7 @@ var (
 	bg_avbflow_end  int
 )
 
-func Generate_Flows(Nnode int, bg_tsn int, bg_avb int, input_tsn int, input_avb int, importantCAN int, unimportantCAN int, HyperPeriod int) *Flows {
+func Generate_TSNFlows(Nnode int, bg_tsn int, bg_avb int, input_tsn int, input_avb int, HyperPeriod int) *TSNFlows {
 	// Constructing Flows structures
 	flow_set := new_Flows()
 	bg_tsnflows_end = bg_tsn
@@ -25,17 +25,10 @@ func Generate_Flows(Nnode int, bg_tsn int, bg_avb int, input_tsn int, input_avb 
 	Generate_AVBFlow(flow_set, Nnode, input_avb, HyperPeriod)
 	fmt.Printf("Complete generating round%d streams.\n", 2)
 
-	canflow_set := new_CANFlows()
-	//importantCAN
-	Generate_importantCANFlow(canflow_set, Nnode, importantCAN, HyperPeriod)
-	//unimportantCAN
-	Generate_unimportantCANFlow(canflow_set, Nnode, unimportantCAN, HyperPeriod)
-	fmt.Printf("Complete generating round%d streams.\n", 2)
-
 	return flow_set
 }
 
-func Generate_TSNFlow(flows *Flows, Nnode int, TS int, HyperPeriod int) {
+func Generate_TSNFlow(flows *TSNFlows, Nnode int, TS int, HyperPeriod int) {
 	for flow := 0; flow < TS; flow++ {
 		tsn := TSN_stream()
 
@@ -50,7 +43,7 @@ func Generate_TSNFlow(flows *Flows, Nnode int, TS int, HyperPeriod int) {
 	}
 }
 
-func Generate_AVBFlow(flows *Flows, Nnode int, AS int, HyperPeriod int) {
+func Generate_AVBFlow(flows *TSNFlows, Nnode int, AS int, HyperPeriod int) {
 	for flow := 0; flow < AS; flow++ {
 		avb := AVB_stream()
 
@@ -62,36 +55,6 @@ func Generate_AVBFlow(flows *Flows, Nnode int, AS int, HyperPeriod int) {
 		Flow.Destinations = destinations
 
 		flows.AVBFlows = append(flows.AVBFlows, Flow)
-	}
-}
-
-func Generate_importantCANFlow(flows *Flows, Nnode int, impcan int, HyperPeriod int) {
-	for flow := 0; flow < impcan; flow++ {
-		importantCAN := importantCAN_stream()
-
-		// Random End Devices 1. source(Talker) 2. destinations(listener)
-		source, destinations := Random_Devices(Nnode)
-
-		Flow := Generate_stream(importantCAN.Period, importantCAN.Deadline, importantCAN.DataSize, HyperPeriod)
-		Flow.Source = source
-		Flow.Destinations = destinations
-
-		flows.importantCANFlows = append(flows.importantCANFlows, Flow)
-	}
-}
-
-func Generate_unimportantCANFlow(flows *Flows, Nnode int, umimpcan int, HyperPeriod int) {
-	for flow := 0; flow < umimpcan; flow++ {
-		unimportantCAN := unimportantCAN_stream()
-
-		// Random End Devices 1. source(Talker) 2. destinations(listener)
-		source, destinations := Random_Devices(Nnode)
-
-		Flow := Generate_stream(unimportantCAN.Period, unimportantCAN.Deadline, unimportantCAN.DataSize, HyperPeriod)
-		Flow.Source = source
-		Flow.Destinations = destinations
-
-		flows.unimportantCANFlows = append(flows.unimportantCANFlows, Flow)
 	}
 }
 

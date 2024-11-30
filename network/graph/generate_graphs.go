@@ -5,7 +5,7 @@ import (
 	"src/network/topology"
 )
 
-func Generate_Graphs(topology *topology.Topology, flows *flow.Flows, bytes_rate float64) *Graphs {
+func Generate_Graphs(topology *topology.Topology, flows *flow.TSNFlows, bytes_rate float64) *Graphs {
 	// Constructing Graph structures
 	graphs := new_Graphs()
 

@@ -94,17 +94,22 @@ func new_Flow(period int, deadline int, datasize float64, HyperPeriod int) *Flow
 }
 
 // 因為所有的Flow的格式都一樣
-type Flows struct {
+type TSNFlows struct {
 	TSNFlows            []*Flow
 	AVBFlows            []*Flow
 	importantCANFlows   []*Flow
 	unimportantCANFlows []*Flow
 }
 
-func new_Flows() *Flows {
-	return &Flows{}
+type CANFlows struct {
+	importantCANFlows   []*Flow
+	unimportantCANFlows []*Flow
 }
 
-func new_CANFlows() *Flows {
-	return &Flows{}
+func new_Flows() *TSNFlows {
+	return &TSNFlows{}
+}
+
+func new_CANFlows() *CANFlows {
+	return &CANFlows{}
 }

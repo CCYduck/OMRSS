@@ -1,0 +1,3 @@
+[submodule "OMRSS"]
+	path = OMRSS
+	url = https://github.com/CCYduck/OMRSS

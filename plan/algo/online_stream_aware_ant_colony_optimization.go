@@ -31,7 +31,7 @@ func (osaco *OSACO) OSACO_Initial_Settings(network *network.Network, SMT *routes
 	osaco.InputTrees = SMT.Input_Tree_set(bg_tsn, bg_avb)
 	osaco.BGTrees = SMT.BG_Tree_set(bg_tsn, bg_avb)
 	osaco.PRM = compute_prm(osaco.KTrees)
-	osaco.VB = compute_vb(osaco.KTrees, network.Flow_Set)
+	osaco.VB = compute_vb(osaco.KTrees, network.TSNFlow_Set)
 
 	osaco.Timer[0] = algo_timer.NewTimer()
 	osaco.Timer[0].TimerMerge(timer)
@@ -120,9 +120,9 @@ func compute_prm(X *routes.KTrees_set) *Pheromone {
 	return pheromone
 }
 
-func compute_vb(X *routes.KTrees_set, flow_set *flow.Flows) *Visibility {
+func compute_vb(X *routes.KTrees_set, flow_set *flow.TSNFlows) *Visibility {
 	var preference float64 = 2.
-	Input_flow_set := flow_set.Input_flow_set()
+	Input_flow_set := flow_set.Input_TSNflow_set()
 	BG_flow_set := flow_set.BG_flow_set()
 
 	visibility := &Visibility{}

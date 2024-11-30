@@ -21,14 +21,15 @@ func Generate_Network(topology_name string, bg_tsn int, bg_avb int, input_tsn in
 	// 3. Generate flows
 	fmt.Println("Generate Flows")
 	fmt.Println("----------------------------------------")
-	Network.Flow_Set = flow.Generate_Flows(len(Network.Topology.Nodes), Network.BG_TSN, Network.BG_AVB, Network.Input_TSN, Network.Input_AVB, Network.ImportantCAN, Network.UnimportantCAN, Network.HyperPeriod)
+	Network.TSNFlow_Set = flow.Generate_TSNFlows(len(Network.Topology.Nodes), Network.BG_TSN, Network.BG_AVB, Network.Input_TSN, Network.Input_AVB, Network.HyperPeriod)
 	fmt.Println("Complete Generating Flows.")
+	Network.CANFlow_Set = flow.Generate_CANFlows(len(Network.Topology.Nodes), Network.ImportantCAN, Network.UnimportantCAN, Network.HyperPeriod)
 	fmt.Println()
 
 	// 4. Simulating graphs using flows in topology
 	fmt.Println("Simulating Graphs")
 	fmt.Println("----------------------------------------")
-	Network.Graph_Set = graph.Generate_Graphs(Network.Topology, Network.Flow_Set, Network.BytesRate)
+	Network.Graph_Set = graph.Generate_Graphs(Network.Topology, Network.TSNFlow_Set, Network.BytesRate)
 	fmt.Println("Complete Simulating Graphs.")
 	fmt.Println()
 

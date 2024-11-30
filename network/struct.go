@@ -18,6 +18,7 @@ type Network struct {
 	UnimportantCAN 	int
 	ImportantCAN 	int
 	Topology     	*topology.Topology
-	Flow_Set     	*flow.Flows
+	TSNFlow_Set     *flow.TSNFlows
+	CANFlow_Set		*flow.CANFlows
 	Graph_Set    	*graph.Graphs
 }
