@@ -7,33 +7,27 @@ import (
 	"src/network/topology"
 )
 
-func Generate_Network(topology_name string, bg_tsn int, bg_avb int, input_tsn int, input_avb int, importantCAN int, unimportantCAN int, hyperperiod int, bandwidth float64) *Network {
-	// 1. Define network parameters
-	Network := new_Network(topology_name, bg_tsn, bg_avb, input_tsn, input_avb, importantCAN, unimportantCAN, hyperperiod, bandwidth)
-
+func (network *Network) Generate_Network() {
 	// 2. Generate topology
 	fmt.Println("Generate Topology")
 	fmt.Println("----------------------------------------")
-	Network.Topology = topology.Generate_Topology(Network.TopologyName, Network.BytesRate)
+	network.Topology = topology.Generate_Topology(network.TopologyName, network.BytesRate)
 	fmt.Println("Complete Generating Topology.")
 	fmt.Println()
 
 	// 3. Generate flows
 	fmt.Println("Generate Flows")
 	fmt.Println("----------------------------------------")
-	Network.TSNFlow_Set = flow.Generate_TSNFlows(len(Network.Topology.Nodes), Network.BG_TSN, Network.BG_AVB, Network.Input_TSN, Network.Input_AVB, Network.HyperPeriod)
+	network.TSNFlow_Set = flow.Generate_TSNFlows(len(network.Topology.Nodes), network.BG_TSN, network.BG_AVB, network.Input_TSN, network.Input_AVB, network.HyperPeriod)
 	fmt.Println("Complete Generating Flows.")
-	Network.CANFlow_Set = flow.Generate_CANFlows(len(Network.Topology.Nodes), Network.ImportantCAN, Network.UnimportantCAN, Network.HyperPeriod)
 	fmt.Println()
 
 	// 4. Simulating graphs using flows in topology
 	fmt.Println("Simulating Graphs")
 	fmt.Println("----------------------------------------")
-	Network.Graph_Set = graph.Generate_Graphs(Network.Topology, Network.TSNFlow_Set, Network.BytesRate)
+	network.Graph_Set = graph.Generate_Graphs(network.Topology, network.TSNFlow_Set, network.BytesRate)
 	fmt.Println("Complete Simulating Graphs.")
 	fmt.Println()
-
-	return Network
 }
 
 func new_Network(topology_name string, bg_tsn int, bg_avb int, input_tsn int, input_avb int, importantCAN int, unimportantCAN int, hyperperiod int, bandwidth float64) *Network {

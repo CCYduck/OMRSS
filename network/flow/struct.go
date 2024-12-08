@@ -97,8 +97,6 @@ func new_Flow(period int, deadline int, datasize float64, HyperPeriod int) *Flow
 type TSNFlows struct {
 	TSNFlows            []*Flow
 	AVBFlows            []*Flow
-	importantCANFlows   []*Flow
-	unimportantCANFlows []*Flow
 }
 
 type CANFlows struct {
