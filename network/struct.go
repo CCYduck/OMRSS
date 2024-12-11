@@ -17,7 +17,7 @@ type Network struct {
 	Input_TSN    int
 	Input_AVB    int
 	Topology     *topology.Topology
-	Flow_Set     *flow.Flows
+	TSNFlow_Set     *flow.TSNFlows
 	Graph_Set    *graph.Graphs
 }
 
@@ -62,7 +62,7 @@ type OSRO_Network struct {
 	Important_CAN   int
 	Unimportant_CAN int
 	Topology        *topology.Topology
-	Flow_Set        *flow.Flows
+	TSNFlow_Set        *flow.TSNFlows
 	Graph_Set       *graph.Graphs
 }
 
