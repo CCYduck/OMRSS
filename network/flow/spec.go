@@ -19,11 +19,18 @@ func AVB_stream() *AVB {
 	return avb
 }
 
-func unimportantCAN_stream() *importantCAN {
-	uc_period,  uc_deadline:= unimportantCAN_random()
-	importantCAN := new_importantCAN(uc_period_rng,  uc_deadline_rng)
+func importantCAN_stream() *importantCAN {
+	
+	importantcan := new_importantCAN()
 
-	return importantCAN
+	return importantcan
+}
+
+func unimportantCAN_stream() *unimportantCAN {
+	uc_period,  uc_deadline := unimportantCAN_random()
+	unimportantcan := new_unimportantCAN(uc_period,  uc_deadline)
+
+	return unimportantcan
 }
 
 func tsn_random() (int, float64) {
