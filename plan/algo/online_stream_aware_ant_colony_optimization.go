@@ -31,7 +31,7 @@ func (osaco *OSACO) OSACO_Initial_Settings(network *network.Network, SMT *routes
 	osaco.InputTrees = SMT.Input_Tree_set(bg_tsn, bg_avb)
 	osaco.BGTrees = SMT.BG_Tree_set(bg_tsn, bg_avb)
 	osaco.PRM = compute_prm(osaco.KTrees)
-	osaco.VB = compute_vb(osaco.KTrees, network.Flow_Set)
+	osaco.VB = compute_vb(osaco.KTrees, network.TSNFlow_Set)
 
 	osaco.Timer[0] = algo_timer.NewTimer()
 	osaco.Timer[0].TimerMerge(timer)

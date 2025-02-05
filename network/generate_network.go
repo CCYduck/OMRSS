@@ -18,14 +18,14 @@ func (network *Network) Generate_Network() {
 	// 3. Generate flows
 	fmt.Println("Generate Flows")
 	fmt.Println("----------------------------------------")
-	network.Flow_Set = flow.Generate_Flows(len(network.Topology.Nodes), network.BG_TSN, network.BG_AVB, network.Input_TSN, network.Input_AVB, network.HyperPeriod)
+	network.TSNFlow_Set = flow.Generate_TSNFlows(len(network.Topology.Nodes), network.BG_TSN, network.BG_AVB, network.Input_TSN, network.Input_AVB, network.HyperPeriod)
 	fmt.Println("Complete Generating Flows.")
 	fmt.Println()
 
 	// 4. Simulating graphs using flows in topology
 	fmt.Println("Simulating Graphs")
 	fmt.Println("----------------------------------------")
-	network.Graph_Set = graph.Generate_Graphs(network.Topology, network.Flow_Set, network.BytesRate)
+	network.Graph_Set = graph.Generate_TSNGraphs(network.Topology, network.TSNFlow_Set, network.BytesRate)
 	fmt.Println("Complete Simulating Graphs.")
 	fmt.Println()
 }
