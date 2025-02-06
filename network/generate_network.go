@@ -19,6 +19,7 @@ func (network *Network) Generate_Network() {
 	fmt.Println("Generate Flows")
 	fmt.Println("----------------------------------------")
 	network.TSNFlow_Set = flow.Generate_TSNFlows(len(network.Topology.Nodes), network.BG_TSN, network.BG_AVB, network.Input_TSN, network.Input_AVB, network.HyperPeriod)
+	network.CANFlow_Set = flow.Generate_CANFlows(len(network.Topology.Nodes), network.Important_CAN, network.Unimportant_CAN, network.HyperPeriod)
 	fmt.Println("Complete Generating Flows.")
 	fmt.Println()
 
@@ -26,6 +27,7 @@ func (network *Network) Generate_Network() {
 	fmt.Println("Simulating Graphs")
 	fmt.Println("----------------------------------------")
 	network.Graph_Set = graph.Generate_TSNGraphs(network.Topology, network.TSNFlow_Set, network.BytesRate)
+	network.Graph_Set = graph.Generate_CANGraphs(network.Topology, network.CANFlow_Set, network.BytesRate)
 	fmt.Println("Complete Simulating Graphs.")
 	fmt.Println()
 }
@@ -44,6 +46,7 @@ func (network *OSRO_Network) Generate_Network() {
 	fmt.Println()
 
 }
+
 
 //func (network *Network) Generate_Network() *Network {
 //

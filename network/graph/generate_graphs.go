@@ -31,17 +31,17 @@ func Generate_CANGraphs(topology *topology.Topology, flows *flow.CANFlows, bytes
 	graphs := new_Graphs()
 
 	// Generating TSN Graphs
-	for _, flow := range flows.importantCANFlows {
+	for _, flow := range flows.ImportantCANFlows  {
 		t := topology.TopologyDeepCopy()                       // Duplicate of Topology
 		t.AddN2S2N(flow.Source, flow.Destinations, bytes_rate) // Undirected Graph
-		graphs.TSNGraphs = append(graphs.TSNGraphs, t)
+		graphs.Important_CANGraphs = append(graphs.Important_CANGraphs, t)
 	}
 
 	// Generating AVB Graphs
-	for _, flow := range flows.AVBFlows {
+	for _, flow := range flows.UnimportantCANFlows {
 		t := topology.TopologyDeepCopy()                       // Duplicate of Topology
 		t.AddN2S2N(flow.Source, flow.Destinations, bytes_rate) // Undirected Graph
-		graphs.AVBGraphs = append(graphs.AVBGraphs, t)
+		graphs.Unimportant_CANGraphs = append(graphs.Unimportant_CANGraphs, t)
 	}
 
 	return graphs

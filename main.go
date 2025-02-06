@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"src/memorizer"
+	//"src/memorizer"
 	"src/network"
-	"src/plan"
+	//"src/plan"
 )
 
 var (
@@ -46,6 +46,7 @@ func init() {
 	flag.IntVar(&hyperperiod, "hyperperiod", 6000, "Greatest Common Divisor of Simulated Time LCM.")
 	flag.Float64Var(&bandwidth, "bandwidth", 1e9, "1 Gbps.")
 
+	//加上plan.go名稱(名稱要相同)
 	flag.StringVar(&plan_name, "plan_name", "omaco", "The plan comprises omaco and osro.")
 	flag.IntVar(&osaco_timeout, "osaco_timeout", 200, "Timeout in milliseconds")
 	flag.IntVar(&osaco_K, "osaco_K", 5, "Select K trees with different weights.")
@@ -63,8 +64,8 @@ func main() {
 	flag.Parse()
 
 	// Data storage architecture
-	Memorizers := memorizer.New_Memorizers()
-	Memorizer := Memorizers[plan_name]
+	//Memorizers := memorizer.New_Memorizers()
+	//Memorizer := Memorizers[plan_name]
 
 	// Run Test-Case
 	for ts := 0; ts < test_case; ts++ {
@@ -74,40 +75,41 @@ func main() {
 		Networks := network.New_Networks(topology_name, bg_tsn, bg_avb, input_tsn, input_avb, important_can, unimportant_can, hyperperiod, bandwidth)
 		Network := Networks[plan_name]
 		Network.Generate_Network() // Generate a.Topology b.Flows c.Graphs
-
-		// 2. Create new plans (a.OMACO ... )
-		Plans := plan.New_Plans(Network, osaco_timeout, osaco_K, osaco_P) // TODO: To process parameters with a dictionary structure
+		
 		if show_network {
 			Network.Show_Network()
 		}
+		// 2. Create new plans (a.OMACO ... )
+		//Plans := plan.New_Plans(Network, osaco_timeout, osaco_K, osaco_P) // TODO: To process parameters with a dictionary structure
+		
 
 		// 3. Select plan
-		Plan := Plans[plan_name]
+		//Plan := Plans[plan_name]
 
 		// 4. Initiate plan
-		Plan.Initiate_Plan()
-		if show_plan {
-			Plan.Show_Plan()
-		}
+		//Plan.Initiate_Plan()
+		//if show_plan {
+		//	Plan.Show_Plan()
+		//}
 
 		// 5. Cumulative quantity
-		Memorizer.M_Cumulative(Plan)
+		//Memorizer.M_Cumulative(Plan)
 
 		fmt.Println("****************************************")
 	}
 
 	// 6. Average statistical results
-	Memorizer.M_Average(test_case)
+	//Memorizer.M_Average(test_case)
 
 	// 7. Output results
-	Memorizer.M_Output_Results()
+	//Memorizer.M_Output_Results()
 
 	// 8. Save as TXT
-	Memorizer.M_Store_Files(topology_name, test_case, input_tsn, input_avb, osaco_K, osaco_P)
+	//Memorizer.M_Store_Files(topology_name, test_case, input_tsn, input_avb, osaco_K, osaco_P)
 	// --------------------------------------------------------------------------------
 
 	// 9. Save as CSV
 	if store_data {
-		Memorizer.M_Store_Data()
+		//Memorizer.M_Store_Data()
 	}
 }

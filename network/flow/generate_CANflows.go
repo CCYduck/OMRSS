@@ -32,7 +32,7 @@ func Generate_importantCANFlow(flows *CANFlows, Nnode int, impcan int, HyperPeri
 		Flow.Source = source
 		Flow.Destinations = destinations
 
-		flows.importantCANFlows = append(flows.importantCANFlows, Flow)
+		flows.ImportantCANFlows = append(flows.ImportantCANFlows, Flow)
 	}
 }
 
@@ -47,7 +47,7 @@ func Generate_unimportantCANFlow(flows *CANFlows, Nnode int, umimpcan int, Hyper
 		Flow.Source = source
 		Flow.Destinations = destinations
 
-		flows.unimportantCANFlows = append(flows.unimportantCANFlows, Flow)
+		flows.UnimportantCANFlows = append(flows.UnimportantCANFlows, Flow)
 	}
 }
 

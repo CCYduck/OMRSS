@@ -1,6 +1,6 @@
 package flow
 
-func (flows *TSNFlows) Input_flow_set() *TSNFlows {
+func (flows *TSNFlows) Input_TSNflow_set() *TSNFlows {
 	Input_flow_set := new_TSNFlows()
 
 	Input_flow_set.TSNFlows = append(Input_flow_set.TSNFlows, flows.TSNFlows[bg_tsnflows_end:]...)
@@ -8,11 +8,11 @@ func (flows *TSNFlows) Input_flow_set() *TSNFlows {
 
 	return Input_flow_set
 }
-func (flows *CANFlows) Input_flow_set() *CANFlows {
+func (flows *CANFlows) Input_CANflow_set() *CANFlows {
 	Input_flow_set := new_CANFlows()
 
-	Input_flow_set.importantCANFlows = append(Input_flow_set.importantCANFlows, flows.importantCANFlows...)
-	Input_flow_set.unimportantCANFlows = append(Input_flow_set.unimportantCANFlows, flows.unimportantCANFlows...)
+	Input_flow_set.ImportantCANFlows = append(Input_flow_set.ImportantCANFlows, flows.ImportantCANFlows...)
+	Input_flow_set.UnimportantCANFlows = append(Input_flow_set.UnimportantCANFlows, flows.UnimportantCANFlows...)
 
 	return Input_flow_set
 }

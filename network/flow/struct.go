@@ -120,8 +120,8 @@ type TSNFlows struct {
 }
 
 type CANFlows struct {
-	importantCANFlows   []*Flow
-	unimportantCANFlows []*Flow
+	ImportantCANFlows   []*Flow
+	UnimportantCANFlows []*Flow
 }
 
 func new_TSNFlows() *TSNFlows {

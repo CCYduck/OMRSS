@@ -33,8 +33,8 @@ func (flows *TSNFlows) Show_TSNStream() {
 }
 
 func (flows *CANFlows) Show_CANStream() {
-	importantCANFlows := flows.importantCANFlows
-	unimportantCANFlows := flows.unimportantCANFlows
+	importantCANFlows := flows.ImportantCANFlows
+	unimportantCANFlows := flows.UnimportantCANFlows
 	number := 1
 	for _, flow := range importantCANFlows {
 		name := fmt.Sprint("ImportantCANflow", number)
@@ -90,8 +90,8 @@ func (flows *TSNFlows) Show_TSNFlow() {
 }
 
 func (flows *CANFlows) Show_CANFlow() {
-	importantCANFlows := flows.importantCANFlows
-	unimportantCANFlows := flows.unimportantCANFlows
+	importantCANFlows := flows.ImportantCANFlows
+	unimportantCANFlows := flows.UnimportantCANFlows
 	
 	number := 1
 	for _, flow := range importantCANFlows {
@@ -127,5 +127,5 @@ func (flows *TSNFlows) Show_TSNFlows() {
 func (flows *CANFlows) Show_CANFlows() {
 	// Display all flows.
 	fmt.Printf("Total Flows:%d (  ImportantCAN Flows:%d   UnimportantCAN Flows:%d )\n",
-		len(flows. importantCANFlows)+len(flows. unimportantCANFlows), len(flows. importantCANFlows), len(flows. unimportantCANFlows))
+		len(flows. ImportantCANFlows)+len(flows. UnimportantCANFlows), len(flows. ImportantCANFlows), len(flows. UnimportantCANFlows))
 }

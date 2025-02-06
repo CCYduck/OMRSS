@@ -120,9 +120,9 @@ func compute_prm(X *routes.KTrees_set) *Pheromone {
 	return pheromone
 }
 
-func compute_vb(X *routes.KTrees_set, flow_set *flow.Flows) *Visibility {
+func compute_vb(X *routes.KTrees_set, flow_set *flow.TSNFlows) *Visibility {
 	var preference float64 = 2.
-	Input_flow_set := flow_set.Input_flow_set()
+	Input_flow_set := flow_set.Input_TSNflow_set()
 	BG_flow_set := flow_set.BG_flow_set()
 
 	visibility := &Visibility{}
@@ -155,7 +155,7 @@ func compute_vb(X *routes.KTrees_set, flow_set *flow.Flows) *Visibility {
 
 			if nth >= bg_avb {
 				//fmt.Printf("Input flow%d tree%d \n", nth, kth)
-				value := mult / float64(schedule.WCD(z, X, Input_flow_set.AVBFlows[nth-bg_avb], flow_set))
+				value := mult / float64(schedule.WCD(z, X, Input_flow_set.AVBFlows[nth-bg_avb], TSNflow_set))
 				v = append(v, value)
 
 			} else {
