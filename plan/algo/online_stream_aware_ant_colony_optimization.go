@@ -155,7 +155,7 @@ func compute_vb(X *routes.KTrees_set, flow_set *flow.TSNFlows) *Visibility {
 
 			if nth >= bg_avb {
 				//fmt.Printf("Input flow%d tree%d \n", nth, kth)
-				value := mult / float64(schedule.WCD(z, X, Input_flow_set.AVBFlows[nth-bg_avb], TSNflow_set))
+				value := mult / float64(schedule.WCD(z, X, Input_flow_set.AVBFlows[nth-bg_avb], flow_set))
 				v = append(v, value)
 
 			} else {

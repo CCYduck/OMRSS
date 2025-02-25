@@ -67,7 +67,7 @@ func (graph *Graph) AddPath(terminal int) {
 		vertex = graph.FindVertex(location)
 	}
 
-	if len(graph.Path) == 0 {
+	if len(graph.KPath) == 0 {
 		graph.Path = append(graph.Path, path)
 	} else {
 		InPath := true
