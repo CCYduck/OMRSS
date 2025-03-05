@@ -25,6 +25,25 @@ func new_OMACO_Plan(network *network.Network, osaco_timeout int, osaco_K int, os
 	return OMACO
 }
 
+type OSRO struct {
+	Network   *network.Network
+	SMT       *algo.SMT
+	MDTC      *algo.MDTC
+	OSACO     *algo.OSACO
+	OSACO_IAS *algo.OSACO
+}
+
+// Developing the OMACO plan
+func new_OSRO_Plan(network *network.Network, osaco_timeout int, osaco_K int, osaco_P float64) *OSRO {
+	OSRO := &OSRO{Network: network}
+
+	OSRO.SMT = &algo.SMT{}
+	OSRO.MDTC = &algo.MDTC{}
+	OSRO.OSACO = &algo.OSACO{Timeout: osaco_timeout, K: osaco_K, P: osaco_P, Method_Number: 0}
+	OSRO.OSACO_IAS = &algo.OSACO{Timeout: osaco_timeout, K: osaco_K, P: osaco_P, Method_Number: 1}
+
+	return OSRO
+}
 //type plan2 struct {
 //	Network *network.Network
 //}

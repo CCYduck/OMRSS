@@ -25,15 +25,6 @@ func new_KPath(k int, source, target int) *KPath{
 	}
 }
 
-type Path_set struct {
-	TSNPaths []*Path
-	AVBPaths []*Path
-}
-
-func new_Path_Set() *Path_set {
-	return &Path_set{}
-}
-
 type Path struct {
 	Nodes  []*Node
 	Weight float64
@@ -49,7 +40,7 @@ type Node struct {
 }
 
 type Connection struct {
-	FromNodeID int     // strat
+	FromNodeID int     // start
 	ToNodeID   int     // next
 	Cost       float64 // 1Gbps => (750,000 bytes/6ms) 750,000 bytes under 6ms for each link ==> 125 bytes/us
 }
@@ -72,20 +63,22 @@ type V2VEdge struct {
 }
 
 type Graph struct {
-	Vertices map[int]*Vertex 
-	Edges    []*Edge         
+	Vertexs  []*Vertex
+	ToVertex int
+	Path     [][]int
 }
 
 type Vertex struct {
-	ID      int      
-	Visited bool     
-	Cost    float64     
-	Path    int      
-	Edges   []*Edge 
+	ID      int
+	Visited bool
+	Cost    int
+	Path    int
+	Edges   []*Edge
 }
 
 type Edge struct {
-	Start int  
-	End   int  
-	Cost  float64
+	Strat int
+	End   int
+	Cost  int
 }
+

@@ -3,6 +3,7 @@ package plan
 import (
 	"fmt"
 	"src/plan/schedule"
+	"src/plan/path"
 )
 
 func (plan *OMACO) Initiate_Plan() {
@@ -57,9 +58,9 @@ func (plan *OMACO) Initiate_Plan() {
 
 }
 
-//func (plan *plan2) Initiate_Plan() {
-//
-//}
+func (plan *OSRO) Initiate_Plan() {
+	path.BestPath(plan.Network)
+}
 
 //func (plan *plan3) Initiate_Plan() {
 //

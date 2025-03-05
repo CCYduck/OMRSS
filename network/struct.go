@@ -70,13 +70,13 @@ type OSRO_Network struct {
 	Graph_Set       *graph.Graphs
 }
 
-func new_OSRO_Network(topology_name string, bg_tsn int, bg_avb int, input_tsn int, input_avb int, important_can int, unimportant_can int, hyperperiod int, bandwidth float64) *OSRO_Network {
+func new_OSRO_Network(topology_name string, bg_tsn int, bg_avb int, input_tsn int, input_avb int, important_can int, unimportant_can int, hyperperiod int, bandwidth float64) *Network {
 	// 1. Define network parameters
 	bw := (bandwidth / 8) * 1e-6 // bytes/us ==> 125 bytes
 	bytes_rate := 1. / bw        // The number of bytes that can be transmitted in 1us ==> 1/125
 	bw *= float64(hyperperiod)   // The bytes that can be transmitted in 6000us (bytes/us * hyperperiod) ==> 750000 bytes
 
-	Network := &OSRO_Network{
+	Network := &Network{
 		HyperPeriod:     hyperperiod,
 		BytesRate:       bytes_rate,
 		Bandwidth:       bw,

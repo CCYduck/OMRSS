@@ -19,13 +19,14 @@ func (v2vedge *V2VEdge) Show_VertexToVertex() {
 
 func (graph *Graph) Show_Path() {
 	fmt.Println("Graph vertices:")
-	for id, vertex := range graph.Vertices {
+	for id, vertex := range graph.Vertexs {
 		fmt.Printf("Vertex %d: %+v\n", id, vertex)
+		fmt.Println("Graph edges:")
+		for _, edge := range vertex.Edges {
+			fmt.Printf("Edge from %d to %d with cost %d\n", edge.Strat, edge.End, edge.Cost)
+		}
 	}
-	fmt.Println("Graph edges:")
-	for _, edge := range graph.Edges {
-		fmt.Printf("Edge from %d to %d with cost %f\n", edge.Start, edge.End, edge.Cost)
-	}
+	
 }
 
 func (Paths *KPath_set) Show_KPath_Set() {
@@ -47,17 +48,17 @@ func (Paths *KPath_set) Show_KPath_Set() {
 
 func (Paths *KPath_set) Show_Path_Set() {
 	tsn := 1
-	for _, tree := range Paths.TSNPaths {
-		fmt.Printf("\nTSN Tree %d \n", tsn)
-		tree.Show_KPath()
+	for _, path := range Paths.TSNPaths {
+		fmt.Printf("\nTSN Path %d \n", tsn)
+		path.Show_KPath()
 		tsn++
 
 		break
 	}
 	avb := 1
-	for _, tree := range Paths.AVBPaths {
-		fmt.Printf("\nAVB Tree %d \n", avb)
-		tree.Show_KPath()
+	for _, path := range Paths.AVBPaths {
+		fmt.Printf("\nAVB Path %d \n", avb)
+		path.Show_KPath()
 		avb++
 		break
 	}

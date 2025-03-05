@@ -5,7 +5,7 @@ import (
 	"fmt"
 	//"src/memorizer"
 	"src/network"
-	//"src/plan"
+	"src/plan"
 )
 
 var (
@@ -80,17 +80,17 @@ func main() {
 			Network.Show_Network()
 		}
 		// 2. Create new plans (a.OMACO ... )
-		//Plans := plan.New_Plans(Network, osaco_timeout, osaco_K, osaco_P) // TODO: To process parameters with a dictionary structure
+		Plans := plan.New_Plans(Network, osaco_timeout, osaco_K, osaco_P) // TODO: To process parameters with a dictionary structure
 		
 
 		// 3. Select plan
-		//Plan := Plans[plan_name]
+		Plan := Plans[plan_name]
 
 		// 4. Initiate plan
-		//Plan.Initiate_Plan()
-		//if show_plan {
-		//	Plan.Show_Plan()
-		//}
+		Plan.Initiate_Plan()
+		if show_plan {
+			Plan.Show_Plan()
+		}
 
 		// 5. Cumulative quantity
 		//Memorizer.M_Cumulative(Plan)

@@ -7,12 +7,12 @@ import (
 
 // Dijkstra’s Algorithm
 // https://medium.com/%E6%8A%80%E8%A1%93%E7%AD%86%E8%A8%98/%E5%9F%BA%E7%A4%8E%E6%BC%94%E7%AE%97%E6%B3%95%E7%B3%BB%E5%88%97-graph-%E8%B3%87%E6%96%99%E7%B5%90%E6%A7%8B%E8%88%87dijkstras-algorithm-6134f62c1fc2
-func Dijkstra(graph *Graph, strat int, terminal int) *Graph {
+func Dijkstra(graph *Graph, start int, terminal int) *Graph {
 	inf := math.MaxInt8
 
 	for _, vertex := range graph.Vertexs {
 		vertex.Visited = false
-		if vertex.ID == strat {
+		if vertex.ID == start {
 			vertex.Cost = 0
 		} else {
 			vertex.Cost = inf
@@ -20,7 +20,7 @@ func Dijkstra(graph *Graph, strat int, terminal int) *Graph {
 		vertex.Path = -1
 	}
 
-	get_dijkstra_shortestpath(graph, strat, terminal)
+	get_dijkstra_shortestpath(graph, start, terminal)
 
 	sort.Slice(graph.Path, func(p, q int) bool {
 		return len(graph.Path[p]) < len(graph.Path[q])
@@ -67,7 +67,7 @@ func (graph *Graph) AddPath(terminal int) {
 		vertex = graph.FindVertex(location)
 	}
 
-	if len(graph.KPath) == 0 {
+	if len(graph.Path) == 0 {
 		graph.Path = append(graph.Path, path)
 	} else {
 		InPath := true
