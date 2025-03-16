@@ -19,13 +19,10 @@ func Dijkstra(graph *Graph, start int, terminal int) *Graph {
 		}
 		vertex.Path = -1
 	}
-
 	get_dijkstra_shortestpath(graph, start, terminal)
-
 	sort.Slice(graph.Path, func(p, q int) bool {
 		return len(graph.Path[p]) < len(graph.Path[q])
 	})
-
 	return graph
 }
 
@@ -50,7 +47,6 @@ func get_dijkstra_shortestpath(graph *Graph, strat int, terminal int) {
 		}
 		get_dijkstra_shortestpath(graph, edge.End, terminal)
 	}
-
 	vertex.Visited = false
 }
 

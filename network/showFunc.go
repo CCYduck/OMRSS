@@ -17,6 +17,10 @@ func (network *OSRO_Network) Show_Network() {
 	network.TSNFlow_Set.Show_TSNFlow()
 	network.TSNFlow_Set.Show_TSNStream()
 
+	network.CANFlow_Set.Show_CANFlows()
+	network.CANFlow_Set.Show_CANFlow()
+	network.CANFlow_Set.Show_CANStream()
+
 	network.Graph_Set.Show_Graphs()
 	
 }

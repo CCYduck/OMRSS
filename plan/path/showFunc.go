@@ -26,7 +26,6 @@ func (graph *Graph) Show_Path() {
 			fmt.Printf("Edge from %d to %d with cost %d\n", edge.Strat, edge.End, edge.Cost)
 		}
 	}
-	
 }
 
 func (Paths *KPath_set) Show_KPath_Set() {
@@ -67,7 +66,7 @@ func (Paths *KPath_set) Show_Path_Set() {
 func (Kpath *KPath) Show_KPath() {
 	for index, Path := range Kpath.Paths {
 		fmt.Printf("Path %d \n", index)
-		fmt.Printf("Path weight: %d \n", Path.Weight)
+		fmt.Printf("Path weight: %e \n", Path.Weight)
 		Path.Show_Path()
 	}
 }

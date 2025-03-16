@@ -60,6 +60,7 @@ func (plan *OMACO) Initiate_Plan() {
 
 func (plan *OSRO) Initiate_Plan() {
 	path.BestPath(plan.Network)
+	
 }
 
 //func (plan *plan3) Initiate_Plan() {

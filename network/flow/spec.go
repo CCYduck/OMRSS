@@ -63,30 +63,15 @@ func unimportantCAN_random() (int, int) {
 func Random_Devices(Nnode int) (int, []int) {
 	// Talker
 	source, _ := rand.Int(rand.Reader, big.NewInt(int64(Nnode)))
-
 	// Listener
 	destinations := []int{}
 	for i := 0; i < Nnode; i++ {
-		if i != int(source.Int64()) {
-			destinations = append(destinations, i+2000)
-		}
+    	if i != int(source.Int64()) {
+        destinations = append(destinations, i+2000)
+    	}
 	}
-
-	numDestinations, _ := rand.Int(rand.Reader, big.NewInt(2))
-	max := big.NewInt(int64(Nnode - 1)) // 10 (0~9) - source = 9
-	num, _ := rand.Int(rand.Reader, max.Sub(max, big.NewInt(3)))
-	n := num.Add(num, big.NewInt(3)).Int64()
-	numDestinations = numDestinations.Add(numDestinations, big.NewInt(n-1))
-
-	selectedDestinations := []int{}
-	for i := 0; i < int(numDestinations.Int64()); i++ {
-		// Randomly selects an element from the 'destinations' slice.
-		randIndex, _ := rand.Int(rand.Reader, big.NewInt(int64(len(destinations))))
-		selectedIndex := int(randIndex.Int64())
-		selectedDestinations = append(selectedDestinations, destinations[selectedIndex])
-		// To prevent repeated selection, remove the selected element from the 'destinations' slice.
-		destinations = append(destinations[:selectedIndex], destinations[selectedIndex+1:]...)
-	}
-
-	return int(source.Int64()) + 1000, selectedDestinations
+	randIndex, _ := rand.Int(rand.Reader, big.NewInt(int64(len(destinations))))
+	selectedDestination := destinations[int(randIndex.Int64())]
+	
+	return int(source.Int64()) + 1000, []int{selectedDestination}
 }

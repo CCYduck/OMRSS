@@ -68,7 +68,7 @@ func (flows *TSNFlows) Show_TSNFlow() {
 	for _, flow := range TSNFlows {
 		name := fmt.Sprint("TSNFlow", number)
 		fmt.Printf("Source: %d\n", flow.Source)
-		fmt.Printf("Destinations: %v\n", flow.Destinations)
+		fmt.Printf("Destinations: %v\n", flow.Destination)
 		fmt.Printf("%s : period:%d us, deadline:%d us, datasize:%f bytes\n",
 			name, flow.Period, flow.Deadline, flow.DataSize)
 		number += 1
@@ -80,7 +80,7 @@ func (flows *TSNFlows) Show_TSNFlow() {
 	for _, flow := range AVBFlows {
 		name := fmt.Sprint("AVBFlow", number)
 		fmt.Printf("Source: %d\n", flow.Source)
-		fmt.Printf("Destinations: %v\n", flow.Destinations)
+		fmt.Printf("Destinations: %v\n", flow.Destination)
 		fmt.Printf("%s : period:%d us, deadline:%d us, datasize:%f bytes\n",
 			name, flow.Period, flow.Deadline, flow.DataSize)
 		number += 1
@@ -97,7 +97,7 @@ func (flows *CANFlows) Show_CANFlow() {
 	for _, flow := range importantCANFlows {
 		name := fmt.Sprint("ImportantCANFlow", number)
 		fmt.Printf("Source: %d\n", flow.Source)
-		fmt.Printf("Destinations: %v\n", flow.Destinations)
+		fmt.Printf("Destinations: %v\n", flow.Destination)
 		fmt.Printf("%s : period:%d us, deadline:%d us, datasize:%f bytes\n",
 			name, flow.Period, flow.Deadline, flow.DataSize)
 		number += 1
@@ -109,7 +109,7 @@ func (flows *CANFlows) Show_CANFlow() {
 	for _, flow := range unimportantCANFlows {
 		name := fmt.Sprint("UnimportantCANFlow", number)
 		fmt.Printf("Source: %d\n", flow.Source)
-		fmt.Printf("Destinations: %v\n", flow.Destinations)
+		fmt.Printf("Destinations: %v\n", flow.Destination)
 		fmt.Printf("%s : period:%d us, deadline:%d us, datasize:%f bytes\n",
 			name, flow.Period, flow.Deadline, flow.DataSize)
 		number += 1
@@ -126,6 +126,6 @@ func (flows *TSNFlows) Show_TSNFlows() {
 
 func (flows *CANFlows) Show_CANFlows() {
 	// Display all flows.
-	fmt.Printf("Total Flows:%d (  ImportantCAN Flows:%d   UnimportantCAN Flows:%d )\n",
+	fmt.Printf("Total Flows:%d ( ImportantCAN Flows:%d  UnimportantCAN Flows:%d )\n",
 		len(flows. ImportantCANFlows)+len(flows. UnimportantCANFlows), len(flows. ImportantCANFlows), len(flows. UnimportantCANFlows))
 }

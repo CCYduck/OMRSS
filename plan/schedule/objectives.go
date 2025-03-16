@@ -89,7 +89,7 @@ func schedulable(node *routes.Node, parentID int, flow *flow.Flow, route *routes
 
 		} else {
 			//// Duplex
-			if !(link.FromNodeID == flow.Source || loopcompare(link.ToNodeID, flow.Destinations)) {
+			if !(link.FromNodeID == flow.Source || loopcompare(link.ToNodeID, flow.Destination)) {
 				key := fmt.Sprintf("%d>%d", link.FromNodeID, link.ToNodeID)
 				linkmap[key] += flow.DataSize * float64((hyperPeriod / flow.Period))
 				if linkmap[key] > bandwidth {

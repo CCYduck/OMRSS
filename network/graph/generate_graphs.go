@@ -12,14 +12,14 @@ func Generate_TSNGraphs(topology *topology.Topology, flows *flow.TSNFlows, bytes
 	// Generating TSN Graphs
 	for _, flow := range flows.TSNFlows {
 		t := topology.TopologyDeepCopy()                       // Duplicate of Topology
-		t.AddN2S2N(flow.Source, flow.Destinations, bytes_rate) // Undirected Graph
+		t.AddN2S2N(flow.Source, flow.Destination, bytes_rate) // Undirected Graph
 		graphs.TSNGraphs = append(graphs.TSNGraphs, t)
 	}
 
 	// Generating AVB Graphs
 	for _, flow := range flows.AVBFlows {
 		t := topology.TopologyDeepCopy()                       // Duplicate of Topology
-		t.AddN2S2N(flow.Source, flow.Destinations, bytes_rate) // Undirected Graph
+		t.AddN2S2N(flow.Source, flow.Destination, bytes_rate) // Undirected Graph
 		graphs.AVBGraphs = append(graphs.AVBGraphs, t)
 	}
 
@@ -30,17 +30,17 @@ func Generate_CANGraphs(topology *topology.Topology, flows *flow.CANFlows, bytes
 	// Constructing Graph structures
 	graphs := new_Graphs()
 
-	// Generating TSN Graphs
+	// Generating ImportantCAN Graphs
 	for _, flow := range flows.ImportantCANFlows  {
 		t := topology.TopologyDeepCopy()                       // Duplicate of Topology
-		t.AddN2S2N(flow.Source, flow.Destinations, bytes_rate) // Undirected Graph
+		t.AddN2S2N(flow.Source, flow.Destination, bytes_rate) // Undirected Graph
 		graphs.Important_CANGraphs = append(graphs.Important_CANGraphs, t)
 	}
 
-	// Generating AVB Graphs
+	// Generating UnimportantCAN Graphs
 	for _, flow := range flows.UnimportantCANFlows {
 		t := topology.TopologyDeepCopy()                       // Duplicate of Topology
-		t.AddN2S2N(flow.Source, flow.Destinations, bytes_rate) // Undirected Graph
+		t.AddN2S2N(flow.Source, flow.Destination, bytes_rate) // Undirected Graph
 		graphs.Unimportant_CANGraphs = append(graphs.Unimportant_CANGraphs, t)
 	}
 
