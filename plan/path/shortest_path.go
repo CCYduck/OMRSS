@@ -9,8 +9,31 @@ import (
 
 func BestPath(Network *network.Network) {
 	
+	for nth, flow := range Network.TSNFlow_Set.TSNFlows {
+		// fmt.Printf("Flow: Source=%d, Destination=%v, Topology=%v\n", flow.Source, flow.Destination[0], Network.Graph_Set.TSNGraphs[nth])
+		fmt.Printf("Flow: Source=%d, Destination=%v", flow.Source, flow.Destination[0])
+		path := saveShortestPathsToBP(flow.Source, flow.Destination[0], Network.Graph_Set.TSNGraphs[nth])
+		if path != nil {
+			fmt.Println("Best Path:", path)
+		} else {
+			fmt.Println("No path found.")
+		}
+	}
+
+	for nth, flow := range Network.TSNFlow_Set.AVBFlows {
+		// fmt.Printf("Flow: Source=%d, Destination=%v, Topology=%v\n", flow.Source, flow.Destination[0], Network.Graph_Set.AVBGraphs[nth])
+		fmt.Printf("Flow: Source=%d, Destination=%v", flow.Source, flow.Destination[0])
+		path := saveShortestPathsToBP(flow.Source, flow.Destination[0], Network.Graph_Set.AVBGraphs[nth])
+		if path != nil {
+			fmt.Println("Best Path:", path)
+		} else {
+			fmt.Println("No path found.")
+		}
+	}
+	
 	for nth, flow := range Network.CANFlow_Set.ImportantCANFlows {
-		fmt.Printf("Flow: Source=%d, Destination=%v, Topology=%v\n", flow.Source, flow.Destination[0], Network.Graph_Set.Important_CANGraphs[nth])
+		fmt.Printf("Flow: Source=%d, Destination=%v ", flow.Source, flow.Destination[0])
+		// fmt.Printf("Flow: Source=%d, Destination=%v, Topology=%v\n", flow.Source, flow.Destination[0], Network.Graph_Set.Important_CANGraphs[nth])
 		path := saveShortestPathsToBP(flow.Source, flow.Destination[0], Network.Graph_Set.Important_CANGraphs[nth])
 		if path != nil {
 			fmt.Println("Best Path:", path)
@@ -18,6 +41,18 @@ func BestPath(Network *network.Network) {
 			fmt.Println("No path found.")
 		}
 	}
+
+	for nth, flow := range Network.CANFlow_Set.UnimportantCANFlows {
+		fmt.Printf("Flow: Source=%d, Destination=%v ", flow.Source, flow.Destination[0])
+		// fmt.Printf("Flow: Source=%d, Destination=%v, Topology=%v\n", flow.Source, flow.Destination[0], Network.Graph_Set.Unimportant_CANGraphs[nth])
+		path := saveShortestPathsToBP(flow.Source, flow.Destination[0], Network.Graph_Set.Unimportant_CANGraphs[nth])
+		if path != nil {
+			fmt.Println("Best Path:", path)
+		} else {
+			fmt.Println("No path found.")
+		}
+	}
+	
 }
 
 func saveShortestPathsToBP(source int, target int, t *topology.Topology) []int {

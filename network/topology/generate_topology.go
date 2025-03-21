@@ -40,6 +40,12 @@ func Generate_Topology(topology_name string, cost float64) *Topology {
 		node := &Node{ID: es + 3000}
 		topology.Nodes = append(topology.Nodes, node)
 	}
+
+	for ces := 0; ces < d.Scale.CanEndStations; ces++ {
+		node := &Node{ID: ces + 4000}
+		topology.Nodes = append(topology.Nodes, node)
+	}
+	
 	define_nodes_connection(topology, d.EndStationEdges, cost)
 
 	return topology

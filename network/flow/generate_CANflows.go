@@ -25,7 +25,7 @@ func Generate_importantCANFlow(flows *CANFlows, Nnode int, impcan int, HyperPeri
 
 		// Random End Devices 1. source(Talker) 2. destinations(listener) 
 		// 這裡要修改Random方法
-		source, destination := Random_Devices(Nnode)
+		source, destination := Random_CANDevices(Nnode)
 		
 		// 這裡要加上封裝的延遲
 		Flow := Generate_CANstream(importantCAN.Period, importantCAN.Deadline, importantCAN.DataSize, HyperPeriod)
@@ -41,7 +41,7 @@ func Generate_unimportantCANFlow(flows *CANFlows, Nnode int, umimpcan int, Hyper
 		unimportantCAN := unimportantCAN_stream()
 
 		// Random End Devices 1. source(Talker) 2. destinations(listener)
-		source, destination := Random_Devices(Nnode)
+		source, destination := Random_CANDevices(Nnode)
 
 		Flow := Generate_CANstream(unimportantCAN.Period, unimportantCAN.Deadline, unimportantCAN.DataSize, HyperPeriod)
 		Flow.Source = source

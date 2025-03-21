@@ -20,9 +20,8 @@ func AVB_stream() *AVB {
 }
 
 func importantCAN_stream() *importantCAN {
-	
 	importantcan := new_importantCAN()
-
+	
 	return importantcan
 }
 
@@ -68,6 +67,22 @@ func Random_Devices(Nnode int) (int, []int) {
 	for i := 0; i < Nnode; i++ {
     	if i != int(source.Int64()) {
         destinations = append(destinations, i+2000)
+    	}
+	}
+	randIndex, _ := rand.Int(rand.Reader, big.NewInt(int64(len(destinations))))
+	selectedDestination := destinations[int(randIndex.Int64())]
+	
+	return int(source.Int64()) + 1000, []int{selectedDestination}
+}
+
+func Random_CANDevices(Cnode int) (int, []int) {
+	// Talker
+	source, _ := rand.Int(rand.Reader, big.NewInt(int64(Cnode)))
+	// Listener
+	destinations := []int{}
+	for i := 0; i < Cnode; i++ {
+    	if i != int(source.Int64()) {
+        destinations = append(destinations, i+4000)
     	}
 	}
 	randIndex, _ := rand.Int(rand.Reader, big.NewInt(int64(len(destinations))))

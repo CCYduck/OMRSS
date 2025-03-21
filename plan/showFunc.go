@@ -26,8 +26,20 @@ func (plan *OMACO) Show_Plan() {
 	plan.OSACO.BGTrees.Show_Trees_Set()
 }
 
-func (OSRO *OSRO) Show_Plan() {
+func (plan *OSRO) Show_Plan() {
+	fmt.Println()
+	fmt.Println("--- 5th Spanning Tree ---")
+	plan.OSACO.KTrees.Show_kTrees_Set()
+	plan.OSACO.Timer[0].TimerExportData()
+	plan.OSACO.Timer[1].TimerExportData()
+	plan.OSACO.Timer[2].TimerExportData()
+	plan.OSACO.Timer[3].TimerExportData()
+	plan.OSACO.Timer[4].TimerExportData()
 
+	fmt.Println()
+	fmt.Println("--- The OSACO final selected routing ---")
+	plan.OSACO.InputTrees.Show_Trees_Set()
+	plan.OSACO.BGTrees.Show_Trees_Set()
 }
 
 //func (plan *Plan3) Show_Plan() {
