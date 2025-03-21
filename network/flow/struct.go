@@ -91,7 +91,7 @@ type Flow struct {
 	DataSize     float64
 	HyperPeriod  int
 	Source       int
-	Destination []int
+	Destination  int
 	Streams      []*Stream
 }
 

@@ -2,6 +2,7 @@ package graph
 
 import (
 	"src/network/flow"
+	
 	"src/network/topology"
 )
 
@@ -29,26 +30,6 @@ func Generate_TSNGraphs(topology *topology.Topology, flows *flow.TSNFlows, bytes
 func Generate_CANGraphs(topology *topology.Topology, flows *flow.CANFlows, bytes_rate float64) *Graphs {
 	// Constructing Graph structures
 	graphs := new_Graphs()
-
-	
-	// cnode := topology.Select_CAN_Node_Set()
-	// // Generating ImportantCAN Graphs
-	// for _, flow := range flows.ImportantCANFlows  {
-	// 	if inCNode(flow.Source, cnode) && allInCNode(flow.Destination, cnode) {
-    //         t := topology.TopologyDeepCopy()                       // Duplicate of Topology
-	// 		t.AddN2S2N(flow.Source, flow.Destination, bytes_rate) // Undirected Graph
-	// 		graphs.Important_CANGraphs = append(graphs.Important_CANGraphs, t)
-    //     }
-	// }
-
-	// // Generating UnimportantCAN Graphs
-	// for _, flow := range flows.UnimportantCANFlows {
-	// 	if inCNode(flow.Source, cnode) && allInCNode(flow.Destination, cnode) {
-	// 		t := topology.TopologyDeepCopy()                       // Duplicate of Topology
-	// 		t.AddN2S2N(flow.Source, flow.Destination, bytes_rate) // Undirected Graph
-	// 		graphs.Unimportant_CANGraphs = append(graphs.Unimportant_CANGraphs, t)
-	// 	}
-	// }
 
 	// Generating ImportantCAN Graphs
 	for _, flow := range flows.ImportantCANFlows  {

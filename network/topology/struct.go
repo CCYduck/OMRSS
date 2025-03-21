@@ -37,7 +37,6 @@ type Edge struct {
 type Data struct {
 	Scale struct {
 		EndStations int `yaml:"end_stations"`
-		CanEndStations int `yaml:"can_end_stations"`
 		Bridges     int `yaml:"bridges"`
 	} `yaml:"scale"`
 	EndStationEdges []Edge `yaml:"end_station_edges"`

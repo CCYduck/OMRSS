@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func Generate_CANFlows(Nnode int,importantCAN int, unimportantCAN int, HyperPeriod int) *CANFlows {
+func Generate_CANFlows(Nnode []int,importantCAN int, unimportantCAN int, HyperPeriod int) *CANFlows {
 	// Constructing Flows structures
 
 	canflow_set := new_CANFlows()
@@ -19,7 +19,7 @@ func Generate_CANFlows(Nnode int,importantCAN int, unimportantCAN int, HyperPeri
 
 
 
-func Generate_importantCANFlow(flows *CANFlows, Nnode int, impcan int, HyperPeriod int) {
+func Generate_importantCANFlow(flows *CANFlows, Nnode []int, impcan int, HyperPeriod int) {
 	for flow := 0; flow < impcan; flow++ {
 		importantCAN := importantCAN_stream()
 
@@ -36,7 +36,7 @@ func Generate_importantCANFlow(flows *CANFlows, Nnode int, impcan int, HyperPeri
 	}
 }
 
-func Generate_unimportantCANFlow(flows *CANFlows, Nnode int, umimpcan int, HyperPeriod int) {
+func Generate_unimportantCANFlow(flows *CANFlows, Nnode []int, umimpcan int, HyperPeriod int) {
 	for flow := 0; flow < umimpcan; flow++ {
 		unimportantCAN := unimportantCAN_stream()
 

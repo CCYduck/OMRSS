@@ -44,6 +44,7 @@ func (t *Topology) Select_CAN_Node_Set() []int {
 
 func (t *Topology) GetNodeByID(id int) *Node {
 	for _, node := range t.Talker {
+		
 		if node.ID == id {
 			return node
 		}

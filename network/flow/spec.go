@@ -59,34 +59,41 @@ func unimportantCAN_random() (int, int) {
 }
 
 
-func Random_Devices(Nnode int) (int, []int) {
-	// Talker
-	source, _ := rand.Int(rand.Reader, big.NewInt(int64(Nnode)))
-	// Listener
-	destinations := []int{}
-	for i := 0; i < Nnode; i++ {
-    	if i != int(source.Int64()) {
-        destinations = append(destinations, i+2000)
-    	}
-	}
-	randIndex, _ := rand.Int(rand.Reader, big.NewInt(int64(len(destinations))))
-	selectedDestination := destinations[int(randIndex.Int64())]
-	
-	return int(source.Int64()) + 1000, []int{selectedDestination}
+func Random_Devices(Nnode int) (int, int) {
+
+	sourceBig, _ := rand.Int(rand.Reader, big.NewInt(int64(Nnode)))
+    sourceIndex := int(sourceBig.Int64())
+
+    var destIndex int
+    for {
+        destBig, _ := rand.Int(rand.Reader, big.NewInt(int64(Nnode)))
+        temp := int(destBig.Int64())
+        if temp != sourceIndex {
+            destIndex = temp
+            break
+        }
+    }
+
+    // 回傳來源 (加1000) 和目的 (加2000)
+    return sourceIndex + 1000, destIndex + 2000
 }
 
-func Random_CANDevices(Cnode int) (int, []int) {
-	// Talker
-	source, _ := rand.Int(rand.Reader, big.NewInt(int64(Cnode)))
-	// Listener
-	destinations := []int{}
-	for i := 0; i < Cnode; i++ {
-    	if i != int(source.Int64()) {
-        destinations = append(destinations, i+4000)
-    	}
-	}
-	randIndex, _ := rand.Int(rand.Reader, big.NewInt(int64(len(destinations))))
-	selectedDestination := destinations[int(randIndex.Int64())]
+func Random_CANDevices(CAN_Node_Set []int) (int, int) {
 	
-	return int(source.Int64()) + 1000, []int{selectedDestination}
+	 // 1. 隨機選取來源
+	 sourceIndexBig, _ := rand.Int(rand.Reader, big.NewInt(int64(len(CAN_Node_Set))))
+	 sourceIndex := int(sourceIndexBig.Int64())
+	 sourceNode := CAN_Node_Set[sourceIndex]
+ 
+	 // 2. 移除來源
+	 tempSet := make([]int, 0, len(CAN_Node_Set)-1)
+	 tempSet = append(tempSet, CAN_Node_Set[:sourceIndex]...)
+	 tempSet = append(tempSet, CAN_Node_Set[sourceIndex+1:]...) 
+ 
+	 // 3. 從新切片中選目的
+	 destIndexBig, _ := rand.Int(rand.Reader, big.NewInt(int64(len(tempSet))))
+	 destIndex := int(destIndexBig.Int64())
+	 destinationNode := tempSet[destIndex]
+
+	 return sourceNode-2000, destinationNode-1000
 }

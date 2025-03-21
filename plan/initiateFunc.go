@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"src/plan/schedule"
 	"src/plan/path"
+	
 )
 
 func (plan *OMACO) Initiate_Plan() {
@@ -38,8 +39,8 @@ func (plan *OMACO) Initiate_Plan() {
 	obj_smt, _ := schedule.OBJ(
 		plan.Network,
 		plan.OSACO.KTrees,
-		plan.SMT.Trees.Input_Tree_set(plan.Network.BG_TSN, plan.Network.BG_AVB),
-		plan.SMT.Trees.BG_Tree_set(plan.Network.BG_TSN, plan.Network.BG_AVB),
+		plan.MDTC.Trees.Input_Tree_set(plan.Network.BG_TSN, plan.Network.BG_AVB),
+		plan.MDTC.Trees.BG_Tree_set(plan.Network.BG_TSN, plan.Network.BG_AVB),
 	)
 
 	obj_mdt, _ := schedule.OBJ(
