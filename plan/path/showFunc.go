@@ -28,7 +28,7 @@ func (graph *Graph) Show_Path() {
 	}
 }
 
-func (Paths *KPath_set) Show_KPath_Set() {
+func (Paths *KPath_Set) Show_KPath_Set() {
 	tsn := 1
 	for _, KPath := range Paths.TSNPaths {
 		fmt.Printf("\nTSN Path %d \n", tsn)
@@ -45,7 +45,7 @@ func (Paths *KPath_set) Show_KPath_Set() {
 	}
 }
 
-func (Paths *KPath_set) Show_Path_Set() {
+func (Paths *KPath_Set) Show_Path_Set() {
 	tsn := 1
 	for _, path := range Paths.TSNPaths {
 		fmt.Printf("\nTSN Path %d \n", tsn)

@@ -34,6 +34,8 @@ func (t *Topology) Select_CAN_Node_Set() []int {
 		node := t.Nodes[index]
 
 		if !used[node.ID] {
+			node.Shape = "CAN"
+
 			result = append(result, node.ID)
 			used[node.ID] = true
 		}
@@ -64,5 +66,6 @@ func (t *Topology) GetNodeByID(id int) *Node {
 			return node
 		}
 	}
+	
 	return nil
 }

@@ -1,8 +1,6 @@
 package topology
 
 
-
-
 func (topology *Topology) AddS2S(fromNodeID int, toNodeID int, cost float64) {
 	connection1 := new_Connection(fromNodeID, toNodeID, cost)
 	connection2 := new_Connection(toNodeID, fromNodeID, cost)

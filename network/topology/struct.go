@@ -2,6 +2,7 @@ package topology
 
 type Node struct {
 	ID          int
+	Shape		string
 	Connections []*Connection
 }
 

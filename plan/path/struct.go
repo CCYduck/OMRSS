@@ -1,12 +1,12 @@
 package path
 
-type KPath_set struct {
+type KPath_Set struct {
 	TSNPaths []*KPath
 	AVBPaths []*KPath
 }
 
-func new_KPath_Set() *KPath_set {
-	return &KPath_set{}
+func new_KPath_Set() *KPath_Set {
+	return &KPath_Set{}
 }
 
 type KPath struct {
@@ -36,6 +36,7 @@ func new_Path() *Path {
 
 type Node struct {
 	ID          int
+	Shape 		string
 	Connections []*Connection
 }
 
@@ -66,6 +67,7 @@ type Graph struct {
 	Vertexs  []*Vertex
 	ToVertex int
 	Path     [][]int
+	ConnPath [][]Connection
 }
 
 type Vertex struct {
