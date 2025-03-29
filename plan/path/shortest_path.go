@@ -11,10 +11,11 @@ func BestPath(Network *network.Network) {
 	for nth, flow := range Network.TSNFlow_Set.TSNFlows {
 		// fmt.Printf("Flow: Source=%d, Destination=%v, Topology=%v\n", flow.Source, flow.Destination, Network.Graph_Set.TSNGraphs[nth])
 		//fmt.Printf("Flow: Source=%d, Destination=%v", flow.Source, flow.Destination)
-		path := saveShortestPathsToGraph(flow.Source, flow.Destination, Network.TSNGraph_Set.TSNGraphs[nth])
+		path,kpath := saveShortestPathsToGraph(flow.Source, flow.Destination, Network.TSNGraph_Set.TSNGraphs[nth])
 		if path != nil {
 			fmt.Println("Best Path:", path)
-			
+			fmt.Printf("KPath: Source=%d, Target=%d, NodeCount=%d\n",
+			kpath.Source, kpath.Target, len(kpath.Paths[0].Nodes))
 		} else {
 			fmt.Println("No path found.")
 		}
@@ -64,15 +65,16 @@ func BestPath(Network *network.Network) {
 	
 }
 
-func saveShortestPathsToGraph(source int, target int, t *topology.Topology) []int,*KPath {
+func saveShortestPathsToGraph(source int, target int, t *topology.Topology) ([]int, *KPath) {
 	// Check if this path has already been taken
 	graph := GetGarph(t)
 	graph.ToVertex = target
 	graph = Dijkstra(graph, target, source)
-	path := &Path{
-		Weight: 0,
-	}
+	
 	if len(graph.Path) > 0 {
+		path := &Path{
+			Weight: 0,
+		}
 		for count,id :=range graph.Path[0] {
 			fmt.Printf("Source=%d,NodeIDs=%v\n", count, id)
 			// 建立一個 *Node，ID 設為 nodeID
@@ -84,10 +86,13 @@ func saveShortestPathsToGraph(source int, target int, t *topology.Topology) []in
 			path.Nodes = append(path.Nodes, newNode)
 		
 		}
-		return graph.Path[0],path
+		k := new_KPath(1, source, target)
+        // 把剛生成的 p 加入 k.Paths
+        k.Paths = append(k.Paths, path)
+		return graph.Path[0],k
 	}
 	
-	return nil
+	return nil,nil
 }
 
 func GetGarph(topology *topology.Topology) *Graph {
