@@ -13,11 +13,11 @@ func (v2v *V2V) Show_V2Vs() {
 func (v2vedge *V2VEdge) Show_VertexToVertex() {
 	for _, graph := range v2vedge.Graphs {
 		fmt.Printf("From Vertex: %d\n", v2vedge.FromVertex)
-		graph.Show_Path()
+		graph.Show_Graph_Path()
 	}
 }
 
-func (graph *Graph) Show_Path() {
+func (graph *Graph) Show_Graph_Path() {
 	fmt.Println("Graph vertices:")
 	for id, vertex := range graph.Vertexs {
 		fmt.Printf("Vertex %d: %+v\n", id, vertex)
@@ -45,20 +45,34 @@ func (Paths *KPath_Set) Show_KPath_Set() {
 	}
 }
 
-func (Paths *KPath_Set) Show_Path_Set() {
-	tsn := 1
-	for _, path := range Paths.TSNPaths {
-		fmt.Printf("\nTSN Path %d \n", tsn)
-		path.Show_KPath()
-		tsn++
+func (Paths *Path_set) Show_Path_Set() {
+
+	for index, path := range Paths.TSNPath {
+		fmt.Printf("\nTSN Path %d \n", index)
+		path.Show_Path()
+
 
 		break
 	}
-	avb := 1
-	for _, path := range Paths.AVBPaths {
-		fmt.Printf("\nAVB Path %d \n", avb)
-		path.Show_KPath()
-		avb++
+
+	for index, path := range Paths.AVBPath {
+		fmt.Printf("\nAVB Path %d \n", index)
+		path.Show_Path()
+
+		break
+	}
+
+	for index, path := range Paths.ImportCanPath {
+		fmt.Printf("\nImportCan Path %d \n", index)
+		path.Show_Path()
+
+		break
+	}
+
+	for index, path := range Paths.UnimportCanPath {
+		fmt.Printf("UnimportCan Path %d \n", index)
+		path.Show_Path()
+
 		break
 	}
 }

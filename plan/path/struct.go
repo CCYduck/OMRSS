@@ -24,6 +24,17 @@ func new_KPath(k int, source, target int) *KPath{
 		Paths:  []*Path{},
 	}
 }
+type Path_set struct {
+	TSNPath []*Path
+	AVBPath []*Path
+	ImportCanPath []*Path
+	UnimportCanPath []*Path
+
+}
+
+func new_Path_Set() *Path_set {
+	return &Path_set{}
+}
 
 type Path struct {
 	Nodes  []*Node

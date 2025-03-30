@@ -31,6 +31,9 @@ func OBJ(network *network.Network, X *routes.KTrees_set, II *routes.Trees_set, I
 		//fmt.Printf("BackGround TSN route%d: %b \n", nth, schedulability)
 	}
 
+	//封裝 這邊要return delay,can2tsn封包
+
+
 	// O2 and O4
 	for nth, route := range II_prime.AVBTrees {
 		wcd := WCD(route, X, S_prime.AVBFlows[nth], network.TSNFlow_Set)
@@ -40,6 +43,11 @@ func OBJ(network *network.Network, X *routes.KTrees_set, II *routes.Trees_set, I
 		//fmt.Printf("BackGround AVB route%d: %b \n", nth, schedulability)
 	}
 	// O3 ... pass
+
+	
+	//解封裝 WCD
+
+
 
 	// Round2: Schedule Input flow
 	// O1

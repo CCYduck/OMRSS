@@ -3,7 +3,7 @@ package flow
 type TSN struct {
 	Period   int     // 100~2000us up 500us
 	Deadline int     // Period = Deadline
-	DataSize float64 // 30~100bytes up 10bytes
+	DataSize float64 // 30~100bytes up 10bytes 最多可以封裝12個CAN封包
 }
 
 func new_TSN(t_period int, t_datasize float64) *TSN {

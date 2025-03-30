@@ -7,92 +7,123 @@ import (
 )
 //主要的function
 
-func BestPath(Network *network.Network) {
+func BestPath(Network *network.Network) *Path_set{
+
+	path_set:=new_Path_Set()
 	for nth, flow := range Network.TSNFlow_Set.TSNFlows {
 		// fmt.Printf("Flow: Source=%d, Destination=%v, Topology=%v\n", flow.Source, flow.Destination, Network.Graph_Set.TSNGraphs[nth])
 		//fmt.Printf("Flow: Source=%d, Destination=%v", flow.Source, flow.Destination)
-		path,kpath := saveShortestPathsToGraph(flow.Source, flow.Destination, Network.TSNGraph_Set.TSNGraphs[nth])
+		path := saveShortestPathsToGraph(flow.Source, flow.Destination, Network.TSNGraph_Set.TSNGraphs[nth])
 		if path != nil {
-			fmt.Println("Best Path:", path)
-			fmt.Printf("KPath: Source=%d, Target=%d, NodeCount=%d\n",
-			kpath.Source, kpath.Target, len(kpath.Paths[0].Nodes))
+			fmt.Println("Best Path:")
+			path.Show_Path()
 		} else {
 			fmt.Println("No path found.")
 		}
-		p := ConvertIDsToPath(path,Network.TSNGraph_Set.TSNGraphs[nth])
-		// 建立一個 *KPath
-		k := new_KPath(nth, flow.Source, flow.Destination)
-		// 把剛生成的 p 加到 k.Paths 裡
-		k.Paths = append(k.Paths, p)
-
+		
+		path_set.TSNPath=append(path_set.TSNPath,path)
 		// 你可以存到一個 KPath_Set 或印出來
 		// fmt.Printf("KPath: Source=%d, Target=%d, NodeIDs=%v\n", k.Source, k.Target, path)
 
 	}
 
-	// for nth, flow := range Network.TSNFlow_Set.AVBFlows {
-	// 	// fmt.Printf("Flow: Source=%d, Destination=%v, Topology=%v\n", flow.Source, flow.Destination[0], Network.Graph_Set.AVBGraphs[nth])
-	// 	//fmt.Printf("Flow: Source=%d, Destination=%v", flow.Source, flow.Destination)
-	// 	path := saveShortestPathsToGraph(flow.Source, flow.Destination, Network.TSNGraph_Set.AVBGraphs[nth])
-	// 	if path != nil {
-	// 		fmt.Println("Best Path:", path)
-	// 	} else {
-	// 		fmt.Println("No path found.")
-	// 	}
-	// }
-	
-	// for nth, flow := range Network.CANFlow_Set.ImportantCANFlows {
-	// 	//fmt.Printf("Flow: Source=%d, Destination=%v ", flow.Source, flow.Destination)
-	// 	// fmt.Printf("Flow: Source=%d, Destination=%v, Topology=%v\n", flow.Source, flow.Destination[0], Network.Graph_Set.Important_CANGraphs[nth])
-	// 	path := saveShortestPathsToGraph(flow.Source, flow.Destination, Network.CANGraph_Set.Important_CANGraphs[nth])
-	// 	if path != nil {
-	// 		fmt.Println("Best Path:", path)
-	// 	} else {
-	// 		fmt.Println("No path found.")
-	// 	}
-	// }
+	for nth, flow := range Network.TSNFlow_Set.AVBFlows {
+		// fmt.Printf("Flow: Source=%d, Destination=%v, Topology=%v\n", flow.Source, flow.Destination, Network.Graph_Set.TSNGraphs[nth])
+		//fmt.Printf("Flow: Source=%d, Destination=%v", flow.Source, flow.Destination)
+		path := saveShortestPathsToGraph(flow.Source, flow.Destination, Network.TSNGraph_Set.AVBGraphs[nth])
+		if path != nil {
+			fmt.Println("Best Path:")
+			path.Show_Path()
+		} else {
+			fmt.Println("No path found.")
+		}
+		
+		path_set.AVBPath=append(path_set.AVBPath,path)
+		// 你可以存到一個 KPath_Set 或印出來
+		// fmt.Printf("KPath: Source=%d, Target=%d, NodeIDs=%v\n", k.Source, k.Target, path)
 
-	// for nth, flow := range Network.CANFlow_Set.UnimportantCANFlows {
-	// 	//fmt.Printf("Flow: Source=%d, Destination=%v ", flow.Source, flow.Destination)
-	// 	// fmt.Printf("Flow: Source=%d, Destination=%v, Topology=%v\n", flow.Source, flow.Destination[0], Network.Graph_Set.Unimportant_CANGraphs[nth])
-	// 	path := saveShortestPathsToGraph(flow.Source, flow.Destination, Network.CANGraph_Set.Unimportant_CANGraphs[nth])
-	// 	if path != nil {
-	// 		fmt.Println("Best Path:", path)
-	// 	} else {
-	// 		fmt.Println("No path found.")
-	// 	}
-	// }
+	}
+
+	for nth, flow := range Network.CANFlow_Set.ImportantCANFlows {
+		// fmt.Printf("Flow: Source=%d, Destination=%v, Topology=%v\n", flow.Source, flow.Destination, Network.Graph_Set.TSNGraphs[nth])
+		//fmt.Printf("Flow: Source=%d, Destination=%v", flow.Source, flow.Destination)
+		path := saveShortestPathsToGraph(flow.Source, flow.Destination, Network.CANGraph_Set.Important_CANGraphs[nth])
+		if path != nil {
+			fmt.Println("Best Path:")
+			path.Show_Path()
+		} else {
+			fmt.Println("No path found.")
+		}
+		
+		path_set.ImportCanPath=append(path_set.ImportCanPath,path)
+		// 你可以存到一個 KPath_Set 或印出來
+		// fmt.Printf("KPath: Source=%d, Target=%d, NodeIDs=%v\n", k.Source, k.Target, path)
+
+	}
 	
+	for nth, flow := range Network.CANFlow_Set.UnimportantCANFlows {
+		// fmt.Printf("Flow: Source=%d, Destination=%v, Topology=%v\n", flow.Source, flow.Destination, Network.Graph_Set.TSNGraphs[nth])
+		//fmt.Printf("Flow: Source=%d, Destination=%v", flow.Source, flow.Destination)
+		path := saveShortestPathsToGraph(flow.Source, flow.Destination, Network.CANGraph_Set.Unimportant_CANGraphs[nth])
+		if path != nil {
+			fmt.Println("Best Path:")
+			path.Show_Path()
+		} else {
+			fmt.Println("No path found.")
+		}
+		
+		path_set.UnimportCanPath=append(path_set.UnimportCanPath,path)
+		// 你可以存到一個 KPath_Set 或印出來
+		// fmt.Printf("KPath: Source=%d, Target=%d, NodeIDs=%v\n", k.Source, k.Target, path)
+
+	}
+
+	return path_set
 }
 
-func saveShortestPathsToGraph(source int, target int, t *topology.Topology) ([]int, *KPath) {
+func saveShortestPathsToGraph(source int, target int, t *topology.Topology) (*Path) {
 	// Check if this path has already been taken
 	graph := GetGarph(t)
 	graph.ToVertex = target
 	graph = Dijkstra(graph, target, source)
 	
 	if len(graph.Path) > 0 {
-		path := &Path{
-			Weight: 0,
-		}
+		path := new_Path()
 		for count,id :=range graph.Path[0] {
-			fmt.Printf("Source=%d,NodeIDs=%v\n", count, id)
 			// 建立一個 *Node，ID 設為 nodeID
 			newNode := &Node{
 				ID: id,
 				// 若要帶入 shape、connections 等，可以在此做處理或查表
 			}
+
+			//fmt.Printf("Source=%d,NodeIDs=%v\n", count, id)
+			if count !=len(graph.Path[0])-1{
+				newfrontConn := &Connection{
+					FromNodeID : 	id ,
+					ToNodeID   :	graph.Path[0][count+1] ,   // next
+					Cost       :	0,
+				}
+				newNode.Connections=append(newNode.Connections,newfrontConn)
+			}
+			
+			if count != 0{
+				newbackConn := &Connection{
+					FromNodeID : 	 id,
+					ToNodeID   :	 graph.Path[0][count-1],   // before
+					Cost       :	0,
+				}
+				newNode.Connections=append(newNode.Connections,newbackConn)
+			}
+			
 			path.Weight +=1
 			path.Nodes = append(path.Nodes, newNode)
-		
+
 		}
-		k := new_KPath(1, source, target)
-        // 把剛生成的 p 加入 k.Paths
-        k.Paths = append(k.Paths, path)
-		return graph.Path[0],k
+		
+		return path
 	}
 	
-	return nil,nil
+	return nil
 }
 
 func GetGarph(topology *topology.Topology) *Graph {
