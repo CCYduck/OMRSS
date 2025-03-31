@@ -5,6 +5,7 @@ import (
 	"src/network"
 	"src/network/flow"
 	"src/plan/routes"
+	// "src/plan/path"
 
 	"time"
 )
@@ -78,6 +79,9 @@ func OBJ(network *network.Network, X *routes.KTrees_set, II *routes.Trees_set, I
 
 	return obj, cost
 }
+
+
+
 
 func schedulability(wcd time.Duration, flow *flow.Flow, route *routes.Tree, linkmap map[string]float64, bandwidth float64, hyperPeriod int) int {
 	r := wcd <= time.Duration(flow.Deadline)*time.Microsecond
