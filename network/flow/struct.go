@@ -56,7 +56,6 @@ func new_unimportantCAN(uc_period int, uc_deadline int) *unimportantCAN {
 	}
 }
 
-
 type Stream struct {
 	Name        string
 	ArrivalTime int
@@ -113,6 +112,8 @@ func new_CANFlow(period int, deadline int, datasize float64, HyperPeriod int) *F
 	}
 }
 
+
+
 // 因為所有的Flow的格式都一樣
 type TSNFlows struct {
 	TSNFlows            []*Flow
@@ -122,6 +123,13 @@ type TSNFlows struct {
 type CANFlows struct {
 	ImportantCANFlows   []*Flow
 	UnimportantCANFlows []*Flow
+}
+
+type CAN2TSNFlow struct{
+	Source 			int
+	Destination 	int
+	Deadline		[]int
+	DataSize		float64
 }
 
 func new_TSNFlows() *TSNFlows {

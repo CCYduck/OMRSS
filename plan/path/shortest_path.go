@@ -15,8 +15,8 @@ func BestPath(Network *network.Network) *Path_set{
 		//fmt.Printf("Flow: Source=%d, Destination=%v", flow.Source, flow.Destination)
 		path := saveShortestPathsToGraph(flow.Source, flow.Destination, Network.TSNGraph_Set.TSNGraphs[nth])
 		if path != nil {
-			fmt.Println("Best Path:")
-			path.Show_Path()
+			// fmt.Println("Best Path:")
+			// // path.Show_Path()
 		} else {
 			fmt.Println("No path found.")
 		}
@@ -32,8 +32,8 @@ func BestPath(Network *network.Network) *Path_set{
 		//fmt.Printf("Flow: Source=%d, Destination=%v", flow.Source, flow.Destination)
 		path := saveShortestPathsToGraph(flow.Source, flow.Destination, Network.TSNGraph_Set.AVBGraphs[nth])
 		if path != nil {
-			fmt.Println("Best Path:")
-			path.Show_Path()
+			// fmt.Println("Best Path:")
+			// path.Show_Path()
 		} else {
 			fmt.Println("No path found.")
 		}
@@ -43,14 +43,15 @@ func BestPath(Network *network.Network) *Path_set{
 		// fmt.Printf("KPath: Source=%d, Target=%d, NodeIDs=%v\n", k.Source, k.Target, path)
 
 	}
+	
 
 	for nth, flow := range Network.CANFlow_Set.ImportantCANFlows {
 		// fmt.Printf("Flow: Source=%d, Destination=%v, Topology=%v\n", flow.Source, flow.Destination, Network.Graph_Set.TSNGraphs[nth])
 		//fmt.Printf("Flow: Source=%d, Destination=%v", flow.Source, flow.Destination)
 		path := saveShortestPathsToGraph(flow.Source, flow.Destination, Network.CANGraph_Set.Important_CANGraphs[nth])
 		if path != nil {
-			fmt.Println("Best Path:")
-			path.Show_Path()
+			// fmt.Println("Best Path:")
+			// path.Show_Path()
 		} else {
 			fmt.Println("No path found.")
 		}
@@ -66,8 +67,8 @@ func BestPath(Network *network.Network) *Path_set{
 		//fmt.Printf("Flow: Source=%d, Destination=%v", flow.Source, flow.Destination)
 		path := saveShortestPathsToGraph(flow.Source, flow.Destination, Network.CANGraph_Set.Unimportant_CANGraphs[nth])
 		if path != nil {
-			fmt.Println("Best Path:")
-			path.Show_Path()
+			// fmt.Println("Best Path:")
+			// path.Show_Path()
 		} else {
 			fmt.Println("No path found.")
 		}

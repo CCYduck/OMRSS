@@ -33,6 +33,7 @@ func OBJ(network *network.Network, X *routes.KTrees_set, II *routes.Trees_set, I
 	}
 
 	//封裝 這邊要return delay,can2tsn封包
+	
 
 
 	// O2 and O4

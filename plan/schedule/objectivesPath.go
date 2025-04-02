@@ -33,10 +33,11 @@ func OBJP(network *network.Network, X *path.Path_set, II *path.Path_set, II_prim
 	//封裝 這邊要return delay,can2tsn封包
 	var totalDelay float64
 	importantCANFlows := network.CANFlow_Set
-    for nth, flow := range importantCANFlows.ImportantCANFlows{
-        d, pkt := EncapsulateCAN2TSN(flow)
+    for _, flow := range importantCANFlows.ImportantCANFlows{
+		fmt.Printf("Source: %v ,Destinatione: %v , Datasize: %v ",flow.Source, flow.Destination, flow.DataSize)
+        d, pkt := EncapsulateCAN2TSN(flow.Source, flow.Destination, flow.DataSize, flow.Deadline)
         if pkt != nil {
-            fmt.Printf("封裝了一個CAN2TSN packet, datasize=%.2f, delay=%.2f\n", pkt.TotalSize, d)
+            fmt.Printf("封裝了一個CAN2TSN packet, datasize=%.2f, delay=%.2f\n", pkt.DataSize, d)
             totalDelay += d
         }
     }
