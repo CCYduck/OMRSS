@@ -15,15 +15,15 @@ var (
     stackLock sync.Mutex
 )
 
-func EncapsulateCAN2TSN(source int, target int, datasize float64 , deadline int) (float64, *flow.Flow){
+func EncapsulateCAN2TSN(source int, target int, datasize float64 , deadline int) (float64, *flow.CAN2TSNFlow){
 
 	stackLock.Lock()
     defer stackLock.Unlock()
 
     dest := target // 假設只考慮單一目的地
 
-	var pkt flow.CAN2TSNFlow
-	flow :=flow.Flow{
+	var pkt *flow.CAN2TSNFlow
+	flow := flow.Flow{
 		Source: 		source,
 		Destination:	target,
 		// DataSize: 		datasize,	
