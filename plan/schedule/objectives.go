@@ -1,7 +1,7 @@
 package schedule
 
 import (
-	// "fmt"
+	"fmt"
 	"src/network"
 	"src/network/flow"
 	"src/plan/routes"
@@ -33,7 +33,16 @@ func OBJ(network *network.Network, X *routes.KTrees_set, II *routes.Trees_set, I
 	}
 
 	//封裝 這邊要return delay,can2tsn封包
-	
+	var totalDelay float64
+	importantCANFlows := network.CANFlow_Set
+    for _, flow := range importantCANFlows.ImportantCANFlows{
+		fmt.Printf("Source: %v ,Destinatione: %v , Datasize: %v ",flow.Source, flow.Destination, flow.DataSize)
+        d, pkt := EncapsulateCAN2TSN(flow.Source, flow.Destination, flow.DataSize, flow.Deadline)
+        if pkt != nil {
+            fmt.Printf("封裝了一個CAN2TSN packet, datasize=%.2f, delay=%.2f\n", pkt.DataSize, d)
+            totalDelay += d
+        }
+    }
 
 
 	// O2 and O4

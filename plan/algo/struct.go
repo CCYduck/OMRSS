@@ -3,7 +3,16 @@ package algo
 import (
 	"src/plan/algo_timer"
 	"src/plan/routes"
+	"src/plan/path"
 )
+
+type SP struct{
+	Path		*path.Path_set
+	InputFlow	*path.Path_set
+	BGFlow		*path.Path_set
+	Objs_SP		*[4]float64
+	Timer 		*algo_timer.Timer
+}
 
 type SMT struct {
 	Trees      *routes.Trees_set
@@ -26,10 +35,13 @@ type OSACO struct {
 	K             int
 	P             float64
 	KTrees        *routes.KTrees_set
+	KPath		  *path.KPath_Set
 	VB            *Visibility
 	PRM           *Pheromone
 	InputTrees    *routes.Trees_set
+	InputPath	  *path.Path_set
 	BGTrees       *routes.Trees_set
+	BGPath		  *path.Path_set
 	Objs_osaco    [5][4]float64        // 200ms{o1, o2, o3, o4} 400ms{o1, o2, o3, o4} 600ms{o1, o2, o3, o4}, 800ms{o1, o2, o3, o4}, 1000ms{o1, o2, o3, o4}
 	Timer         [5]*algo_timer.Timer // 200ms{time} 400ms{time} 600ms{time}, 800ms{time}, 1000ms{time}
 	Method_Number int                  // 0: TOP K minimum weight 1: Increasing Arithmetic Sequence 2: Average Arithmetic Sequence

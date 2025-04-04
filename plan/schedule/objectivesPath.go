@@ -9,7 +9,7 @@ import (
 )
 
 // Objectives
-func OBJP(network *network.Network, X *path.Path_set, II *path.Path_set, II_prime *path.Path_set) ([4]float64, int) {
+func OBJP(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prime *path.Path_set) ([4]float64, int) {
 	S := network.TSNFlow_Set.Input_TSNflow_set()
 	S_prime := network.TSNFlow_Set.BG_flow_set()
 	var (

@@ -3,6 +3,7 @@ package plan
 import (
 	"src/network"
 	"src/plan/algo"
+	
 )
 
 type OMACO struct {
@@ -27,6 +28,7 @@ func new_OMACO_Plan(network *network.Network, osaco_timeout int, osaco_K int, os
 
 type OSRO struct {
 	Network   *network.Network
+	SP		  *algo.SP
 	SMT       *algo.SMT
 	MDTC      *algo.MDTC
 	OSACO     *algo.OSACO
@@ -36,7 +38,7 @@ type OSRO struct {
 // Developing the OMACO plan
 func new_OSRO_Plan(network *network.Network, osaco_timeout int, osaco_K int, osaco_P float64) *OSRO {
 	OSRO := &OSRO{Network: network}
-
+	OSRO.SP	 = &algo.SP{}
 	OSRO.SMT = &algo.SMT{}
 	OSRO.MDTC = &algo.MDTC{}
 	OSRO.OSACO = &algo.OSACO{Timeout: osaco_timeout, K: osaco_K, P: osaco_P, Method_Number: 0}

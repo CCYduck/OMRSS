@@ -39,8 +39,8 @@ func (plan *OMACO) Initiate_Plan() {
 	obj_smt, _ := schedule.OBJ(
 		plan.Network,
 		plan.OSACO.KTrees,
-		plan.MDTC.Trees.Input_Tree_set(plan.Network.BG_TSN, plan.Network.BG_AVB),
-		plan.MDTC.Trees.BG_Tree_set(plan.Network.BG_TSN, plan.Network.BG_AVB),
+		plan.SMT.Trees.Input_Tree_set(plan.Network.BG_TSN, plan.Network.BG_AVB),
+		plan.SMT.Trees.BG_Tree_set(plan.Network.BG_TSN, plan.Network.BG_AVB),
 	)
 
 	obj_mdt, _ := schedule.OBJ(
@@ -61,8 +61,38 @@ func (plan *OMACO) Initiate_Plan() {
 
 func (plan *OSRO) Initiate_Plan() {
 	path_set:=path.BestPath(plan.Network)
+	
 	path_set.Show_Path_Set()
+	fmt.Println("Shortest Path")
+	fmt.Println("----------------------------------------")
+	plan.SP.SP_Run(plan.Network)
 
+	// fmt.Println()
+	// fmt.Println("OSACO")
+	// fmt.Println("----------------------------------------")
+	// plan.OSACO.Path_OSACO_Initial_Settings(plan.Network, plan.SP.Path)
+	// // The timeout of each run is set as 100~1000 ms (200ms, 400ms, 600ms, 800ms, 1000ms)
+	// for i := 0; i < 5; i++ {
+	// 	plan.OSACO.Objs_osaco[i] = plan.OSACO.OSACO_Run(plan.Network, i)
+	// }
+
+	// fmt.Println()
+	// fmt.Println("OSACO_IAS")
+	// fmt.Println("----------------------------------------")
+	// plan.OSACO_IAS.Path_OSACO_Initial_Settings(plan.Network, plan.SP.Path)
+
+	// obj_mdt, _ := schedule.OBJP(
+	// 	plan.Network,
+	// 	plan.OSACO.KPath,
+	// 	plan.SP.Path.Input_Path_set(plan.Network.BG_TSN, plan.Network.BG_AVB),
+	// 	plan.SP.Path.BG_Path_set(plan.Network.BG_TSN, plan.Network.BG_AVB),
+	// )
+
+	// plan.MDTC.Objs_mdtc = obj_mdt
+
+	// if obj_mdt[0] != 0 || obj_mdt[1] != 0 {
+	// 	plan.MDTC.Timer.TimerMax()
+	// }
 	
 }
 
