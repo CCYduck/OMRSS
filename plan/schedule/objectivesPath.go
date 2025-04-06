@@ -30,17 +30,8 @@ func OBJP(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_pri
 		//fmt.Printf("BackGround TSN route%d: %b \n", nth, schedulability)
 	}
 
-	//封裝 這邊要return delay,can2tsn封包
-	var totalDelay float64
-	importantCANFlows := network.CANFlow_Set
-    for _, flow := range importantCANFlows.ImportantCANFlows{
-		fmt.Printf("Source: %v ,Destinatione: %v , Datasize: %v ",flow.Source, flow.Destination, flow.DataSize)
-        d, pkt := EncapsulateCAN2TSN(flow.Source, flow.Destination, flow.DataSize, flow.Deadline)
-        if pkt != nil {
-            fmt.Printf("封裝了一個CAN2TSN packet, datasize=%.2f, delay=%.2f\n", pkt.DataSize, d)
-            totalDelay += d
-        }
-    }
+	
+    
 
 	// O2 and O4
 	for nth, path := range II_prime.AVBPath {
@@ -59,11 +50,20 @@ func OBJP(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_pri
 
 	// Round2: Schedule Input flow
 	// O1
+
+	
+
+
 	for nth, path := range II.TSNPath {
 		schedulability := path_schedulability(0, S.TSNFlows[nth], path, linkmap, network.Bandwidth, network.HyperPeriod)
 		tsn_failed_count += 1 - schedulability
 		//fmt.Printf("Input TSN route%d: %b \n", nth, schedulability)
 	}
+
+	//封裝 這邊要return delay,can2tsn封包
+	
+	can2tsnflow := EncapsulateCAN2TSN(network.CANFlow_Set)
+	fmt.Printf("%v",can2tsnflow)
 
 	// O2 and O4
 	for nth, path := range II.AVBPath {
@@ -155,3 +155,7 @@ func path_loopcompare(a int, b int) bool {
 	return false
 }
 
+func Testqueue(network *network.Network){
+	can2tsnflow := EncapsulateCAN2TSN(network.CANFlow_Set)
+	fmt.Printf("%v",can2tsnflow)
+}

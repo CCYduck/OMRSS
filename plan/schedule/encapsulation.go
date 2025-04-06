@@ -3,66 +3,74 @@ package schedule
 import (
 	// "src/network"
 	"src/network/flow"
-	"sync"
+	// "sync"
 	// "src/plan/algo_timer"
-	// "fmt"
-	"sort"
+	"fmt"
+	// "sort"
 )
 
-//network b 1.堆疊 2.根據週期進入堆疊 3.根據最大封裝數量12個進行封裝 4.然後生成TSN flow Datasize 100bytes , period 5000 , deadline 5000us
-// 全域堆疊結構(視你需求放哪裡)，用 map[destID][]flow.Flow
-var (
-    flowStack = make(map[int][]flow.Flow)
-    stackLock sync.Mutex
-	// timer = algo_timer.NewTimer()
-)
 
-func EncapsulateCAN2TSN(source int, target int, datasize float64 , deadline int) (float64, *flow.Flow){
-	stackLock.Lock()
-    defer stackLock.Unlock()
+type MessageQueues struct{
+	Queue 		[]*Queue
+}
 
-	// timer.TimerStart()
-    dest := target // 假設只考慮單一目的地
+type Queue struct{
+	Source			int
+	Destination 	int
+	Streams 		[]*flow.Stream
+}
 
-	newFlow := flow.Flow{
-		Source: 		source,
-		Destination:	target,
-		// DataSize: 		datasize,	
-		Deadline: 		deadline,
+func (mq *MessageQueues)createQueue(f *flow.Flow){
+	queue := &Queue{}
+
+	queue.Source=f.Source
+	queue.Destination=f.Destination
+	queue.Streams=append(queue.Streams,f.Streams...)
+
+	mq.Queue=append(mq.Queue, queue)
+}
+
+func (q *Queue)saveStream(f *flow.Flow){
+	q.Streams=append(q.Streams,f.Streams...)
+}
+
+func (mq *MessageQueues)searchQueue(f *flow.Flow){
+	s :=f.Source
+	d :=f.Destination
+
+	for _,queue:=range mq.Queue{
+		if queue.Source ==s && queue.Destination==d{
+			queue.saveStream(f)
+		}
 	}
-    // push flow 進入對應目的地堆疊
-    flowStack[dest] = append(flowStack[dest], newFlow)
+	mq.createQueue(f)
+}
 
-    // 若堆疊長度達到 5，就執行封裝
-    if len(flowStack[dest]) >= 12 {
-		
-		sort.Slice(flowStack[dest], func(i, j int) bool {
-            return flowStack[dest][i].Deadline < flowStack[dest][j].Deadline
-        })
-        flowsToEncap := flowStack[dest][:12]       // 取前 12
-        flowStack[dest] = flowStack[dest][12:]     // 移除前 12
-        // 建立封裝產物
-		
-		var pkt *flow.Flow
-		pkt.Source 		=	source
-		pkt.Destination = 	target
-		pkt.Deadline	=	5000
+func EncapsulateCAN2TSN(f *flow.CANFlows) (flow.Flow){
+	
+	mq	:=	&MessageQueues{}
 
+	for _, impf := range f.ImportantCANFlows{
+		fmt.Printf("Source: %v ,Destinatione: %v , Datasize: %v \n",impf.Source, impf.Destination, impf.DataSize)
 
-        // 計算大小
-        var sumSize float64
-        for _, cf := range flowsToEncap {
-            sumSize += cf.DataSize // flow 中的 DataSize
-			// pkt.Deadline=append(pkt.Deadline, cf.Deadline)
-        }
-        pkt.DataSize = sumSize
-
-        // 計算 delay
-        // 例如：delay = sumSize / 125
-        delay := sumSize / 125.0
-		// timer.TimerEnd()
-        return delay, pkt
+		mq.searchQueue(impf)
     }
-    // 尚未達 5 條，不封裝
-    return 0, nil
+
+	for _, unimpf := range f.UnimportantCANFlows{
+		fmt.Printf("Source: %v ,Destinatione: %v , Datasize: %v \n",unimpf.Source, unimpf.Destination, unimpf.DataSize)
+		mq.searchQueue(unimpf)
+    }//檢查CAN NODE 檢查stream
+	//現在有每個queue了 接下來就是咬把每個queue進行封裝 
+	mq.Show_MQ()
+
+	
+    return flow.Flow{}
+}
+
+func (mq *MessageQueues) Show_MQ() {
+
+	for index, q := range mq.Queue {
+		fmt.Printf("Queue %d Source: %v  ,Destination: %v\n",index , q.Source , q.Destination)
+		
+	}
 }

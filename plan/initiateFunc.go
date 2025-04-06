@@ -63,9 +63,11 @@ func (plan *OSRO) Initiate_Plan() {
 	path_set:=path.BestPath(plan.Network)
 	
 	path_set.Show_Path_Set()
-	fmt.Println("Shortest Path")
-	fmt.Println("----------------------------------------")
-	plan.SP.SP_Run(plan.Network)
+	// fmt.Println("Shortest Path")
+	// fmt.Println("----------------------------------------")
+	// plan.SP.SP_Run(plan.Network)
+
+	schedule.Testqueue(plan.Network)
 
 	// fmt.Println()
 	// fmt.Println("OSACO")
