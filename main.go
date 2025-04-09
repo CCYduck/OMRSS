@@ -43,7 +43,7 @@ func init() {
 	flag.IntVar(&bg_avb, "bg_avb", 15, "Number of AVB bg flows.")
 	flag.IntVar(&important_can, "important_can", 5, "Number of CAN important flows.")
 	flag.IntVar(&unimportant_can, "unimportant_can", 25, "Number of CAN unimportant flows.")
-	flag.IntVar(&hyperperiod, "hyperperiod", 6000, "Greatest Common Divisor of Simulated Time LCM.")
+	flag.IntVar(&hyperperiod, "hyperperiod", 300000, "Greatest Common Divisor of Simulated Time LCM.")
 	flag.Float64Var(&bandwidth, "bandwidth", 1e9, "1 Gbps.")
 
 	//加上plan.go名稱(名稱要相同)
@@ -95,7 +95,7 @@ func main() {
 		// 5. Cumulative quantity
 		//Memorizer.M_Cumulative(Plan)
 
-		fmt.Println("****************************************")
+		fmt.Println("\n****************************************")
 	}
 
 	// 6. Average statistical results

@@ -48,7 +48,7 @@ func (Paths *KPath_Set) Show_KPath_Set() {
 func (Paths *Path_set) Show_Path_Set() {
 
 	for index, path := range Paths.TSNPath {
-		fmt.Printf("\nTSN Path %d \n", index)
+		fmt.Printf("TSN Path %d\n", index)
 		path.Show_Path()
 
 
@@ -70,11 +70,12 @@ func (Paths *Path_set) Show_Path_Set() {
 	}
 
 	for index, path := range Paths.UnimportCanPath {
-		fmt.Printf("UnimportCan Path %d \n", index)
+		fmt.Printf("\nUnimportCan Path %d \n", index)
 		path.Show_Path()
 
 		break
 	}
+	fmt.Println("\n")
 }
 
 func (Kpath *KPath) Show_KPath() {
@@ -89,7 +90,7 @@ func (Path *Path) Show_Path() {
 	for _, node := range Path.Nodes {
 		fmt.Println(node.ID)
 		for _, c := range node.Connections {
-			fmt.Printf("%d --> %d \n", c.FromNodeID, c.ToNodeID)
+			fmt.Printf("%d --> %d\n", c.FromNodeID, c.ToNodeID)
 		}
 	}
 }

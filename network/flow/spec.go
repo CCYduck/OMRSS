@@ -50,7 +50,7 @@ func avb_random() float64 {
 
 //因為ImpCAN 是固定的無需做random生成
 func unimportantCAN_random() (int, int) {
-	unimportantCAN_period_arr := []int{50000, 60000, 70000, 80000, 90000, 100000}
+	unimportantCAN_period_arr := []int{50000, 100000, 150000}
 	unimportantCAN_deadline := []int{10000, 12000, 14000, 16000, 18000, 20000}
 	period_rng, _ := rand.Int(rand.Reader, big.NewInt(int64(len(unimportantCAN_period_arr))))
 	deadline_rng, _ := rand.Int(rand.Reader, big.NewInt(int64(len(unimportantCAN_deadline))))

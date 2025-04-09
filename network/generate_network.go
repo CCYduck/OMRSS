@@ -27,7 +27,7 @@ func (network *Network) Generate_Network() {
 	fmt.Println("Generate Flows")
 	fmt.Println("----------------------------------------")
 	network.TSNFlow_Set = flow.Generate_TSNFlows(len(network.Topology.Nodes), network.BG_TSN, network.BG_AVB, network.Input_TSN, network.Input_AVB, network.HyperPeriod)
-	network.CANFlow_Set = flow.Generate_CANFlows(network.Topology.Select_CAN_Node_Set(), network.Important_CAN, network.Unimportant_CAN, network.HyperPeriod)
+	network.CANFlow_Set = flow.Generate_CANFlows(CAN_Node_Set, network.Important_CAN, network.Unimportant_CAN, network.HyperPeriod)
 	fmt.Println("Complete Generating Flows.")
 	fmt.Println()
 

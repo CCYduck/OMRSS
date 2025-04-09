@@ -8,6 +8,7 @@ func (flows *TSNFlows) Input_TSNflow_set() *TSNFlows {
 
 	return Input_flow_set
 }
+
 func (flows *CANFlows) Input_CANflow_set() *CANFlows {
 	Input_flow_set := new_CANFlows()
 

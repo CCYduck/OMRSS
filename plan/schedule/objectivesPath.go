@@ -63,7 +63,8 @@ func OBJP(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_pri
 	//封裝 這邊要return delay,can2tsn封包
 	
 	can2tsnflow := EncapsulateCAN2TSN(network.CANFlow_Set)
-	fmt.Printf("%v",can2tsnflow)
+	// fmt.Printf("\n%v\n",)
+	can2tsnflow.Show_MQ()
 
 	// O2 and O4
 	for nth, path := range II.AVBPath {
@@ -157,5 +158,6 @@ func path_loopcompare(a int, b int) bool {
 
 func Testqueue(network *network.Network){
 	can2tsnflow := EncapsulateCAN2TSN(network.CANFlow_Set)
-	fmt.Printf("%v",can2tsnflow)
+	// fmt.Printf("\n%v\n",)
+	can2tsnflow.Show_MQ()
 }
