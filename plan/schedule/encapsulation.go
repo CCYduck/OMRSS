@@ -17,8 +17,8 @@ type MessageQueues struct{
 type Queue struct{
 	Source			int
 	Destination 	int
-	Flow			*flow.Flow
-	CanStreams 		[]*flow.Stream
+	Flow			*flow.Flow		// CAN→TSN 聚合後的 TSN Flow
+	CanStreams 		[]*flow.Stream	// 原始 CAN Streams
 }
 
 func (mq *MessageQueues)createQueue(f *flow.Flow){
@@ -40,12 +40,15 @@ func (mq *MessageQueues)searchQueue(f *flow.Flow){
 	s :=f.Source
 	d :=f.Destination
 
+	
 	for _,queue:=range mq.Queue{
 		if queue.Source ==s && queue.Destination==d{
 			queue.saveCanStream(f)
+			return
 		}
 	}
 	mq.createQueue(f)
+	
 }
 
 func EncapsulateCAN2TSN(f *flow.CANFlows) *MessageQueues{
@@ -64,17 +67,15 @@ func EncapsulateCAN2TSN(f *flow.CANFlows) *MessageQueues{
 	//現在有每個queue了 接下來就是咬把每個queue進行封裝 
 	
 	for _, q:= range mq.Queue{
-		// 依 ArrivalTime 排序，保持 FIFO
-		sort.Slice(q.CanStreams, func(i, j int) bool {
-            return q.CanStreams[i].ArrivalTime < q.CanStreams[j].ArrivalTime
-        })
+
+		sortCANStreams(q.CanStreams, "deadline")
 		
 		maxdatasize := 64
 		count := 0
 		arrivalTime := 0
 		deadline := 5000
 
-		fmt.Printf("%v\n",len(q.CanStreams))
+		// fmt.Printf("%v\n",len(q.CanStreams))
 		for ind,stream := range q.CanStreams{
 			if count >= maxdatasize{
 				q.Flow.Streams=append(q.Flow.Streams,createCAN2TSNStream(arrivalTime,deadline,float64(maxdatasize)))
@@ -99,13 +100,46 @@ func EncapsulateCAN2TSN(f *flow.CANFlows) *MessageQueues{
 	return mq
 }
 
+func sortCANStreams(streams []*flow.Stream, strategy string) {
+	switch strategy {
+	case "fifo":
+		// 到達時間小 → 大
+		sort.Slice(streams, func(i, j int) bool {
+			return streams[i].ArrivalTime < streams[j].ArrivalTime
+		})
+	case "deadline":
+		// Deadline 小 → 大（最急先送）
+		sort.Slice(streams, func(i, j int) bool {
+			return streams[i].Deadline < streams[j].Deadline
+		})
+	case "datasize":
+		// 資料量大 → 小
+		sort.Slice(streams, func(i, j int) bool {
+			return streams[i].DataSize > streams[j].DataSize
+		})
+	default:
+		// 預設 FIFO
+		sort.Slice(streams, func(i, j int) bool {
+			return streams[i].ArrivalTime < streams[j].ArrivalTime
+		})
+	}
+}
+
 func (mq *MessageQueues) Show_MQ() {
 
-	for index, q := range mq.Queue {
-		fmt.Printf("Queue %d Source: %v  ,Destination: %v \n",index , q.Source , q.Destination)
-		for ind, stream := range q.Flow.Streams{
-			fmt.Printf("	Stream %v ,ArrivalTime: %v  ,Deadline: %v ,Datasize: %v\n" ,ind , stream.ArrivalTime , stream.Deadline , stream.DataSize)
-		}	
+	// for index, q := range mq.Queue {
+	// 	fmt.Printf("Queue %d Source: %v  ,Destination: %v \n",index , q.Source , q.Destination)
+	// 	for ind, stream := range q.Flow.Streams{
+	// 		fmt.Printf("	Stream %v ,ArrivalTime: %v  ,Deadline: %v ,Datasize: %v\n" ,ind , stream.ArrivalTime , stream.Deadline , stream.DataSize)
+	// 	}	
+		
+	// }
+	for _, q := range mq.Queue {
+		fmt.Printf("Queue (%d→%d) streams=%d\n",
+			q.Source, q.Destination, len(q.CanStreams))
+			for ind, stream := range q.Flow.Streams{
+				fmt.Printf("	Stream %v ,ArrivalTime: %v  ,Deadline: %v ,Datasize: %v\n" ,ind , stream.ArrivalTime , stream.Deadline , stream.DataSize)
+			}
 		
 	}
 }
