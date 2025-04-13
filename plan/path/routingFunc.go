@@ -44,8 +44,8 @@ func Get_OSACO_Routing(network *network.Network, SP *Path_set, K int, Method_Num
 func (kpath_set *KPath_Set) Input_kpath_set(bg_tsn_end int, bg_avb_end int) *KPath_Set {
 	Input_kpath_set :=  new_KPath_Set()
 
-	// Input_kpath_set.TSNPaths = append(Input_kpath_set.TSNPaths, kpath_set.TSNPaths[bg_tsn_end:]...)
-	// Input_kpath_set.AVBPaths = append(Input_kpath_set.AVBPaths, kpath_set.AVBPaths[bg_tsn_end:]...)
+	Input_kpath_set.TSNPaths = append(Input_kpath_set.TSNPaths, kpath_set.TSNPaths[bg_tsn_end:]...)
+	Input_kpath_set.AVBPaths = append(Input_kpath_set.AVBPaths, kpath_set.AVBPaths[bg_tsn_end:]...)
 
 	return Input_kpath_set
 }
@@ -53,8 +53,8 @@ func (kpath_set *KPath_Set) Input_kpath_set(bg_tsn_end int, bg_avb_end int) *KPa
 func (kpath_set *KPath_Set) BG_kpath_set(bg_tsn_end int, bg_avb_end int) *KPath_Set {
 	BG_kpath_set := new_KPath_Set()
 
-	// BG_kpath_set.TSNPaths = append(BG_kpath_set.TSNPaths, kpath_set.TSNPaths[:bg_tsn_end]...)
-	// BG_kpath_set.AVBPaths = append(BG_kpath_set.TSNPaths, kpath_set.AVBPaths[:bg_tsn_end]...)
+	BG_kpath_set.TSNPaths = append(BG_kpath_set.TSNPaths, kpath_set.TSNPaths[:bg_tsn_end]...)
+	BG_kpath_set.AVBPaths = append(BG_kpath_set.TSNPaths, kpath_set.AVBPaths[:bg_tsn_end]...)
 
 	return BG_kpath_set
 }

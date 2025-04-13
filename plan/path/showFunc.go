@@ -75,7 +75,7 @@ func (Paths *Path_set) Show_Path_Set() {
 
 		break
 	}
-	fmt.Println("\n")
+	// fmt.Println("\n")
 }
 
 func (Kpath *KPath) Show_KPath() {

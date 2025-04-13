@@ -20,6 +20,13 @@ func BestPath(Network *network.Network) *Path_set{
 	return path_set
 }
 
+func appendPaths(dst *[]*Path, flows []*flow.Flow, topos []*topology.Topology) {
+    for i, f := range flows {
+        p := ShortestPathAsPath(topos[i], f.Source, f.Destination)
+        *dst = append(*dst, p)
+    }
+}
+
 func ShortestPathAsPath(topo *topology.Topology, src, dst int) *Path {
     g := GetGarph(topo)
     g.ToVertex = dst
@@ -72,33 +79,6 @@ func (vertex *Vertex) AddEdge(connections []*topology.Connection) {
 	}
 }
 
-// func (v2v *V2V) GetV2VEdge(terminal int) (*V2VEdge, bool) {
-// 	for _, edge := range v2v.V2VEdges {
-// 		if edge.FromVertex == terminal {
-// 			return edge, false
-// 		}
-// 	}
-// 	return &V2VEdge{FromVertex: terminal}, true
-// }
-
-// func (v2vedge *V2VEdge) InV2VEdge(terminal int) bool {
-// 	for _, graph := range v2vedge.Graphs {
-// 		if graph.ToVertex == terminal {
-// 			return true
-// 		}
-// 	}
-// 	return false
-// }
-
-// func (v2vedge *V2VEdge) GetV2VPath(terminal int) [][]int {
-// 	var path [][]int
-// 	for _, graph := range v2vedge.Graphs {
-// 		if graph.ToVertex == terminal {
-// 			path = graph.Path
-// 		}
-// 	}
-// 	return path
-// }
 
 // 依據節點 ID 切片，生成一個 *Path，其中每個節點都是新的 Node 物件
 func idsToPath(ids []int,topo *topology.Topology) *Path {
@@ -121,8 +101,7 @@ func idsToPath(ids []int,topo *topology.Topology) *Path {
             Shape: realNode.Shape, // 如果在 realNode 中有 shape
             Connections: make([]*Connection, 0), // 稍後若需要也可填
         }
-        p.Nodes = append(p.Nodes, node)
-        
+       
         // 如果要順手加「邊的資訊」：可以在這裡 or 之後做
         if i < len(ids)-1 {
             // 尋找 (id -> ids[i+1]) 這條連線
@@ -140,6 +119,7 @@ func idsToPath(ids []int,topo *topology.Topology) *Path {
                 p.Weight += conn.Cost
             }
         }
+		p.Nodes = append(p.Nodes, node)
     }
     return p
 }
@@ -153,11 +133,3 @@ func findConnectionInNode(node *topology.Node, toID int) *topology.Connection {
     return nil
 }
 
-
-
-func appendPaths(dst *[]*Path, flows []*flow.Flow, topos []*topology.Topology) {
-    for i, f := range flows {
-        p := ShortestPathAsPath(topos[i], f.Source, f.Destination)
-        *dst = append(*dst, p)
-    }
-}

@@ -69,3 +69,14 @@ func (t *Topology) GetNodeByID(id int) *Node {
 	
 	return nil
 }
+
+func (t *Topology) RemoveEdge(u, v int) {
+	n := t.GetNodeByID(u)
+	if n == nil { return }
+	for i := 0; i < len(n.Connections); i++ {
+		if n.Connections[i].ToNodeID == v {
+			n.Connections = append(n.Connections[:i], n.Connections[i+1:]...)
+			break
+		}
+	}
+}
