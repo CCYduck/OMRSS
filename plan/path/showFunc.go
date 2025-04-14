@@ -88,7 +88,7 @@ func (Kpath *KPath) Show_KPath() {
 
 func (Path *Path) Show_Path() {
 	for _, node := range Path.Nodes {
-		fmt.Println(node.ID)
+		// fmt.Println(node.ID)
 		for _, c := range node.Connections {
 			fmt.Printf("%d --> %d\n", c.FromNodeID, c.ToNodeID)
 		}

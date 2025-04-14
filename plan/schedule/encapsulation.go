@@ -21,6 +21,7 @@ type Queue struct{
 	CanStreams 		[]*flow.Stream	// 原始 CAN Streams
 }
 
+
 func (mq *MessageQueues)createQueue(f *flow.Flow){
 	queue := &Queue{}
 
@@ -30,11 +31,12 @@ func (mq *MessageQueues)createQueue(f *flow.Flow){
 	queue.CanStreams=append(queue.CanStreams,f.Streams...)
 
 	mq.Queue=append(mq.Queue, queue)
+	// fmt.Println(len(f.Streams))
 }
 
 func (q *Queue)saveCanStream(f *flow.Flow){
-	
 	q.CanStreams=append(q.CanStreams,f.Streams...)
+	// fmt.Println(len(f.Streams))
 }
 
 func (mq *MessageQueues)searchQueue(f *flow.Flow){
@@ -42,20 +44,24 @@ func (mq *MessageQueues)searchQueue(f *flow.Flow){
 	s :=f.Source
 	d :=f.Destination
 
-	
 	for _,queue:=range mq.Queue{
 		if queue.Source ==s && queue.Destination==d{
 			queue.saveCanStream(f)
+			
 			return
 		}
+		
 	}
 	mq.createQueue(f)
 	
 }
 
-func EncapsulateCAN2TSN(f *flow.CANFlows) *MessageQueues{
+func EncapsulateCAN2TSN(f *flow.CANFlows)(*MessageQueues,int){
 	mq	:=	&MessageQueues{}
 
+	o1_candrop:=0
+
+	
 	for _, impf := range f.ImportantCANFlows{
 		// fmt.Printf("Source: %v ,Destinatione: %v , Datasize: %v \n",impf.Source, impf.Destination, impf.DataSize)
 		mq.searchQueue(impf)
@@ -69,63 +75,80 @@ func EncapsulateCAN2TSN(f *flow.CANFlows) *MessageQueues{
 	//現在有每個queue了 接下來就是咬把每個queue進行封裝 
 	
 	for _, q:= range mq.Queue{
-
-		sortCANStreams(q.CanStreams, "fifo")
-
-		maxdatasize := 64
+		
+		// fmt.Println(len(q.CanStreams))
+		maxdatasize := 100
 		count := 0
 		arrivalTime := 0
 		deadline := 5000
+		// fmt.Println(len(q.CanStreams))
+		current_time := 0
+		method := "deadline"
 
 		// fmt.Printf("%v\n",len(q.CanStreams))
+		stack := &stack{}
 		for ind,stream := range q.CanStreams{
-			if count >= maxdatasize{
-				q.Flow.Streams=append(q.Flow.Streams,createCAN2TSNStream(arrivalTime,deadline,float64(maxdatasize)))
-
-				count = int(stream.DataSize)
-				arrivalTime	+=	5000
-				deadline	+=	5000
+			if stream.ArrivalTime==current_time{
+				stack.appendstack(stream)
 			}else{
-				count += int(stream.DataSize)
-
+				stack.sortstack(method)
+				for _,stackstream := range stack.stack{
+					if current_time	> stackstream.ArrivalTime+stackstream.Deadline{
+						o1_candrop+=1
+		
+					}else{
+						count += int(stackstream.DataSize)
+						if count >= maxdatasize{
+							// fmt.Println(ind,stream.ArrivalTime,stream.Deadline,current_time)
+							q.Flow.Streams=append(q.Flow.Streams,createCAN2TSNStream(arrivalTime,deadline,float64(maxdatasize)))
+							
+							count = int(stackstream.DataSize)
+							arrivalTime		+=	5000
+							deadline		+=	5000
+							current_time	+=	5000
+							
+							continue
+						}
+						// fmt.Println(len(stack.stack))
+						stack.popstack()
+						// fmt.Println(len(stack.stack))
+					}			
+				}
+				
+				stack.appendstack(stream)
+				
 			}
 			if ind == len(q.CanStreams)-1{
-				q.Flow.Streams=append(q.Flow.Streams,createCAN2TSNStream(arrivalTime,deadline,float64(maxdatasize)))
-				count = int(stream.DataSize)
-
+				stack.sortstack(method)
+				for _,stackstream := range stack.stack{
+					if current_time	> stackstream.ArrivalTime+stackstream.Deadline{
+						o1_candrop+=1
+		
+					}else{
+						count += int(stackstream.DataSize)
+						if count >= maxdatasize{
+							// fmt.Println(ind,stream.ArrivalTime,stream.Deadline,current_time)
+							q.Flow.Streams=append(q.Flow.Streams,createCAN2TSNStream(arrivalTime,deadline,float64(maxdatasize)))
+							
+							count = int(stackstream.DataSize)
+							arrivalTime		+=	5000
+							deadline		+=	5000
+							current_time	+=	5000
+							continue
+						}
+						stack.popstack()
+					}		
+					if  len(stack.stack)>=0 {
+						q.Flow.Streams=append(q.Flow.Streams,createCAN2TSNStream(arrivalTime,deadline,float64(maxdatasize)))
+					}
+				}
 			}
-			
 		}
 	}
 	// mq.Show_MQ()
-	return mq
+	
+	return mq,o1_candrop
 
-}
-
-func sortCANStreams(streams []*flow.Stream, strategy string) {
-
-	switch strategy {
-	case "fifo":
-		// 到達時間小 → 大
-		sort.Slice(streams, func(i, j int) bool {
-			return streams[i].ArrivalTime < streams[j].ArrivalTime
-		})
-	case "deadline":
-		// Deadline 小 → 大（最急先送）
-		sort.Slice(streams, func(i, j int) bool {
-			return streams[i].Deadline < streams[j].Deadline
-		})
-	case "datasize":
-		// 資料量大 → 小
-		sort.Slice(streams, func(i, j int) bool {
-			return streams[i].DataSize > streams[j].DataSize
-		})
-	default:
-		// 預設 FIFO
-		sort.Slice(streams, func(i, j int) bool {
-			return streams[i].ArrivalTime < streams[j].ArrivalTime
-		})
-	}
 }
 
 func (mq *MessageQueues) Show_MQ() {
@@ -162,4 +185,36 @@ func createCAN2TSNStream(arrivaltime int, deadline int,datasize float64) *flow.S
 	}
 
 	return newStream
+}
+
+type stack struct{
+	stack		[]*flow.Stream
+}
+
+func (s *stack)appendstack(stream *flow.Stream){
+	s.stack=append(s.stack, stream)
+}
+
+func (s *stack)popstack(){
+	s.stack=s.stack[1:]
+}
+
+func (s *stack)sortstack(method string){
+	switch method {
+	case "fifo":
+		// 到達時間小 → 大
+		sort.Slice(s.stack, func(i, j int) bool {
+			return s.stack[i].ArrivalTime <  s.stack[j].ArrivalTime
+		})
+	case "deadline":
+		// Deadline 小 → 大（最急先送）
+		sort.Slice( s.stack, func(i, j int) bool {
+			return  s.stack[i].Deadline <  s.stack[j].Deadline
+		})
+	default:
+		// 預設 FIFO
+		sort.Slice( s.stack, func(i, j int) bool {
+			return  s.stack[i].ArrivalTime <  s.stack[j].ArrivalTime
+		})
+}
 }

@@ -58,7 +58,7 @@ func Generate_CANstream(period int, deadline int, datasize float64, HyperPeriod 
 		Deadline    int = 0
 		number      int = 0
 	)
-	//這裡要修改
+
 	flow := new_CANFlow(period, deadline, datasize, HyperPeriod)
 
 	for FinishTime < HyperPeriod {

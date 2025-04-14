@@ -59,16 +59,14 @@ func (plan *OMACO) Initiate_Plan() {
 
 }
 
-// func (plan *OSRO) Initiate_Plan() {
-// 	path_set:=path.BestPath(plan.Network)	
-// 	path_set.Show_Path_Set()
-// 	schedule.Testqueue(plan.Network)
-
-// }
 
 func (plan *OSRO) Initiate_Plan() {
-	kpath_set:=path.KShortestPath(plan.Network)	
-	kpath_set.Show_KPath_Set()
+	//Imp50 60 70 80 Unmp 250 300 350 400 
+	path_set:=path.BestPath(plan.Network)	
+	path_set.Show_Path_Set()
+	schedule.Testqueue(plan.Network)
+	// kpath_set:=path.KShortestPath(plan.Network)	
+	// kpath_set.Show_KPath_Set()
 	// schedule.Testqueue(plan.Network)
 
 }

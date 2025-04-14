@@ -4,38 +4,127 @@ import (
 	"fmt"
 	"src/network"
 	"src/network/topology"
-	"src/network/flow"
 )
 //主要的function
 
 func BestPath(Network *network.Network) *Path_set{
 
 	path_set:=new_Path_Set()
+	for nth, flow := range Network.TSNFlow_Set.TSNFlows {
+		// fmt.Printf("Flow: Source=%d, Destination=%v, Topology=%v\n", flow.Source, flow.Destination, Network.Graph_Set.TSNGraphs[nth])
+		//fmt.Printf("Flow: Source=%d, Destination=%v", flow.Source, flow.Destination)
+		path := saveShortestPathsToGraph(flow.Source, flow.Destination, Network.TSNGraph_Set.TSNGraphs[nth])
+		if path != nil {
+			// fmt.Println("Best Path:")
+			// path.Show_Path()
+		} else {
+			fmt.Println("No path found.")
+		}
+		
+		path_set.TSNPath=append(path_set.TSNPath,path)
+		// 你可以存到一個 KPath_Set 或印出來
+		// fmt.Printf("KPath: Source=%d, Target=%d, NodeIDs=%v\n", k.Source, k.Target, path)
 
-	appendPaths(&path_set.TSNPath,  Network.TSNFlow_Set.TSNFlows,             Network.TSNGraph_Set.TSNGraphs)
-    appendPaths(&path_set.AVBPath,  Network.TSNFlow_Set.AVBFlows,             Network.TSNGraph_Set.AVBGraphs)
-    appendPaths(&path_set.ImportCanPath, Network.CANFlow_Set.ImportantCANFlows, Network.CANGraph_Set.Important_CANGraphs)
-    appendPaths(&path_set.UnimportCanPath, Network.CANFlow_Set.UnimportantCANFlows, Network.CANGraph_Set.Unimportant_CANGraphs)
+	}
+
+	for nth, flow := range Network.TSNFlow_Set.AVBFlows {
+		// fmt.Printf("Flow: Source=%d, Destination=%v, Topology=%v\n", flow.Source, flow.Destination, Network.Graph_Set.TSNGraphs[nth])
+		//fmt.Printf("Flow: Source=%d, Destination=%v", flow.Source, flow.Destination)
+		path := saveShortestPathsToGraph(flow.Source, flow.Destination, Network.TSNGraph_Set.AVBGraphs[nth])
+		if path != nil {
+			// fmt.Println("Best Path:")
+			// path.Show_Path()
+		} else {
+			fmt.Println("No path found.")
+		}
+		
+		path_set.AVBPath=append(path_set.AVBPath,path)
+		// 你可以存到一個 KPath_Set 或印出來
+		// fmt.Printf("KPath: Source=%d, Target=%d, NodeIDs=%v\n", k.Source, k.Target, path)
+
+	}
+	
+
+	for nth, flow := range Network.CANFlow_Set.ImportantCANFlows {
+		// fmt.Printf("Flow: Source=%d, Destination=%v, Topology=%v\n", flow.Source, flow.Destination, Network.Graph_Set.TSNGraphs[nth])
+		//fmt.Printf("Flow: Source=%d, Destination=%v", flow.Source, flow.Destination)
+		path := saveShortestPathsToGraph(flow.Source, flow.Destination, Network.CANGraph_Set.Important_CANGraphs[nth])
+		if path != nil {
+			// fmt.Println("Best Path:")
+			// path.Show_Path()
+		} else {
+			fmt.Println("No path found.")
+		}
+		
+		path_set.ImportCanPath=append(path_set.ImportCanPath,path)
+		// 你可以存到一個 KPath_Set 或印出來
+		// fmt.Printf("KPath: Source=%d, Target=%d, NodeIDs=%v\n", k.Source, k.Target, path)
+
+	}
+	
+	for nth, flow := range Network.CANFlow_Set.UnimportantCANFlows {
+		// fmt.Printf("Flow: Source=%d, Destination=%v, Topology=%v\n", flow.Source, flow.Destination, Network.Graph_Set.TSNGraphs[nth])
+		//fmt.Printf("Flow: Source=%d, Destination=%v", flow.Source, flow.Destination)
+		path := saveShortestPathsToGraph(flow.Source, flow.Destination, Network.CANGraph_Set.Unimportant_CANGraphs[nth])
+		if path != nil {
+			// fmt.Println("Best Path:")
+			// path.Show_Path()
+		} else {
+			fmt.Println("No path found.")
+		}
+		
+		path_set.UnimportCanPath=append(path_set.UnimportCanPath,path)
+		// 你可以存到一個 KPath_Set 或印出來
+		// fmt.Printf("KPath: Source=%d, Target=%d, NodeIDs=%v\n", k.Source, k.Target, path)
+
+	}
 
 	return path_set
 }
 
-func appendPaths(dst *[]*Path, flows []*flow.Flow, topos []*topology.Topology) {
-    for i, f := range flows {
-        p := ShortestPathAsPath(topos[i], f.Source, f.Destination)
-        *dst = append(*dst, p)
-    }
-}
+func saveShortestPathsToGraph(source int, target int, t *topology.Topology) (*Path) {
+	// Check if this path has already been taken
+	graph := GetGarph(t)
+	graph.ToVertex = target
+	graph = Dijkstra(graph, target, source)
+	
+	if len(graph.Path) > 0 {
+		path := new_Path()
+		for count,id :=range graph.Path[0] {
+			// 建立一個 *Node，ID 設為 nodeID
+			newNode := &Node{
+				ID: id,
+				// 若要帶入 shape、connections 等，可以在此做處理或查表
+			}
 
-func ShortestPathAsPath(topo *topology.Topology, src, dst int) *Path {
-    g := GetGarph(topo)
-    g.ToVertex = dst
-    Dijkstra(g, dst, src)
+			//fmt.Printf("Source=%d,NodeIDs=%v\n", count, id)
+			if count !=len(graph.Path[0])-1{
+				newfrontConn := &Connection{
+					FromNodeID : 	id ,
+					ToNodeID   :	graph.Path[0][count+1] ,   // next
+					Cost       :	0,
+				}
+				newNode.Connections=append(newNode.Connections,newfrontConn)
+			}
+			
+			if count != 0{
+				newbackConn := &Connection{
+					FromNodeID : 	 id,
+					ToNodeID   :	 graph.Path[0][count-1],   // before
+					Cost       :	0,
+				}
+				newNode.Connections=append(newNode.Connections,newbackConn)
+			}
+			
+			path.Weight +=1
+			path.Nodes = append(path.Nodes, newNode)
 
-    if len(g.Path) == 0 {
-        return nil
-    }
-    return idsToPath(g.Path[0], topo)
+		}
+		
+		return path
+	}
+	
+	return nil
 }
 
 func GetGarph(topology *topology.Topology) *Graph {
@@ -79,9 +168,36 @@ func (vertex *Vertex) AddEdge(connections []*topology.Connection) {
 	}
 }
 
+func (v2v *V2V) GetV2VEdge(terminal int) (*V2VEdge, bool) {
+	for _, edge := range v2v.V2VEdges {
+		if edge.FromVertex == terminal {
+			return edge, false
+		}
+	}
+	return &V2VEdge{FromVertex: terminal}, true
+}
+
+func (v2vedge *V2VEdge) InV2VEdge(terminal int) bool {
+	for _, graph := range v2vedge.Graphs {
+		if graph.ToVertex == terminal {
+			return true
+		}
+	}
+	return false
+}
+
+func (v2vedge *V2VEdge) GetV2VPath(terminal int) [][]int {
+	var path [][]int
+	for _, graph := range v2vedge.Graphs {
+		if graph.ToVertex == terminal {
+			path = graph.Path
+		}
+	}
+	return path
+}
 
 // 依據節點 ID 切片，生成一個 *Path，其中每個節點都是新的 Node 物件
-func idsToPath(ids []int,topo *topology.Topology) *Path {
+func ConvertIDsToPath(ids []int,topo *topology.Topology) *Path {
     p := &Path{
         Nodes:  make([]*Node, 0, len(ids)),
         Weight: 0,
@@ -101,7 +217,8 @@ func idsToPath(ids []int,topo *topology.Topology) *Path {
             Shape: realNode.Shape, // 如果在 realNode 中有 shape
             Connections: make([]*Connection, 0), // 稍後若需要也可填
         }
-       
+        p.Nodes = append(p.Nodes, node)
+        
         // 如果要順手加「邊的資訊」：可以在這裡 or 之後做
         if i < len(ids)-1 {
             // 尋找 (id -> ids[i+1]) 這條連線
@@ -119,7 +236,6 @@ func idsToPath(ids []int,topo *topology.Topology) *Path {
                 p.Weight += conn.Cost
             }
         }
-		p.Nodes = append(p.Nodes, node)
     }
     return p
 }
@@ -132,4 +248,3 @@ func findConnectionInNode(node *topology.Node, toID int) *topology.Connection {
     }
     return nil
 }
-
