@@ -30,9 +30,6 @@ func OBJP(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_pri
 		//fmt.Printf("BackGround TSN route%d: %b \n", nth, schedulability)
 	}
 
-	
-    
-
 	// O2 and O4
 	for nth, path := range II_prime.AVBPath {
 		wcd := WCDP(path, X, S_prime.AVBFlows[nth], network.TSNFlow_Set)
@@ -43,16 +40,10 @@ func OBJP(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_pri
 	}
 	// O3 ... pass
 
-	
 	//解封裝 WCD
-
-
 
 	// Round2: Schedule Input flow
 	// O1
-
-	
-
 
 	for nth, path := range II.TSNPath {
 		schedulability := path_schedulability(0, S.TSNFlows[nth], path, linkmap, network.Bandwidth, network.HyperPeriod)
@@ -61,11 +52,11 @@ func OBJP(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_pri
 	}
 
 	//封裝 這邊要return delay,can2tsn封包
-	
-	can2tsnflow,o1_candrop := EncapsulateCAN2TSN(network.CANFlow_Set)
-	
-	can2tsnflow.Show_MQ()
-	fmt.Printf("O1_CAN Drop: %v \n",o1_candrop)
+
+	can2tsnflow, o1_candrop := EncapsulateCAN2TSN(network.CANFlow_Set, network.HyperPeriod)
+
+	can2tsnflow.Show_CAN2TSNFlowSet()
+	fmt.Printf("O1_CAN Drop: %v \n", o1_candrop)
 
 	// O2 and O4
 	for nth, path := range II.AVBPath {
@@ -88,9 +79,6 @@ func OBJP(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_pri
 
 	return obj, cost
 }
-
-
-
 
 func path_schedulability(wcd time.Duration, flow *flow.Flow, path *path.Path, linkmap map[string]float64, bandwidth float64, hyperPeriod int) int {
 	r := wcd <= time.Duration(flow.Deadline)*time.Microsecond
@@ -151,16 +139,16 @@ func path_schedulable(node *path.Node, parentID int, flow *flow.Flow, route *pat
 }
 
 func path_loopcompare(a int, b int) bool {
-		if a == b {
-			return true
-		}
+	if a == b {
+		return true
+	}
 	return false
 }
 
-func Testqueue(network *network.Network){
-	can2tsnflow,o1_candrop := EncapsulateCAN2TSN(network.CANFlow_Set)
+func Testqueue(network *network.Network) {
+	can2tsnflow, o1_candrop := EncapsulateCAN2TSN(network.CANFlow_Set, network.HyperPeriod)
 	// fmt.Printf("\n%v\n",)
-	
-	can2tsnflow.Show_MQ()
-	fmt.Printf("O1_CAN Drop: %v \n",o1_candrop)
+
+	can2tsnflow.Show_CAN2TSNFlowSet()
+	fmt.Printf("O1_CAN Drop: %v \n", o1_candrop)
 }

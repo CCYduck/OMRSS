@@ -1,220 +1,167 @@
 package schedule
 
 import (
-	// "src/network"
-	"src/network/flow"
-	// "sync"
-	// "src/plan/algo_timer"
 	"fmt"
 	"sort"
+	"src/network/flow"
 )
 
-
-type MessageQueues struct{
-	Queue 		[]*Queue
-}
-
-type Queue struct{
-	Source			int
-	Destination 	int
-	Flow			*flow.Flow		// CAN→TSN 聚合後的 TSN Flow
-	CanStreams 		[]*flow.Stream	// 原始 CAN Streams
-}
-
-
-func (mq *MessageQueues)createQueue(f *flow.Flow){
-	queue := &Queue{}
-
-	queue.Source=f.Source
-	queue.Destination=f.Destination
-	queue.Flow = createCAN2TSNFlow(f.Source,f.Destination)
-	queue.CanStreams=append(queue.CanStreams,f.Streams...)
-
-	mq.Queue=append(mq.Queue, queue)
-	// fmt.Println(len(f.Streams))
-}
-
-func (q *Queue)saveCanStream(f *flow.Flow){
-	q.CanStreams=append(q.CanStreams,f.Streams...)
-	// fmt.Println(len(f.Streams))
-}
-
-func (mq *MessageQueues)searchQueue(f *flow.Flow){
-
-	s :=f.Source
-	d :=f.Destination
-
-	for _,queue:=range mq.Queue{
-		if queue.Source ==s && queue.Destination==d{
-			queue.saveCanStream(f)
-			
-			return
-		}
-		
+func EncapsulateCAN2TSN(f *flow.CANFlows, hyperperiod int) (*CAN2TSN_Flow_Set, int) {
+	can2tsnFlowSet := &CAN2TSN_Flow_Set{}
+	// create flow set
+	for _, impf := range f.ImportantCANFlows {
+		can2tsnFlowSet.searchCAN2TSNFlow(impf)
 	}
-	mq.createQueue(f)
-	
-}
+	for _, unimpf := range f.UnimportantCANFlows {
+		can2tsnFlowSet.searchCAN2TSNFlow(unimpf)
+	}
 
-func EncapsulateCAN2TSN(f *flow.CANFlows)(*MessageQueues,int){
-	mq	:=	&MessageQueues{}
+	// encapsulate
+	o1_can_drop := 0
+	method := "deadline"
+	datasize_max := 100.
+	deadline := 5000
+	for _, can2tsnFlow := range can2tsnFlowSet.CAN2TSN_Flows {
+		queue := &Queue{}
+		datasize_count := 0.
+		for current_time := 0; current_time < hyperperiod; current_time += 5000 {
+			queue.appendQueue(can2tsnFlow.getStreamsByCurrentTime(current_time))
+			queue.sortQueue(method)
 
-	o1_candrop:=0
+			// example:
+			// current_time=0 queue=[0_1, 0_2, 0_3, 0_4, 0_5] if 05 datasize_count>datasize_max, createCAN2TSNStream datasize_count = 0
+			// current_time=5000 queue=[0_5, 5000_1, 5000_2, 5000_3, 5000_4, 5000_5]
+			for _, queue_stream := range queue.Streams {
+				if current_time > queue_stream.FinishTime {
+					o1_can_drop += 1
 
-	
-	for _, impf := range f.ImportantCANFlows{
-		// fmt.Printf("Source: %v ,Destinatione: %v , Datasize: %v \n",impf.Source, impf.Destination, impf.DataSize)
-		mq.searchQueue(impf)
-    }
-
-	for _, unimpf := range f.UnimportantCANFlows{
-		// fmt.Printf("Source: %v ,Destinatione: %v , Datasize: %v \n",unimpf.Source, unimpf.Destination, unimpf.DataSize)
-		mq.searchQueue(unimpf)
-    }
-	//檢查CAN NODE 檢查stream
-	//現在有每個queue了 接下來就是咬把每個queue進行封裝 
-	
-	for _, q:= range mq.Queue{
-		
-		// fmt.Println(len(q.CanStreams))
-		maxdatasize := 100
-		count := 0
-		arrivalTime := 0
-		deadline := 5000
-		// fmt.Println(len(q.CanStreams))
-		current_time := 0
-		method := "deadline"
-
-		// fmt.Printf("%v\n",len(q.CanStreams))
-		stack := &stack{}
-		for ind,stream := range q.CanStreams{
-			if stream.ArrivalTime==current_time{
-				stack.appendstack(stream)
-			}else{
-				stack.sortstack(method)
-				for _,stackstream := range stack.stack{
-					if current_time	> stackstream.ArrivalTime+stackstream.Deadline{
-						o1_candrop+=1
-		
-					}else{
-						count += int(stackstream.DataSize)
-						if count >= maxdatasize{
-							// fmt.Println(ind,stream.ArrivalTime,stream.Deadline,current_time)
-							q.Flow.Streams=append(q.Flow.Streams,createCAN2TSNStream(arrivalTime,deadline,float64(maxdatasize)))
-							
-							count = int(stackstream.DataSize)
-							arrivalTime		+=	5000
-							deadline		+=	5000
-							current_time	+=	5000
-							
-							continue
-						}
-						// fmt.Println(len(stack.stack))
-						stack.popstack()
-						// fmt.Println(len(stack.stack))
-					}			
-				}
-				
-				stack.appendstack(stream)
-				
-			}
-			if ind == len(q.CanStreams)-1{
-				stack.sortstack(method)
-				for _,stackstream := range stack.stack{
-					if current_time	> stackstream.ArrivalTime+stackstream.Deadline{
-						o1_candrop+=1
-		
-					}else{
-						count += int(stackstream.DataSize)
-						if count >= maxdatasize{
-							// fmt.Println(ind,stream.ArrivalTime,stream.Deadline,current_time)
-							q.Flow.Streams=append(q.Flow.Streams,createCAN2TSNStream(arrivalTime,deadline,float64(maxdatasize)))
-							
-							count = int(stackstream.DataSize)
-							arrivalTime		+=	5000
-							deadline		+=	5000
-							current_time	+=	5000
-							continue
-						}
-						stack.popstack()
-					}		
-					if  len(stack.stack)>=0 {
-						q.Flow.Streams=append(q.Flow.Streams,createCAN2TSNStream(arrivalTime,deadline,float64(maxdatasize)))
+				} else {
+					datasize_count += queue_stream.DataSize
+					if datasize_count >= datasize_max {
+						can2tsnStream := createCAN2TSNStream(current_time, deadline, datasize_max)
+						can2tsnFlow.CAN2TSN_Flow.Streams = append(can2tsnFlow.CAN2TSN_Flow.Streams, can2tsnStream)
+						datasize_count = 0
+						break
 					}
+					queue.popQueue()
 				}
 			}
 		}
 	}
 	// mq.Show_MQ()
-	
-	return mq,o1_candrop
+
+	return can2tsnFlowSet, o1_can_drop
 
 }
 
-func (mq *MessageQueues) Show_MQ() {
+type CAN2TSN_Flow_Set struct {
+	CAN2TSN_Flows []*CAN2TSN_Flow
+}
 
-	for _, q := range mq.Queue {
-		fmt.Printf("Queue (%d→%d) streams=%d\n",
-			q.Source, q.Destination, len(q.CanStreams))
-			for ind, stream := range q.Flow.Streams{
-				fmt.Printf("	Stream %v ,ArrivalTime: %v  ,Deadline: %v ,Datasize: %v\n" ,ind , stream.ArrivalTime , stream.Deadline , stream.DataSize)
-			}
-		
+type CAN2TSN_Flow struct {
+	Source       int
+	Destination  int
+	CAN_Streams  []*flow.Stream
+	CAN2TSN_Flow *flow.Flow
+}
+
+func (can2tsnFlow *CAN2TSN_Flow) appendCANStreamsToFlow(f *flow.Flow) {
+	can2tsnFlow.CAN_Streams = append(can2tsnFlow.CAN_Streams, f.Streams...)
+}
+
+func (can2tsnFlow *CAN2TSN_Flow) getStreamsByCurrentTime(current_time int) []*flow.Stream {
+	streams := []*flow.Stream{}
+	for _, stream := range can2tsnFlow.CAN_Streams {
+		if stream.ArrivalTime == current_time {
+			streams = append(streams, stream)
+		}
+	}
+	return streams
+}
+
+func (can2tsnFlowSet *CAN2TSN_Flow_Set) addNewCAN2TSNFlowToSet(f *flow.Flow) {
+	can2tsnFlow := &CAN2TSN_Flow{}
+	can2tsnFlow.Source = f.Source
+	can2tsnFlow.Destination = f.Destination
+	can2tsnFlow.CAN2TSN_Flow = createCAN2TSNFlow(f.Source, f.Destination)
+	can2tsnFlow.appendCANStreamsToFlow(f)
+	can2tsnFlowSet.CAN2TSN_Flows = append(can2tsnFlowSet.CAN2TSN_Flows, can2tsnFlow)
+}
+
+func (can2tsnFlowSet *CAN2TSN_Flow_Set) searchCAN2TSNFlow(f *flow.Flow) {
+	s := f.Source
+	d := f.Destination
+
+	for _, can2tsnFlow := range can2tsnFlowSet.CAN2TSN_Flows {
+		if can2tsnFlow.Source == s && can2tsnFlow.Destination == d {
+			can2tsnFlow.appendCANStreamsToFlow(f)
+			return
+		}
+	}
+	can2tsnFlowSet.addNewCAN2TSNFlowToSet(f)
+}
+
+func (can2tsnFlowSet *CAN2TSN_Flow_Set) Show_CAN2TSNFlowSet() {
+	for _, can2tsnFlow := range can2tsnFlowSet.CAN2TSN_Flows {
+		fmt.Printf("Queue (%d→%d) streams=%d\n", can2tsnFlow.Source, can2tsnFlow.Destination, len(can2tsnFlow.CAN_Streams))
+		for ind, stream := range can2tsnFlow.CAN2TSN_Flow.Streams {
+			fmt.Printf("Stream %v ,ArrivalTime: %v  ,Deadline: %v ,Datasize: %v\n", ind, stream.ArrivalTime, stream.Deadline, stream.DataSize)
+		}
+
 	}
 }
 
-func createCAN2TSNFlow(source int, destination int) *flow.Flow{
-
+func createCAN2TSNFlow(source int, destination int) *flow.Flow {
 	newFlow := &flow.Flow{
 		Period:      5000,
 		Deadline:    5000,
 		DataSize:    100,
 		Source:      source,
-		Destination: destination, 
+		Destination: destination,
 	}
 
 	return newFlow
 }
 
-func createCAN2TSNStream(arrivaltime int, deadline int,datasize float64) *flow.Stream{
-
+func createCAN2TSNStream(arrival_time int, deadline int, datasize float64) *flow.Stream {
 	newStream := &flow.Stream{
-		ArrivalTime: arrivaltime,
-		Deadline:    deadline,       
+		ArrivalTime: arrival_time,
+		Deadline:    deadline,
 		DataSize:    datasize,
+		FinishTime:  arrival_time + deadline,
 	}
 
 	return newStream
 }
 
-type stack struct{
-	stack		[]*flow.Stream
+type Queue struct {
+	Streams []*flow.Stream
 }
 
-func (s *stack)appendstack(stream *flow.Stream){
-	s.stack=append(s.stack, stream)
+func (q *Queue) appendQueue(streams []*flow.Stream) {
+	q.Streams = append(q.Streams, streams...)
 }
 
-func (s *stack)popstack(){
-	s.stack=s.stack[1:]
+func (q *Queue) popQueue() {
+	q.Streams = q.Streams[1:]
 }
 
-func (s *stack)sortstack(method string){
+func (q *Queue) sortQueue(method string) {
 	switch method {
 	case "fifo":
 		// 到達時間小 → 大
-		sort.Slice(s.stack, func(i, j int) bool {
-			return s.stack[i].ArrivalTime <  s.stack[j].ArrivalTime
+		sort.Slice(q.Streams, func(i, j int) bool {
+			return q.Streams[i].ArrivalTime < q.Streams[j].ArrivalTime
 		})
 	case "deadline":
 		// Deadline 小 → 大（最急先送）
-		sort.Slice( s.stack, func(i, j int) bool {
-			return  s.stack[i].Deadline <  s.stack[j].Deadline
+		sort.Slice(q.Streams, func(i, j int) bool {
+			return q.Streams[i].Deadline < q.Streams[j].Deadline
 		})
 	default:
 		// 預設 FIFO
-		sort.Slice( s.stack, func(i, j int) bool {
-			return  s.stack[i].ArrivalTime <  s.stack[j].ArrivalTime
+		sort.Slice(q.Streams, func(i, j int) bool {
+			return q.Streams[i].ArrivalTime < q.Streams[j].ArrivalTime
 		})
-}
+	}
 }
