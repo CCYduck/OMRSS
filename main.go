@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+
 	//"src/memorizer"
 	"src/network"
 	"src/plan"
@@ -26,6 +27,12 @@ var (
 	osaco_timeout int
 	osaco_K       int
 	osaco_P       float64
+
+	// schedule parameters
+	o1_cost int
+	o2_cost int
+	o3_cost int
+	o4_cost int
 
 	// show parameters
 	show_network bool
@@ -52,6 +59,11 @@ func init() {
 	flag.IntVar(&osaco_K, "osaco_K", 5, "Select K trees with different weights.")
 	flag.Float64Var(&osaco_P, "osaco_P", 0.6, "The pheromone value of each routing path starts to evaporate, where P is the given evaporation coefficient. (0 <= p <= 1)")
 
+	flag.IntVar(&o1_cost, "o1_cost", 100000000, "O1 cost")
+	flag.IntVar(&o2_cost, "o2_cost", 100000, "O2 cost")
+	flag.IntVar(&o3_cost, "o3_cost", 0, "O3 cost")
+	flag.IntVar(&o4_cost, "o4_cost", 1, "O4 cost")
+
 	flag.BoolVar(&show_network, "show_network", false, "Present all network information comprehensively.")
 	flag.BoolVar(&show_plan, "show_plan", false, "Provide a comprehensive display of all plan information.")
 	flag.BoolVar(&store_data, "store_data", true, "Store all statistical data")
@@ -64,6 +76,7 @@ func main() {
 	flag.Parse()
 
 	// Data storage architecture
+	// ----------------------------------------------
 	//Memorizers := memorizer.New_Memorizers()
 	//Memorizer := Memorizers[plan_name]
 
@@ -75,41 +88,42 @@ func main() {
 		Networks := network.New_Networks(topology_name, bg_tsn, bg_avb, input_tsn, input_avb, important_can, unimportant_can, hyperperiod, bandwidth)
 		Network := Networks[plan_name]
 		Network.Generate_Network() // Generate a.Topology b.Flows c.Graphs
-		
 		if show_network {
 			Network.Show_Network()
 		}
-		// 2. Create new plans (a.OMACO ... )
-		Plans := plan.New_Plans(Network, osaco_timeout, osaco_K, osaco_P) // TODO: To process parameters with a dictionary structure
-		
 
-		// 3. Select plan
+		// 2. Create new plans (a.OMACO ... )
+		Plans := plan.New_Plans(Network, osaco_timeout, osaco_K, osaco_P)
 		Plan := Plans[plan_name]
 
-		// 4. Initiate plan
+		// 3. Initiate plan
+		//cost_setting1 := [4]int{o1_cost, o2_cost, o3_cost, o4_cost}
 		Plan.Initiate_Plan()
 		if show_plan {
 			Plan.Show_Plan()
 		}
 
-		// 5. Cumulative quantity
+		// 4. Cumulative quantity
+		// ------------------------------------------
 		//Memorizer.M_Cumulative(Plan)
-
 		fmt.Println("\n****************************************")
 	}
 
-	// 6. Average statistical results
+	// 5. Average statistical results
+	// ---------------------------------
 	//Memorizer.M_Average(test_case)
 
-	// 7. Output results
+	// 6. Output results
+	// -----------------------------------
 	//Memorizer.M_Output_Results()
 
-	// 8. Save as TXT
-	//Memorizer.M_Store_Files(topology_name, test_case, input_tsn, input_avb, osaco_K, osaco_P)
-	// --------------------------------------------------------------------------------
+	// 7. Save as CSV
+	// --------------------------------------------------------------------------------------------------------------------------------------------------
+	//name := fmt.Sprintf("%s_tsn%d_avb%d_K%d_P%.1f_timeout%d_O1%d_O2%d", topology_name, input_tsn, input_avb, osaco_K, osaco_P, osaco_timeout, o1_cost, o2_cost)
+	//Memorizer.M_Store_Data(name, test_case)
 
-	// 9. Save as CSV
-	if store_data {
-		//Memorizer.M_Store_Data()
-	}
+	// 8. Save as TXT
+	// ------------------------------------
+	//Memorizer.M_Store_File(name)
+	// --------------------------------------------------------------------------------
 }
