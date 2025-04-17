@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func (flows *TSNFlows) Show_TSNStream() {
+func (flows *Flows) Show_TSNStream() {
 	TSNFlows := flows.TSNFlows
 	AVBFlows := flows.AVBFlows
 	number := 1
@@ -32,7 +32,7 @@ func (flows *TSNFlows) Show_TSNStream() {
 	}
 }
 
-func (flows *CANFlows) Show_CANStream() {
+func (flows *Flows) Show_CANStream() {
 	importantCANFlows := flows.ImportantCANFlows
 	unimportantCANFlows := flows.UnimportantCANFlows
 	number := 1
@@ -60,10 +60,10 @@ func (flows *CANFlows) Show_CANStream() {
 	}
 }
 
-func (flows *TSNFlows) Show_TSNFlow() {
+func (flows *Flows) Show_TSNFlow() {
 	TSNFlows := flows.TSNFlows
 	AVBFlows := flows.AVBFlows
-	
+
 	number := 1
 	for _, flow := range TSNFlows {
 		name := fmt.Sprint("TSNFlow", number)
@@ -89,10 +89,10 @@ func (flows *TSNFlows) Show_TSNFlow() {
 	}
 }
 
-func (flows *CANFlows) Show_CANFlow() {
+func (flows *Flows) Show_CANFlow() {
 	importantCANFlows := flows.ImportantCANFlows
 	unimportantCANFlows := flows.UnimportantCANFlows
-	
+
 	number := 1
 	for _, flow := range importantCANFlows {
 		name := fmt.Sprint("ImportantCANFlow", number)
@@ -118,14 +118,14 @@ func (flows *CANFlows) Show_CANFlow() {
 	}
 }
 
-func (flows *TSNFlows) Show_TSNFlows() {
+func (flows *Flows) Show_TSNFlows() {
 	// Display all flows.
 	fmt.Printf("Total Flows:%d ( TSN Flows:%d  AVB Flows:%d )\n",
 		len(flows.TSNFlows)+len(flows.AVBFlows), len(flows.TSNFlows), len(flows.AVBFlows))
 }
 
-func (flows *CANFlows) Show_CANFlows() {
+func (flows *Flows) Show_CANFlows() {
 	// Display all flows.
 	fmt.Printf("Total Flows:%d ( ImportantCAN Flows:%d  UnimportantCAN Flows:%d )\n",
-		len(flows. ImportantCANFlows)+len(flows. UnimportantCANFlows), len(flows. ImportantCANFlows), len(flows. UnimportantCANFlows))
+		len(flows.ImportantCANFlows)+len(flows.UnimportantCANFlows), len(flows.ImportantCANFlows), len(flows.UnimportantCANFlows))
 }

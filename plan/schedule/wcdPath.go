@@ -2,12 +2,12 @@ package schedule
 
 import (
 	"src/network/flow"
-	"time"
 	"src/plan/path"
+	"time"
 )
 
 // Worse-Case Delay
-func WCDP(z *path.Path, kpath_set *path.KPath_Set, flow *flow.Flow, flow_set *flow.TSNFlows) time.Duration {
+func WCDP(z *path.Path, kpath_set *path.KPath_Set, flow *flow.Flow, flow_set *flow.Flows) time.Duration {
 	end2end := time.Duration(0)
 	node := z.GetNodeByID(flow.Source)
 	wcd := path_end2end_delay(node, -1, end2end, z, kpath_set, flow, flow_set)
@@ -18,7 +18,7 @@ func WCDP(z *path.Path, kpath_set *path.KPath_Set, flow *flow.Flow, flow_set *fl
 
 // Use DFS to find all dataflow paths in the Route
 // Calculate the End to End Delay for each dataflow path and select the maximum one
-func path_end2end_delay(node *path.Node, parentID int, end2end time.Duration, z *path.Path, kpath_set *path.KPath_Set, flow *flow.Flow, flow_set *flow.TSNFlows) time.Duration {
+func path_end2end_delay(node *path.Node, parentID int, end2end time.Duration, z *path.Path, kpath_set *path.KPath_Set, flow *flow.Flow, flow_set *flow.Flows) time.Duration {
 	//fmt.Printf("%d: %v \n", node.ID, end2end)
 	maxE2E := end2end
 	for _, link := range node.Connections {
@@ -68,7 +68,7 @@ func path_transmit_avb_itself(datasize float64, bytes_rate float64) time.Duratio
 //}
 
 // The time occupied by other AVB packets during transmission
-func path_interfere_from_avb(link *path.Connection, KPath_set *path.KPath_Set,	 datasize float64) time.Duration {
+func path_interfere_from_avb(link *path.Connection, KPath_set *path.KPath_Set, datasize float64) time.Duration {
 	// Occupied bytes by other AVB
 	var occupiedbytes float64
 	for _, avb_kpath := range KPath_set.AVBPaths {
@@ -89,7 +89,7 @@ func path_interfere_from_avb(link *path.Connection, KPath_set *path.KPath_Set,	 
 }
 
 // The known time occupied by TSN packets during transmission
-func path_interfere_from_tsn(link *path.Connection, kpath_set *path.KPath_Set, flow_set *flow.TSNFlows) time.Duration {
+func path_interfere_from_tsn(link *path.Connection, kpath_set *path.KPath_Set, flow_set *flow.Flows) time.Duration {
 	// Occupied bytes by TSN
 	var occupiedbytes float64
 	for nth, tsn_path := range kpath_set.TSNPaths {

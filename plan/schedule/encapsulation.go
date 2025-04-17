@@ -6,7 +6,7 @@ import (
 	"src/network/flow"
 )
 
-func EncapsulateCAN2TSN(f *flow.CANFlows, hyperperiod int) (*CAN2TSN_Flow_Set, int) {
+func EncapsulateCAN2TSN(f *flow.Flows, hyperperiod int) (*CAN2TSN_Flow_Set, int) {
 	can2tsnFlowSet := &CAN2TSN_Flow_Set{}
 	// create flow set
 	for _, impf := range f.ImportantCANFlows {

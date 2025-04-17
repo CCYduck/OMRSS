@@ -8,42 +8,33 @@ import (
 )
 
 func (network *Network) Generate_Network() {
-	// 2. Generate topology
+	// 1. Generate topology
 	fmt.Println("Generate Topology")
 	fmt.Println("----------------------------------------")
 	network.Topology = topology.Generate_Topology(network.TopologyName, network.BytesRate)
 	fmt.Println("Complete Generating Topology.")
 	fmt.Println()
 
-
 	// select CAN node
 	CAN_Node_Set := network.Topology.Select_CAN_Node_Set()
 	fmt.Printf("CAN nodes: %v", CAN_Node_Set)
-
 	fmt.Println()
 
-
-	// 3. Generate flows
+	// 2. Generate flows
 	fmt.Println("Generate Flows")
 	fmt.Println("----------------------------------------")
-	network.TSNFlow_Set = flow.Generate_TSNFlows(len(network.Topology.Nodes), network.BG_TSN, network.BG_AVB, network.Input_TSN, network.Input_AVB, network.HyperPeriod)
-	network.CANFlow_Set = flow.Generate_CANFlows(CAN_Node_Set, network.Important_CAN, network.Unimportant_CAN, network.HyperPeriod)
+	network.Flow_Set = flow.Generate_OSRO_Flows(CAN_Node_Set, network.Important_CAN, network.Unimportant_CAN, len(network.Topology.Nodes), network.BG_TSN, network.BG_AVB, network.Input_TSN, network.Input_AVB, network.HyperPeriod)
 	fmt.Println("Complete Generating Flows.")
 	fmt.Println()
 
-
-	// 4. Simulating graphs using flows in topology
+	// 3. Simulating graphs using flows in topology
 	fmt.Println("Simulating Graphs")
 	fmt.Println("----------------------------------------")
-	network.TSNGraph_Set = graph.Generate_TSNGraphs(network.Topology, network.TSNFlow_Set, network.BytesRate)
-	network.CANGraph_Set = graph.Generate_CANGraphs(network.Topology, network.CANFlow_Set, network.BytesRate)
+	network.Graph_Set = graph.Generate_OSRO_Graphs(network.Topology, network.Flow_Set, network.BytesRate)
 	fmt.Println("Complete Simulating Graphs.")
 	fmt.Println()
 
 }
-
-
-
 
 //func (network *Network) Generate_Network() *Network {
 //

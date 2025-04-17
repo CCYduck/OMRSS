@@ -52,7 +52,7 @@ func new_unimportantCAN(uc_period int, uc_deadline int) *unimportantCAN {
 	return &unimportantCAN{
 		Period:   uc_period,   // 50000~150000us up 50000us
 		Deadline: uc_deadline, // 10000~20000us up 2000us
-		DataSize: 8,          // 8bytes
+		DataSize: 8,           // 8bytes
 	}
 }
 
@@ -64,7 +64,7 @@ type Stream struct {
 	FinishTime  int
 }
 
-func new_TSNStream(name string, arrivalTime int, datasize float64, deadline int, finishTime int) *Stream {
+func new_TTStream(name string, arrivalTime int, datasize float64, deadline int, finishTime int) *Stream {
 	return &Stream{
 		Name:        name,
 		ArrivalTime: arrivalTime,
@@ -85,16 +85,16 @@ func new_CANStream(name string, arrivalTime int, datasize float64, deadline int,
 }
 
 type Flow struct {
-	Period       int
-	Deadline     int
-	DataSize     float64
-	HyperPeriod  int
-	Source       int
-	Destination  int
-	Streams      []*Stream
+	Period      int
+	Deadline    int
+	DataSize    float64
+	HyperPeriod int
+	Source      int
+	Destination int
+	Streams     []*Stream
 }
 
-func new_TSNFlow(period int, deadline int, datasize float64, HyperPeriod int) *Flow {
+func new_TTFlow(period int, deadline int, datasize float64, HyperPeriod int) *Flow {
 	return &Flow{
 		Period:      period,
 		Deadline:    deadline,
@@ -112,30 +112,13 @@ func new_CANFlow(period int, deadline int, datasize float64, HyperPeriod int) *F
 	}
 }
 
-
-
-// 因為所有的Flow的格式都一樣
-type TSNFlows struct {
+type Flows struct {
 	TSNFlows            []*Flow
 	AVBFlows            []*Flow
-}
-
-type CANFlows struct {
 	ImportantCANFlows   []*Flow
 	UnimportantCANFlows []*Flow
 }
 
-type CAN2TSNFlow struct{
-	Source 			int
-	Destination 	int
-	Deadline		[]int
-	DataSize		float64
-}
-
-func new_TSNFlows() *TSNFlows {
-	return &TSNFlows{}
-}
-
-func new_CANFlows() *CANFlows {
-	return &CANFlows{}
+func new_Flows() *Flows {
+	return &Flows{}
 }

@@ -19,10 +19,8 @@ type Network struct {
 	Important_CAN   int
 	Unimportant_CAN int
 	Topology        *topology.Topology
-	TSNFlow_Set     *flow.TSNFlows
-	CANFlow_Set		*flow.CANFlows
-	TSNGraph_Set       *graph.Graphs
-	CANGraph_Set       *graph.Graphs
+	Flow_Set        *flow.Flows
+	Graph_Set       *graph.Graphs
 }
 
 func new_OMACO_Network(topology_name string, bg_tsn int, bg_avb int, input_tsn int, input_avb int, important_can int, unimportant_can int, hyperperiod int, bandwidth float64) *Network {

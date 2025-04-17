@@ -8,6 +8,7 @@ import (
 	"src/network"
 	"src/network/flow"
 	"src/plan/algo_timer"
+
 	// "src/plan/routes"
 	"src/plan/path"
 	"src/plan/schedule"
@@ -32,7 +33,7 @@ func (osaco *OSACO) Path_OSACO_Initial_Settings(network *network.Network, SP *pa
 	osaco.InputPath = SP.Input_Path_set(path_bg_tsn, path_bg_avb)
 	osaco.BGPath = SP.BG_Path_set(path_bg_tsn, path_bg_avb)
 	osaco.PRM = path_compute_prm(osaco.KPath)
-	osaco.VB = path_compute_vb(osaco.KPath, network.TSNFlow_Set)
+	osaco.VB = path_compute_vb(osaco.KPath, network.Flow_Set)
 
 	osaco.Timer[0] = algo_timer.NewTimer()
 	osaco.Timer[0].TimerMerge(timer)
@@ -64,7 +65,7 @@ func (osaco *OSACO) Path_OSACO_Run(network *network.Network, timeout_index int) 
 		II := path_epoch(network, osaco, timeout_index)
 		osaco.Timer[timeout_index].TimerStop()
 
-		_, cost1 := schedule.OBJP(network, osaco.KPath, II, osaco.BGPath)               // new
+		_, cost1 := schedule.OBJP(network, osaco.KPath, II, osaco.BGPath)              // new
 		_, cost2 := schedule.OBJP(network, osaco.KPath, osaco.InputPath, osaco.BGPath) // old
 
 		if cost1 < cost2 {
@@ -121,7 +122,7 @@ func path_compute_prm(X *path.KPath_Set) *Pheromone {
 	return pheromone
 }
 
-func path_compute_vb(X *path.KPath_Set, flow_set *flow.TSNFlows) *Visibility {
+func path_compute_vb(X *path.KPath_Set, flow_set *flow.Flows) *Visibility {
 	var preference float64 = 2.
 	Input_flow_set := flow_set.Input_TSNflow_set()
 	BG_flow_set := flow_set.BG_flow_set()
@@ -253,7 +254,7 @@ func path_epoch(network *network.Network, osaco *OSACO, timeout_index int) *path
 	}
 
 	for nth, kpath := range osaco.KPath.TSNPaths {
-		for kth := range	kpath.Paths {
+		for kth := range kpath.Paths {
 			if nth < bg_tsn { // BG ... pass
 				//osaco.PRM.TSN_PRM[nth][kth] *= osaco.P
 				//if kth == bg_k_location[0][nth] {

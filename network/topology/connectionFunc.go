@@ -1,6 +1,5 @@
 package topology
 
-
 func (topology *Topology) AddS2S(fromNodeID int, toNodeID int, cost float64) {
 	connection1 := new_Connection(fromNodeID, toNodeID, cost)
 	connection2 := new_Connection(toNodeID, fromNodeID, cost)
@@ -14,8 +13,8 @@ func (topology *Topology) AddnullN2S(fromNodeID int, toNodeID int, cost float64)
 }
 
 // Undirected Graph function
-func (topology *Topology) AddN2S2N(source int, destinations int, cost float64) {
-	
+func (topology *Topology) AddN2S2N_For_Path(source int, destinations int, cost float64) {
+
 	sid := source % 1000
 	sfromNode := topology.GetNodeByID(sid + 3000)
 	sfromNode.ID = source
@@ -24,17 +23,17 @@ func (topology *Topology) AddN2S2N(source int, destinations int, cost float64) {
 	stoNodeID := sfromNode.Connections[0].ToNodeID
 	connection2 := new_Connection(stoNodeID, source, cost)
 	topology.Switch[stoNodeID].Connections = append(topology.Switch[stoNodeID].Connections, connection2)
-	
+
 	did := destinations % 1000
 	dfromNode := topology.GetNodeByID(did + 3000)
 	dfromNode.ID = destinations
 	dfromNode.Connections[0].FromNodeID = destinations
-	topology.Listener = append(topology.Listener,dfromNode)
+	topology.Listener = append(topology.Listener, dfromNode)
 
 	dtoNodeID := dfromNode.Connections[0].ToNodeID
 	connection1 := new_Connection(dtoNodeID, destinations, cost)
 	topology.Switch[dtoNodeID].Connections = append(topology.Switch[dtoNodeID].Connections, connection1)
-	
+
 }
 
 // Directed Graph function

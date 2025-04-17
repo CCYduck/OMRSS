@@ -5,6 +5,7 @@ import (
 	"src/network"
 	"src/network/flow"
 	"src/plan/routes"
+
 	// "src/plan/path"
 
 	"time"
@@ -12,8 +13,8 @@ import (
 
 // Objectives
 func OBJ(network *network.Network, X *routes.KTrees_set, II *routes.Trees_set, II_prime *routes.Trees_set) ([4]float64, int) {
-	S := network.TSNFlow_Set.Input_TSNflow_set()
-	S_prime := network.TSNFlow_Set.BG_flow_set()
+	S := network.Flow_Set.Input_TSNflow_set()
+	S_prime := network.Flow_Set.BG_flow_set()
 	var (
 		obj                [4]float64
 		cost               int
@@ -32,11 +33,9 @@ func OBJ(network *network.Network, X *routes.KTrees_set, II *routes.Trees_set, I
 		//fmt.Printf("BackGround TSN route%d: %b \n", nth, schedulability)
 	}
 
-
-
 	// O2 and O4
 	for nth, route := range II_prime.AVBTrees {
-		wcd := WCD(route, X, S_prime.AVBFlows[nth], network.TSNFlow_Set)
+		wcd := WCD(route, X, S_prime.AVBFlows[nth], network.Flow_Set)
 		avb_wcd_sum += wcd
 		schedulability := schedulability(wcd, S_prime.AVBFlows[nth], route, linkmap, network.Bandwidth, network.HyperPeriod)
 		avb_failed_count += 1 - schedulability
@@ -44,10 +43,7 @@ func OBJ(network *network.Network, X *routes.KTrees_set, II *routes.Trees_set, I
 	}
 	// O3 ... pass
 
-	
 	//解封裝 WCD
-
-
 
 	// Round2: Schedule Input flow
 	// O1
@@ -59,7 +55,7 @@ func OBJ(network *network.Network, X *routes.KTrees_set, II *routes.Trees_set, I
 
 	// O2 and O4
 	for nth, route := range II.AVBTrees {
-		wcd := WCD(route, X, S.AVBFlows[nth], network.TSNFlow_Set)
+		wcd := WCD(route, X, S.AVBFlows[nth], network.Flow_Set)
 		avb_wcd_sum += wcd
 		schedulability := schedulability(wcd, S.AVBFlows[nth], route, linkmap, network.Bandwidth, network.HyperPeriod)
 		avb_failed_count += 1 - schedulability
@@ -78,9 +74,6 @@ func OBJ(network *network.Network, X *routes.KTrees_set, II *routes.Trees_set, I
 
 	return obj, cost
 }
-
-
-
 
 func schedulability(wcd time.Duration, flow *flow.Flow, route *routes.Tree, linkmap map[string]float64, bandwidth float64, hyperPeriod int) int {
 	r := wcd <= time.Duration(flow.Deadline)*time.Microsecond

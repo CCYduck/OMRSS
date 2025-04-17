@@ -10,8 +10,8 @@ import (
 
 // Objectives
 func OBJP(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prime *path.Path_set) ([4]float64, int) {
-	S := network.TSNFlow_Set.Input_TSNflow_set()
-	S_prime := network.TSNFlow_Set.BG_flow_set()
+	S := network.Flow_Set.Input_TSNflow_set()
+	S_prime := network.Flow_Set.BG_flow_set()
 	var (
 		obj                [4]float64
 		cost               int
@@ -32,7 +32,7 @@ func OBJP(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_pri
 
 	// O2 and O4
 	for nth, path := range II_prime.AVBPath {
-		wcd := WCDP(path, X, S_prime.AVBFlows[nth], network.TSNFlow_Set)
+		wcd := WCDP(path, X, S_prime.AVBFlows[nth], network.Flow_Set)
 		avb_wcd_sum += wcd
 		schedulability := path_schedulability(wcd, S_prime.AVBFlows[nth], path, linkmap, network.Bandwidth, network.HyperPeriod)
 		avb_failed_count += 1 - schedulability
@@ -53,14 +53,14 @@ func OBJP(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_pri
 
 	//封裝 這邊要return delay,can2tsn封包
 
-	can2tsnflow, o1_candrop := EncapsulateCAN2TSN(network.CANFlow_Set, network.HyperPeriod)
+	can2tsnflow, o1_candrop := EncapsulateCAN2TSN(network.Flow_Set, network.HyperPeriod)
 
 	can2tsnflow.Show_CAN2TSNFlowSet()
 	fmt.Printf("O1_CAN Drop: %v \n", o1_candrop)
 
 	// O2 and O4
 	for nth, path := range II.AVBPath {
-		wcd := WCDP(path, X, S.AVBFlows[nth], network.TSNFlow_Set)
+		wcd := WCDP(path, X, S.AVBFlows[nth], network.Flow_Set)
 		avb_wcd_sum += wcd
 		schedulability := path_schedulability(wcd, S.AVBFlows[nth], path, linkmap, network.Bandwidth, network.HyperPeriod)
 		avb_failed_count += 1 - schedulability
@@ -146,7 +146,7 @@ func path_loopcompare(a int, b int) bool {
 }
 
 func Testqueue(network *network.Network) {
-	can2tsnflow, o1_candrop := EncapsulateCAN2TSN(network.CANFlow_Set, network.HyperPeriod)
+	can2tsnflow, o1_candrop := EncapsulateCAN2TSN(network.Flow_Set, network.HyperPeriod)
 	// fmt.Printf("\n%v\n",)
 
 	can2tsnflow.Show_CAN2TSNFlowSet()
