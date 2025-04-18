@@ -53,11 +53,11 @@ func OBJP(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_pri
 
 	//封裝 這邊要return delay,can2tsn封包
 	
-	can2tsnflow, o1_can_drop_1 , o1_can_drop_2 := EncapsulateCAN2TSN(network.Flow_Set, network.HyperPeriod)
+	can2tsnflow, o1_can_drop_fifo , o1_can_drop_priority,o1_can_drop_mat , delay_fifo , delay_priority ,delay_mat := EncapsulateCAN2TSN(network.Flow_Set, network.HyperPeriod)
 	// fmt.Printf("\n%v\n",)
 
 	can2tsnflow.Show_CAN2TSNFlowSet()
-	fmt.Printf("O1_CAN Drop: M1: %v , M2: %v\n", o1_can_drop_1, o1_can_drop_2)
+	fmt.Printf("O1_CAN Drop: M1: %v , M2: %v\n ,  Encapsulate Delay: %v", o1_can_drop_fifo , o1_can_drop_priority,o1_can_drop_mat , delay_fifo , delay_priority ,delay_mat)
 
 	// O2 and O4
 	for nth, path := range II.AVBPath {
@@ -147,9 +147,10 @@ func path_loopcompare(a int, b int) bool {
 }
 
 func Testqueue(network *network.Network) {
-	can2tsnflow, o1_can_drop_1, o1_can_drop_2 := EncapsulateCAN2TSN(network.Flow_Set, network.HyperPeriod)
+	can2tsnflow, o1_can_drop_fifo , o1_can_drop_priority,o1_can_drop_mat , delay_fifo , delay_priority ,delay_mat := EncapsulateCAN2TSN(network.Flow_Set, network.HyperPeriod)
 	// fmt.Printf("\n%v\n",)
 
 	can2tsnflow.Show_CAN2TSNFlowSet()
-	fmt.Printf("O1_CAN Drop: M1: %v , M2: %v\n", o1_can_drop_1, o1_can_drop_2)
+	fmt.Printf("O1_CAN Drop FIFO: %v Delay %v , Priority: %v Delay: %v , MAT: %v Delay: %v \n",
+	o1_can_drop_fifo , delay_fifo, o1_can_drop_priority , delay_priority , o1_can_drop_mat   ,delay_mat)
 }
