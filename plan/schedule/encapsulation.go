@@ -6,7 +6,7 @@ import (
 	"src/network/flow"
 )
 
-func EncapsulateCAN2TSN(f *flow.Flows, hyperperiod int) (*CAN2TSN_Flow_Set, int) {
+func EncapsulateCAN2TSN(f *flow.Flows, hyperperiod int) (*CAN2TSN_Flow_Set, int , int) {
 	can2tsnFlowSet := &CAN2TSN_Flow_Set{}
 	// create flow set
 	for _, impf := range f.ImportantCANFlows {
@@ -17,48 +17,96 @@ func EncapsulateCAN2TSN(f *flow.Flows, hyperperiod int) (*CAN2TSN_Flow_Set, int)
 	}
 
 	// encapsulate
-	o1_can_drop := 0
-	method := "deadline"
-	datasize_max := 100.
-	deadline := 5000
+	o1_can_drop_1	:= 0
+	o1_can_drop_2	:= 0
+	method			:= "deadline"
+	datasize_max 	:= 100.
+	deadline 		:= 5000
+	step 			:= 5000
+
 	for _, can2tsnFlow := range can2tsnFlowSet.CAN2TSN_Flows {
 		queue := &Queue{}
-		datasize_count := 0.
-		for current_time := 0; current_time < hyperperiod; current_time += 5000 {
+		
+		for current_time := 0; current_time < hyperperiod; current_time += step {
+			
+			datasize_count := 0.
 			queue.appendQueue(can2tsnFlow.getStreamsByCurrentTime(current_time))
 			queue.sortQueue(method)
-
+			
+			// M1
 			// example:
 			// current_time=0 queue=[0_1, 0_2, 0_3, 0_4, 0_5] if 05 datasize_count>datasize_max, createCAN2TSNStream datasize_count = 0
 			// current_time=5000 queue=[0_5, 5000_1, 5000_2, 5000_3, 5000_4, 5000_5]
 			for _, queue_stream := range queue.Streams {
+				
 				if current_time > queue_stream.FinishTime {
-					o1_can_drop += 1
-
-				} else {
-					datasize_count += queue_stream.DataSize
-					if datasize_count >= datasize_max {
-						can2tsnStream := createCAN2TSNStream(current_time, deadline, datasize_max)
-						can2tsnFlow.CAN2TSN_Flow.Streams = append(can2tsnFlow.CAN2TSN_Flow.Streams, can2tsnStream)
-						datasize_count = 0
-						break
-					}
+					o1_can_drop_1 += 1
 					queue.popQueue()
+					continue
+				} 
+				datasize_count += queue_stream.DataSize
+
+				if datasize_count >= datasize_max {
+					can2tsnStream := createCAN2TSNStream(current_time, deadline, datasize_max)
+					can2tsnFlow.CAN2TSN_Flow.Streams = append(can2tsnFlow.CAN2TSN_Flow.Streams, can2tsnStream)
+					datasize_count = 0
+					break
 				}
-			}			
+
+				// if queue_stream.FinishTime - current_time < 5000{
+				// 	can2tsnStream := createCAN2TSNStream(current_time, deadline, datasize_max)
+				// 	can2tsnFlow.CAN2TSN_Flow.Streams = append(can2tsnFlow.CAN2TSN_Flow.Streams, can2tsnStream)
+				// 	datasize_count = 0
+				// 	break
+				// }
+				queue.popQueue()
+					
+			}	
 		}
-		// if   datasize_count > 0 {
-		// 	s := createCAN2TSNStream(hyperperiod, deadline, datasize_count)
-		// 	can2tsnFlow.CAN2TSN_Flow.Streams = append(can2tsnFlow.CAN2TSN_Flow.Streams, s)
-		// 	datasize_count = 0
-		// }
 
+		queue_1 := &Queue{}
+		for current_time := 0; current_time < hyperperiod; current_time += step {
+			datasize_count := 0.
+			
+			queue_1.appendQueue(can2tsnFlow.getStreamsByCurrentTime(current_time))
+			queue_1.sortQueue(method)
+			// M2
+			// ❗ 不用 range；自己控制 pop，才不會亂位
+			for len(queue_1.Streams) > 0 {
+				qs :=queue_1.Streams[0]      // 先抓頭
+				queue_1.popQueue()            // 立刻移除，避免重複
 
+				if current_time >= qs.FinishTime {   // 已逾期
+					o1_can_drop_2++
+					continue
+				}
+
+				datasize_count += qs.DataSize
+				timeLeft := qs.FinishTime - current_time
+
+				// 決定是否提前封裝
+				shouldSend := datasize_count >= datasize_max || // 滿載
+				timeLeft < step  ||                       // 快逾期
+				len(queue_1.Streams) == 0                       // 佇列已空
+
+				
+				if shouldSend {
+					size := datasize_count    // 用實際累積量，而不是 datasizeMax
+					can2tsnStream := createCAN2TSNStream(current_time, deadline, size)
+					can2tsnFlow.CAN2TSN_Flow.Streams =
+						append(can2tsnFlow.CAN2TSN_Flow.Streams, can2tsnStream)
+
+					datasize_count = 0        // 重置計數
+					break                    // 本時槽已送一包，下一包留到 5 ms 後
+				}
+			}
+		}
 		
+
 	}
 	// mq.Show_MQ()
-
-	return can2tsnFlowSet, o1_can_drop
+	
+	return can2tsnFlowSet, o1_can_drop_1 , o1_can_drop_2
 
 }
 
@@ -173,3 +221,5 @@ func (q *Queue) sortQueue(method string) {
 		})
 	}
 }
+
+
