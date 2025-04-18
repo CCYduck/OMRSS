@@ -52,8 +52,9 @@ func OBJP(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_pri
 	}
 
 	//封裝 這邊要return delay,can2tsn封包
-
+	
 	can2tsnflow, o1_candrop := EncapsulateCAN2TSN(network.Flow_Set, network.HyperPeriod)
+	// fmt.Printf("\n%v\n",)
 
 	can2tsnflow.Show_CAN2TSNFlowSet()
 	fmt.Printf("O1_CAN Drop: %v \n", o1_candrop)

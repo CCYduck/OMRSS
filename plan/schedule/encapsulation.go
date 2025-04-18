@@ -45,8 +45,16 @@ func EncapsulateCAN2TSN(f *flow.Flows, hyperperiod int) (*CAN2TSN_Flow_Set, int)
 					}
 					queue.popQueue()
 				}
-			}
+			}			
 		}
+		// if   datasize_count > 0 {
+		// 	s := createCAN2TSNStream(hyperperiod, deadline, datasize_count)
+		// 	can2tsnFlow.CAN2TSN_Flow.Streams = append(can2tsnFlow.CAN2TSN_Flow.Streams, s)
+		// 	datasize_count = 0
+		// }
+
+
+		
 	}
 	// mq.Show_MQ()
 
