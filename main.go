@@ -105,25 +105,25 @@ func main() {
 
 		// 4. Cumulative quantity
 		// ------------------------------------------
-		//Memorizer.M_Cumulative(Plan)
-		fmt.Println("\n****************************************")
+		// Memorizer.M_Cumulative(Plan)
+		// fmt.Println("\n****************************************")
 	}
 
-	// 5. Average statistical results
-	// ---------------------------------
-	//Memorizer.M_Average(test_case)
+	// // 5. Average statistical results
+	// // ---------------------------------
+	// Memorizer.M_Average(test_case)
 
-	// 6. Output results
-	// -----------------------------------
-	//Memorizer.M_Output_Results()
+	// // 6. Output results
+	// // -----------------------------------
+	// Memorizer.M_Output_Results()
 
-	// 7. Save as CSV
-	// --------------------------------------------------------------------------------------------------------------------------------------------------
-	//name := fmt.Sprintf("%s_tsn%d_avb%d_K%d_P%.1f_timeout%d_O1%d_O2%d", topology_name, input_tsn, input_avb, osaco_K, osaco_P, osaco_timeout, o1_cost, o2_cost)
-	//Memorizer.M_Store_Data(name, test_case)
+	// // 7. Save as CSV
+	// // --------------------------------------------------------------------------------------------------------------------------------------------------
+	// name := fmt.Sprintf("%s_tsn%d_avb%d_K%d_P%.1f_timeout%d_O1%d_O2%d", topology_name, input_tsn, input_avb, osaco_K, osaco_P, osaco_timeout, o1_cost, o2_cost)
+	// Memorizer.M_Store_Data(name, test_case)
 
-	// 8. Save as TXT
-	// ------------------------------------
-	//Memorizer.M_Store_File(name)
-	// --------------------------------------------------------------------------------
+	// // 8. Save as TXT
+	// // ------------------------------------
+	// Memorizer.M_Store_File(name)
+	// // --------------------------------------------------------------------------------
 }
