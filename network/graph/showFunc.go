@@ -11,13 +11,9 @@ func (graphs *Graphs) Show_Graphs() {
 		break
 	}
 
-	for _, graph := range graphs.Important_CANGraphs {
+	for _, graph := range graphs.CAN2TSNGraphs {
 		graph.Show_Topology()
 		break
 	}
 
-	for _, graph := range graphs.Unimportant_CANGraphs {
-		graph.Show_Topology()
-		break
-	}
 }

@@ -24,18 +24,11 @@ func Generate_OSRO_Graphs(topology *topology.Topology, flows *flow.Flows, bytes_
 	}
 
 	// Generating ImportantCAN Graphs
-	for _, flow := range flows.ImportantCANFlows {
+	for _, flow := range flows.CAN2TSNFlows {
 		t := topology.TopologyDeepCopy()                               // Duplicate of Topology
 		t.AddN2S2N_For_Path(flow.Source, flow.Destination, bytes_rate) // Undirected Graph
-		graphs.Important_CANGraphs = append(graphs.Important_CANGraphs, t)
+		graphs.CAN2TSNGraphs = append(graphs.CAN2TSNGraphs, t)
 
-	}
-
-	// Generating UnimportantCAN Graphs
-	for _, flow := range flows.UnimportantCANFlows {
-		t := topology.TopologyDeepCopy()                               // Duplicate of Topology
-		t.AddN2S2N_For_Path(flow.Source, flow.Destination, bytes_rate) // Undirected Graph
-		graphs.Unimportant_CANGraphs = append(graphs.Unimportant_CANGraphs, t)
 	}
 
 	return graphs

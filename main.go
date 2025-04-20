@@ -53,7 +53,6 @@ func init() {
 	flag.IntVar(&hyperperiod, "hyperperiod", 300000, "Greatest Common Divisor of Simulated Time LCM.")
 	flag.Float64Var(&bandwidth, "bandwidth", 1e9, "1 Gbps.")
 
-	//加上plan.go名稱(名稱要相同)
 	flag.StringVar(&plan_name, "plan_name", "omaco", "The plan comprises omaco and osro.")
 	flag.IntVar(&osaco_timeout, "osaco_timeout", 200, "Timeout in milliseconds")
 	flag.IntVar(&osaco_K, "osaco_K", 5, "Select K trees with different weights.")

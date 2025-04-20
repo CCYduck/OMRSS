@@ -4,14 +4,17 @@ import (
 	"fmt"
 )
 
-func (flow_set *Flows) Generate_CAN_Flows(CANnode []int, importantCAN int, unimportantCAN int, HyperPeriod int) {
+func Generate_CAN_Flows(CANnode []int, importantCAN int, unimportantCAN int, HyperPeriod int) ([]*Flow, []*Flow) {
 	// Generate CAN Flows
-	Generate_Important_CANFlow(flow_set, CANnode, importantCAN, HyperPeriod)
-	Generate_Unimportant_CANFlow(flow_set, CANnode, unimportantCAN, HyperPeriod)
+	ImportantCANFlows := Generate_Important_CANFlow(CANnode, importantCAN, HyperPeriod)
+	UnimportantCANFlows := Generate_Unimportant_CANFlow(CANnode, unimportantCAN, HyperPeriod)
 	fmt.Println("Complete generating can streams.")
+
+	return ImportantCANFlows, UnimportantCANFlows
 }
 
-func Generate_Important_CANFlow(flows *Flows, CANnode []int, impcan int, HyperPeriod int) {
+func Generate_Important_CANFlow(CANnode []int, impcan int, HyperPeriod int) []*Flow {
+	ImportantCANFlows := []*Flow{}
 	for flow := 0; flow < impcan; flow++ {
 		importantCAN := config_ImportantCAN_Stream()
 
@@ -22,11 +25,14 @@ func Generate_Important_CANFlow(flows *Flows, CANnode []int, impcan int, HyperPe
 		Flow.Source = source
 		Flow.Destination = destination
 
-		flows.ImportantCANFlows = append(flows.ImportantCANFlows, Flow)
+		ImportantCANFlows = append(ImportantCANFlows, Flow)
 	}
+
+	return ImportantCANFlows
 }
 
-func Generate_Unimportant_CANFlow(flows *Flows, CANnode []int, umimpcan int, HyperPeriod int) {
+func Generate_Unimportant_CANFlow(CANnode []int, umimpcan int, HyperPeriod int) []*Flow {
+	UnimportantCANFlows := []*Flow{}
 	for flow := 0; flow < umimpcan; flow++ {
 		unimportantCAN := config_UnimportantCAN_Stream()
 
@@ -37,8 +43,10 @@ func Generate_Unimportant_CANFlow(flows *Flows, CANnode []int, umimpcan int, Hyp
 		Flow.Source = source
 		Flow.Destination = destination
 
-		flows.UnimportantCANFlows = append(flows.UnimportantCANFlows, Flow)
+		UnimportantCANFlows = append(UnimportantCANFlows, Flow)
 	}
+
+	return UnimportantCANFlows
 }
 
 func Generate_CAN_Streams(period int, deadline int, datasize float64, HyperPeriod int) *Flow {

@@ -10,13 +10,13 @@ func new_KPath_Set() *KPath_Set {
 }
 
 type KPath struct {
-	K      int      
-	Source int      
-	Target int      
-	Paths  []*Path  
+	K      int
+	Source int
+	Target int
+	Paths  []*Path
 }
 
-func new_KPath(k int, source, target int) *KPath{
+func new_KPath(k int, source, target int) *KPath {
 	return &KPath{
 		K:      k,
 		Source: source,
@@ -24,12 +24,11 @@ func new_KPath(k int, source, target int) *KPath{
 		Paths:  []*Path{},
 	}
 }
-type Path_set struct {
-	TSNPath []*Path
-	AVBPath []*Path
-	ImportCanPath []*Path
-	UnimportCanPath []*Path
 
+type Path_set struct {
+	TSNPath     []*Path
+	AVBPath     []*Path
+	CAN2TSNPath []*Path
 }
 
 func new_Path_Set() *Path_set {
@@ -47,7 +46,7 @@ func new_Path() *Path {
 
 type Node struct {
 	ID          int
-	Shape 		string
+	Shape       string
 	Connections []*Connection
 }
 
@@ -66,12 +65,12 @@ func new_Connection(fromNodeID int, toNodeID int, cost float64) *Connection {
 }
 
 type V2V struct {
-	V2VEdges []*V2VEdge 
+	V2VEdges []*V2VEdge
 }
 
 type V2VEdge struct {
-	FromVertex int      
-	Graphs     []*Graph 
+	FromVertex int
+	Graphs     []*Graph
 }
 
 type Graph struct {
@@ -94,4 +93,3 @@ type Edge struct {
 	End   int
 	Cost  int
 }
-

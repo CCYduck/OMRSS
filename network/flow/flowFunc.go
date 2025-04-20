@@ -12,8 +12,7 @@ func (flows *Flows) Input_TSNflow_set() *Flows {
 func (flows *Flows) Input_CANflow_set() *Flows {
 	Input_flow_set := new_Flows()
 
-	Input_flow_set.ImportantCANFlows = append(Input_flow_set.ImportantCANFlows, flows.ImportantCANFlows...)
-	Input_flow_set.UnimportantCANFlows = append(Input_flow_set.UnimportantCANFlows, flows.UnimportantCANFlows...)
+	Input_flow_set.CAN2TSNFlows = append(Input_flow_set.CAN2TSNFlows, flows.CAN2TSNFlows...)
 
 	return Input_flow_set
 }

@@ -51,13 +51,6 @@ func OBJP(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_pri
 		//fmt.Printf("Input TSN route%d: %b \n", nth, schedulability)
 	}
 
-	//封裝 這邊要return delay,can2tsn封包
-
-	can2tsnflow, o1_candrop := EncapsulateCAN2TSN(network.Flow_Set, network.HyperPeriod)
-
-	can2tsnflow.Show_CAN2TSNFlowSet()
-	fmt.Printf("O1_CAN Drop: %v \n", o1_candrop)
-
 	// O2 and O4
 	for nth, path := range II.AVBPath {
 		wcd := WCDP(path, X, S.AVBFlows[nth], network.Flow_Set)
@@ -143,12 +136,4 @@ func path_loopcompare(a int, b int) bool {
 		return true
 	}
 	return false
-}
-
-func Testqueue(network *network.Network) {
-	can2tsnflow, o1_candrop := EncapsulateCAN2TSN(network.Flow_Set, network.HyperPeriod)
-	// fmt.Printf("\n%v\n",)
-
-	can2tsnflow.Show_CAN2TSNFlowSet()
-	fmt.Printf("O1_CAN Drop: %v \n", o1_candrop)
 }

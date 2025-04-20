@@ -11,7 +11,8 @@ func Generate_OSRO_Flows(CANnode []int, importantCAN int, unimportantCAN int, Nn
 	bg_avbflows_end = bg_avb
 
 	flow_set.Generate_TT_Flows(Nnode_length, bg_tsn, bg_avb, input_tsn, input_avb, HyperPeriod)
-	flow_set.Generate_CAN_Flows(CANnode, importantCAN, unimportantCAN, HyperPeriod)
+	flow_set.Generate_CAN2TSN_Flows(CANnode, importantCAN, unimportantCAN, HyperPeriod, "FIFO")
+	flow_set.Show_CANFlows()
 
 	return flow_set
 }

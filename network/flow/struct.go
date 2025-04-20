@@ -1,5 +1,7 @@
 package flow
 
+import "time"
+
 type TSN struct {
 	Period   int     // 100~2000us up 500us
 	Deadline int     // Period = Deadline
@@ -113,10 +115,11 @@ func new_CANFlow(period int, deadline int, datasize float64, HyperPeriod int) *F
 }
 
 type Flows struct {
-	TSNFlows            []*Flow
-	AVBFlows            []*Flow
-	ImportantCANFlows   []*Flow
-	UnimportantCANFlows []*Flow
+	TSNFlows        []*Flow
+	AVBFlows        []*Flow
+	CAN2TSNFlows    []*Flow
+	CAN2TSN_O1_Drop int
+	CAN2TSN_Delay   time.Duration
 }
 
 func new_Flows() *Flows {

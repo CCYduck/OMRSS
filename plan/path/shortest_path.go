@@ -45,10 +45,10 @@ func BestPath(Network *network.Network) *Path_set {
 
 	}
 
-	for nth, flow := range Network.Flow_Set.ImportantCANFlows {
+	for nth, flow := range Network.Flow_Set.CAN2TSNFlows {
 		// fmt.Printf("Flow: Source=%d, Destination=%v, Topology=%v\n", flow.Source, flow.Destination, Network.Graph_Set.TSNGraphs[nth])
 		//fmt.Printf("Flow: Source=%d, Destination=%v", flow.Source, flow.Destination)
-		path := saveShortestPathsToGraph(flow.Source, flow.Destination, Network.Graph_Set.Important_CANGraphs[nth])
+		path := saveShortestPathsToGraph(flow.Source, flow.Destination, Network.Graph_Set.CAN2TSNGraphs[nth])
 		if path != nil {
 			// fmt.Println("Best Path:")
 			// path.Show_Path()
@@ -56,24 +56,7 @@ func BestPath(Network *network.Network) *Path_set {
 			fmt.Println("No path found.")
 		}
 
-		path_set.ImportCanPath = append(path_set.ImportCanPath, path)
-		// 你可以存到一個 KPath_Set 或印出來
-		// fmt.Printf("KPath: Source=%d, Target=%d, NodeIDs=%v\n", k.Source, k.Target, path)
-
-	}
-
-	for nth, flow := range Network.Flow_Set.UnimportantCANFlows {
-		// fmt.Printf("Flow: Source=%d, Destination=%v, Topology=%v\n", flow.Source, flow.Destination, Network.Graph_Set.TSNGraphs[nth])
-		//fmt.Printf("Flow: Source=%d, Destination=%v", flow.Source, flow.Destination)
-		path := saveShortestPathsToGraph(flow.Source, flow.Destination, Network.Graph_Set.Unimportant_CANGraphs[nth])
-		if path != nil {
-			// fmt.Println("Best Path:")
-			// path.Show_Path()
-		} else {
-			fmt.Println("No path found.")
-		}
-
-		path_set.UnimportCanPath = append(path_set.UnimportCanPath, path)
+		path_set.CAN2TSNPath = append(path_set.CAN2TSNPath, path)
 		// 你可以存到一個 KPath_Set 或印出來
 		// fmt.Printf("KPath: Source=%d, Target=%d, NodeIDs=%v\n", k.Source, k.Target, path)
 

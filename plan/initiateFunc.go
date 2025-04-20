@@ -2,9 +2,8 @@ package plan
 
 import (
 	"fmt"
-	"src/plan/schedule"
 	"src/plan/path"
-	
+	"src/plan/schedule"
 )
 
 func (plan *OMACO) Initiate_Plan() {
@@ -59,13 +58,12 @@ func (plan *OMACO) Initiate_Plan() {
 
 }
 
-
 func (plan *OSRO) Initiate_Plan() {
-	//Imp50 60 70 80 Unmp 250 300 350 400 
-	path_set:=path.BestPath(plan.Network)	
+	//Imp50 60 70 80 Unmp 250 300 350 400
+	path_set := path.BestPath(plan.Network)
 	path_set.Show_Path_Set()
-	schedule.Testqueue(plan.Network)
-	// kpath_set:=path.KShortestPath(plan.Network)	
+
+	// kpath_set:=path.KShortestPath(plan.Network)
 	// kpath_set.Show_KPath_Set()
 	// schedule.Testqueue(plan.Network)
 
