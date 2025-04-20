@@ -9,16 +9,16 @@ import (
 )
 
 // Objectives
-func OBJP(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prime *path.Path_set) ([4]float64, int) {
+func OBJP(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prime *path.Path_set, can2tsn_paths *path.Path_set) ([4]float64, int) {
 	S := network.Flow_Set.Input_TSNflow_set()
 	S_prime := network.Flow_Set.BG_flow_set()
 	var (
-		obj                [4]float64
-		cost               int
-		tsn_failed_count   int           = 0 // O1
-		avb_failed_count   int           = 0 // O2
-		all_rerouted_count int           = 0 // O3 ... pass
-		avb_wcd_sum        time.Duration     // O4
+		obj                  [4]float64
+		cost                 int
+		tsn_can_failed_count int           = 0 // O1
+		avb_failed_count     int           = 0 // O2
+		bandwidth_userate    int           = 0 // O3 ... pass
+		wcd_sum              time.Duration     // O4
 	)
 	linkmap := map[string]float64{}
 
@@ -26,49 +26,55 @@ func OBJP(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_pri
 	// O1
 	for nth, path := range II_prime.TSNPath {
 		schedulability := path_schedulability(0, S_prime.TSNFlows[nth], path, linkmap, network.Bandwidth, network.HyperPeriod)
-		tsn_failed_count += 1 - schedulability
+		tsn_can_failed_count += 1 - schedulability
 		//fmt.Printf("BackGround TSN route%d: %b \n", nth, schedulability)
 	}
 
 	// O2 and O4
 	for nth, path := range II_prime.AVBPath {
 		wcd := WCDP(path, X, S_prime.AVBFlows[nth], network.Flow_Set)
-		avb_wcd_sum += wcd
+		wcd_sum += wcd
 		schedulability := path_schedulability(wcd, S_prime.AVBFlows[nth], path, linkmap, network.Bandwidth, network.HyperPeriod)
 		avb_failed_count += 1 - schedulability
 		//fmt.Printf("BackGround AVB route%d: %b \n", nth, schedulability)
 	}
-	// O3 ... pass
-
-	//解封裝 WCD
 
 	// Round2: Schedule Input flow
 	// O1
-
 	for nth, path := range II.TSNPath {
 		schedulability := path_schedulability(0, S.TSNFlows[nth], path, linkmap, network.Bandwidth, network.HyperPeriod)
-		tsn_failed_count += 1 - schedulability
+		tsn_can_failed_count += 1 - schedulability
 		//fmt.Printf("Input TSN route%d: %b \n", nth, schedulability)
 	}
+
+	// O1 and O4
+	// tsn_can_failed_count += network.Flow_Set.CAN2TSN_O1_Drop
+	// wcd_sum += network.Flow_Set.CAN2TSN_Delay
+	// for nth, path := range can2tsn_paths.CAN2TSNPath {
+	// 	schedulability := path_schedulability(0, network.Flow_Set.CAN2TSNFlows[nth], path, linkmap, network.Bandwidth, network.HyperPeriod)
+	// 	tsn_can_failed_count += 1 - schedulability
+	// 	//fmt.Printf("Input TSN route%d: %b \n", nth, schedulability)
+	// }
 
 	// O2 and O4
 	for nth, path := range II.AVBPath {
 		wcd := WCDP(path, X, S.AVBFlows[nth], network.Flow_Set)
-		avb_wcd_sum += wcd
+		wcd_sum += wcd
 		schedulability := path_schedulability(wcd, S.AVBFlows[nth], path, linkmap, network.Bandwidth, network.HyperPeriod)
 		avb_failed_count += 1 - schedulability
 		//fmt.Printf("Input AVB route%d: %b \n", nth, schedulability)
 	}
-	// O3 ... pass
 
-	obj[0] = float64(tsn_failed_count)               // O1
-	obj[1] = float64(avb_failed_count)               // O2
-	obj[2] = float64(all_rerouted_count)             // O3 ... pass
-	obj[3] = float64(avb_wcd_sum / time.Microsecond) // O4
+	// O3 bandwidth_userate
 
-	cost += int(avb_wcd_sum/time.Microsecond) * 1
+	obj[0] = float64(tsn_can_failed_count)       // O1
+	obj[1] = float64(avb_failed_count)           // O2
+	obj[2] = float64(bandwidth_userate)          // O3 ... pass
+	obj[3] = float64(wcd_sum / time.Microsecond) // O4
+
+	cost += int(wcd_sum/time.Microsecond) * 1
 	cost += avb_failed_count * 1000000
-	cost += tsn_failed_count * 100000000
+	cost += tsn_can_failed_count * 100000000
 
 	return obj, cost
 }
