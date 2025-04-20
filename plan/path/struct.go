@@ -29,7 +29,7 @@ type Path_set struct {
 	AVBPath []*Path
 	ImportCanPath []*Path
 	UnimportCanPath []*Path
-
+	Can2TsnPath		[]*Path
 }
 
 func new_Path_Set() *Path_set {

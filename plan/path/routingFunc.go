@@ -3,7 +3,29 @@ package path
 import (
 	// "fmt"
 	"src/network"
+	"src/network/topology"
+	"unique"
 )
+
+func Get_SteninerTree_Routing(net *network.Network, k int) *KPath_Set {
+	ks := new_KPath_Set()
+    attach := func(src, dst int, topo *topology.Topology, bag *[]*KPath) {
+        kp := new_KPath(k, src, dst)
+        ids := YenKShortest(GetGarph(topo), src, dst, k)
+        for _, p := range ids {
+            kp.Paths = append(kp.Paths, ConvertIDsToPath(p, topo))
+        }
+        *bag = append(*bag, kp)
+    }
+    for i, f := range net.Flow_Set.TSNFlows {
+        attach(f.Source, f.Destination, net.Graph_Set.TSNGraphs[i], &ks.TSNPaths)
+    }
+    for i, f := range net.Flow_Set.AVBFlows {
+        attach(f.Source, f.Destination, net.Graph_Set.AVBGraphs[i], &ks.AVBPaths)
+    }
+    // Important / Unimportant CAN 類似添加…
+    return ks
+}
 
 func (path_set *Path_set) Input_Path_set(bg_tsn_end int, bg_avb_end int) *Path_set {
 	Input_path_set := new_Path_Set()
@@ -11,6 +33,22 @@ func (path_set *Path_set) Input_Path_set(bg_tsn_end int, bg_avb_end int) *Path_s
 	Input_path_set.TSNPath= append(Input_path_set.TSNPath, Input_path_set.TSNPath[bg_tsn_end:]...)
 	Input_path_set.AVBPath = append(Input_path_set.AVBPath, Input_path_set.AVBPath[bg_avb_end:]...)
 
+	return Input_path_set
+}
+
+func (path_set *Path_set) Input_Can_Path_set() *Path_set {
+	Input_path_set := new_Path_Set()
+
+	unique_path := make(map[int]int)
+	for i,p	:=range path_set.ImportCanPath{
+		//透過S，D 加進map ，path要存到set
+		if unique_path[p.]
+	}
+
+	for i,p	:=range path_set.UnimportCanPath{
+
+	}
+	
 	return Input_path_set
 }
 

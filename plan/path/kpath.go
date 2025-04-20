@@ -1,12 +1,15 @@
 package path
 
-// import (
-// 	// "fmt"
-// 	"src/network"
-// 	"src/network/topology"
-// 	"src/network/flow"
-// 	"container/heap"
-// )
+import (
+	// "fmt"
+	"src/network"
+	"src/network/topology"
+	// "src/network/flow"
+	"container/heap"
+	"math"
+)
+
+
 
 // var k =5
 
@@ -144,3 +147,201 @@ package path
 // 	}
 // 	return c
 // }
+
+// kpath_all.go  ── 整合 Yen K‑Shortest Paths + Dijkstra + 與現有結構對接
+// 放在 path/ 目錄即可直接 `go test ./path`
+
+// ─────────────────────────────────────────────────────────────
+// 1. 最短路徑 Dijkstra  (回傳 dist / prev)
+// ─────────────────────────────────────────────────────────────
+func KDijkstra(g *Graph, src int) (map[int]float64, map[int]int) {
+    dist := map[int]float64{}
+    prev := map[int]int{}
+    for _, v := range g.Vertexs {
+        dist[v.ID] = math.Inf(1)
+    }
+    dist[src] = 0
+
+    pq := &vertexPQ{}
+    heap.Init(pq)
+    heap.Push(pq, &vertexCost{src, 0})
+
+    for pq.Len() > 0 {
+        vc := heap.Pop(pq).(*vertexCost)
+        if vc.cost > dist[vc.id] {
+            continue // outdated
+        }
+        v := g.getVertex(vc.id)
+        for _, e := range v.Edges {
+            alt := dist[vc.id] + float64(e.Cost)
+            if alt < dist[e.End] {
+                dist[e.End] = alt
+                prev[e.End] = vc.id
+                heap.Push(pq, &vertexCost{e.End, alt})
+            }
+        }
+    }
+    return dist, prev
+}
+
+// ── PQ for Dijkstra
+
+type vertexCost struct{ id int; cost float64 }
+type vertexPQ []*vertexCost
+
+func (h vertexPQ) Len() int            { return len(h) }
+func (h vertexPQ) Less(i, j int) bool  { return h[i].cost < h[j].cost }
+func (h vertexPQ) Swap(i, j int)       { h[i], h[j] = h[j], h[i] }
+func (h *vertexPQ) Push(x interface{}) { *h = append(*h, x.(*vertexCost)) }
+func (h *vertexPQ) Pop() interface{} {
+    old := *h
+    n := len(old)
+    x := old[n-1]
+    *h = old[:n-1]
+    return x
+}
+
+func (g *Graph) getVertex(id int) *Vertex {
+    for _, v := range g.Vertexs {
+        if v.ID == id {
+            return v
+        }
+    }
+    return nil
+}
+
+// ─────────────────────────────────────────────────────────────
+// 2. Yen K‑Shortest Paths (loop‑free)  回傳 [][]int
+// ─────────────────────────────────────────────────────────────
+
+func YenKShortest(g *Graph, src, dst, K int) [][]int {
+    dist, prev := KDijkstra(g, src)
+    if dist[dst] == math.Inf(1) {
+        return nil // 無路徑
+    }
+    P := [][]int{rebuildPath(prev, dst)}
+    cand := &pathHeap{}
+    heap.Init(cand)
+
+    for k := 1; k < K; k++ {
+        last := P[k-1]
+        for i := 0; i < len(last)-1; i++ {
+            spurNode := last[i]
+            root := append([]int{}, last[:i+1]...) // copy
+
+            removed := removeEdgesAndNodes(g, root)
+            d, p := KDijkstra(g, spurNode)
+            restore(removed)
+            if d[dst] == math.Inf(1) {
+                continue
+            }
+            spur := rebuildPath(p, dst)
+            totalPath := append(root[:len(root)-1], spur...)
+            totalCost := pathCost(root, g) + d[dst]
+            heap.Push(cand, &candPath{totalPath, totalCost})
+        }
+        if cand.Len() == 0 {
+            break
+        }
+        P = append(P, heap.Pop(cand).(*candPath).ids)
+    }
+    return P
+}
+
+// ── 候選路徑最小堆
+
+type candPath struct{ ids []int; cost float64 }
+type pathHeap []*candPath
+
+func (h pathHeap) Len() int           { return len(h) }
+func (h pathHeap) Less(i, j int) bool { return h[i].cost < h[j].cost }
+func (h pathHeap) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
+func (h *pathHeap) Push(x interface{}) { *h = append(*h, x.(*candPath)) }
+func (h *pathHeap) Pop() interface{} {
+    old := *h
+    n := len(old)
+    x := old[n-1]
+    *h = old[:n-1]
+    return x
+}
+
+// ── 工具：路徑重建、成本計算、刪除/還原邊節點
+
+func rebuildPath(prev map[int]int, dst int) []int {
+    var rev []int
+    for u, ok := dst, true; ok; u, ok = prev[u] {
+        rev = append(rev, u)
+        if u == 0 { break }
+    }
+    // reverse
+    for i, j := 0, len(rev)-1; i < j; i, j = i+1, j-1 {
+        rev[i], rev[j] = rev[j], rev[i]
+    }
+    return rev
+}
+
+func pathCost(path []int, g *Graph) float64 {
+    cost := 0.0
+    for i := 0; i < len(path)-1; i++ {
+        v := g.getVertex(path[i])
+        for _, e := range v.Edges {
+            if e.End == path[i+1] {
+                cost += float64(e.Cost)
+            }
+        }
+    }
+    return cost
+}
+
+type removedObj struct{ from, to int; vertex *Vertex }
+
+func removeEdgesAndNodes(g *Graph, prefix []int) []removedObj {
+    var removed []removedObj
+    // 移除 prefix 中的邊及重複節點
+    for i := 0; i < len(prefix)-1; i++ {
+        v := g.getVertex(prefix[i])
+        for idx, e := range v.Edges {
+            if e.End == prefix[i+1] {
+                removed = append(removed, removedObj{from: v.ID, to: e.End})
+                v.Edges = append(v.Edges[:idx], v.Edges[idx+1:]...)
+                break
+            }
+        }
+    }
+    // optional: node‑disjoint 可移除節點 (略)
+    return removed
+}
+
+func restore(objs []removedObj) {
+    for _, o := range objs {
+        v := o.vertex
+        if v == nil {
+            // 恢復邊
+            // 找到對應 Vertex 加回 Edge (Cost=1 預設)
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────
+// 3. 對接 Flow → KPath
+// ─────────────────────────────────────────────────────────────
+
+func BuildAllKPathSet(net *network.Network, k int) *KPath_Set {
+    ks := new_KPath_Set()
+    attach := func(src, dst int, topo *topology.Topology, bag *[]*KPath) {
+        kp := new_KPath(k, src, dst)
+        ids := YenKShortest(GetGarph(topo), src, dst, k)
+        for _, p := range ids {
+            kp.Paths = append(kp.Paths, ConvertIDsToPath(p, topo))
+        }
+        *bag = append(*bag, kp)
+    }
+    for i, f := range net.Flow_Set.TSNFlows {
+        attach(f.Source, f.Destination, net.Graph_Set.TSNGraphs[i], &ks.TSNPaths)
+    }
+    for i, f := range net.Flow_Set.AVBFlows {
+        attach(f.Source, f.Destination, net.Graph_Set.AVBGraphs[i], &ks.AVBPaths)
+    }
+    // Important / Unimportant CAN 類似添加…
+    return ks
+}

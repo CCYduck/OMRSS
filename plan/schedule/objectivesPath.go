@@ -5,6 +5,7 @@ import (
 	"src/network"
 	"src/network/flow"
 	"src/plan/path"
+	
 	"time"
 )
 
@@ -15,30 +16,31 @@ func OBJP(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_pri
 	var (
 		obj                [4]float64
 		cost               int
-		tsn_failed_count   int           = 0 // O1
-		avb_failed_count   int           = 0 // O2
-		all_rerouted_count int           = 0 // O3 ... pass
-		avb_wcd_sum        time.Duration     // O4
+		tsn_can_failed_count   int           = 0 // O1 tsn和can的AR (掉包率)
+		avb_failed_count   int           = 0 // O2 AVB的AR
+		bandwidth_userate int           = 0 // O3 頻寬使用率
+		wcd_sum        time.Duration     // O4 TSN 和 CAN的 Delay
 	)
 	linkmap := map[string]float64{}
 
 	// Round1: Schedule BG flow
-	// O1
+	// O1 
 	for nth, path := range II_prime.TSNPath {
 		schedulability := path_schedulability(0, S_prime.TSNFlows[nth], path, linkmap, network.Bandwidth, network.HyperPeriod)
-		tsn_failed_count += 1 - schedulability
+		tsn_can_failed_count += 1 - schedulability
 		//fmt.Printf("BackGround TSN route%d: %b \n", nth, schedulability)
 	}
 
 	// O2 and O4
 	for nth, path := range II_prime.AVBPath {
 		wcd := WCDP(path, X, S_prime.AVBFlows[nth], network.Flow_Set)
-		avb_wcd_sum += wcd
+		wcd_sum += wcd
 		schedulability := path_schedulability(wcd, S_prime.AVBFlows[nth], path, linkmap, network.Bandwidth, network.HyperPeriod)
 		avb_failed_count += 1 - schedulability
 		//fmt.Printf("BackGround AVB route%d: %b \n", nth, schedulability)
 	}
 	// O3 ... pass
+	bandwidth_userate =0
 
 	//解封裝 WCD
 
@@ -47,36 +49,45 @@ func OBJP(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_pri
 
 	for nth, path := range II.TSNPath {
 		schedulability := path_schedulability(0, S.TSNFlows[nth], path, linkmap, network.Bandwidth, network.HyperPeriod)
-		tsn_failed_count += 1 - schedulability
+		tsn_can_failed_count += 1 - schedulability
 		//fmt.Printf("Input TSN route%d: %b \n", nth, schedulability)
 	}
 
 	//封裝 這邊要return delay,can2tsn封包
 	
-	can2tsnflow, o1_can_drop_fifo , o1_can_drop_priority,o1_can_drop_mat , delay_fifo , delay_priority ,delay_mat := EncapsulateCAN2TSN(network.Flow_Set, network.HyperPeriod)
+	can2tsnflow, o1_can_drop_fifo , o1_can_drop_priority, o1_can_drop_mat , delay_fifo , delay_priority , delay_mat := EncapsulateCAN2TSN(network.Flow_Set, network.HyperPeriod)
 	// fmt.Printf("\n%v\n",)
+	tsn_can_failed_count += o1_can_drop_fifo
+
+	for nth, path := range II.TSNPath {
+		schedulability := path_schedulability(0, S.TSNFlows[nth], path, linkmap, network.Bandwidth, network.HyperPeriod)
+		tsn_can_failed_count += 1 - schedulability
+		//fmt.Printf("Input TSN route%d: %b \n", nth, schedulability)
+	}
 
 	can2tsnflow.Show_CAN2TSNFlowSet()
 	fmt.Printf("O1_CAN Drop: M1: %v , M2: %v\n ,  Encapsulate Delay: %v", o1_can_drop_fifo , o1_can_drop_priority,o1_can_drop_mat , delay_fifo , delay_priority ,delay_mat)
 
-	// O2 and O4
-	for nth, path := range II.AVBPath {
-		wcd := WCDP(path, X, S.AVBFlows[nth], network.Flow_Set)
-		avb_wcd_sum += wcd
-		schedulability := path_schedulability(wcd, S.AVBFlows[nth], path, linkmap, network.Bandwidth, network.HyperPeriod)
-		avb_failed_count += 1 - schedulability
-		//fmt.Printf("Input AVB route%d: %b \n", nth, schedulability)
-	}
+
+	
+	// // O2 and O4
+	// for nth, path := range II.AVBPath {
+	// 	wcd := WCDP(path, X, S.AVBFlows[nth], network.Flow_Set)
+	// 	avb_wcd_sum += wcd
+	// 	schedulability := path_schedulability(wcd, S.AVBFlows[nth], path, linkmap, network.Bandwidth, network.HyperPeriod)
+	// 	avb_failed_count += 1 - schedulability
+	// 	//fmt.Printf("Input AVB route%d: %b \n", nth, schedulability)
+	// }
 	// O3 ... pass
 
-	obj[0] = float64(tsn_failed_count)               // O1
-	obj[1] = float64(avb_failed_count)               // O2
-	obj[2] = float64(all_rerouted_count)             // O3 ... pass
-	obj[3] = float64(avb_wcd_sum / time.Microsecond) // O4
+	// obj[0] = float64(tsn_failed_count)               // O1
+	// // obj[1] = float64(avb_failed_count)               // O2
+	// obj[2] = float64(all_rerouted_count)             // O3 ... pass linkmap
+	// obj[3] = float64(avb_wcd_sum / time.Microsecond) // O4
 
-	cost += int(avb_wcd_sum/time.Microsecond) * 1
-	cost += avb_failed_count * 1000000
-	cost += tsn_failed_count * 100000000
+	// cost += int(avb_wcd_sum/time.Microsecond) * 1
+	// cost += avb_failed_count * 1000000
+	// cost += tsn_failed_count * 100000000
 
 	return obj, cost
 }
