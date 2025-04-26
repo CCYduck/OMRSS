@@ -45,18 +45,26 @@ func BestPath(Network *network.Network) *Path_set {
 
 	}
 
-	for nth, flow := range Network.Flow_Set.CAN2TSNFlows {
+	for _, method := range Network.Flow_Set.Encapsulate {
 		// fmt.Printf("Flow: Source=%d, Destination=%v, Topology=%v\n", flow.Source, flow.Destination, Network.Graph_Set.TSNGraphs[nth])
 		//fmt.Printf("Flow: Source=%d, Destination=%v", flow.Source, flow.Destination)
-		path := saveShortestPathsToGraph(flow.Source, flow.Destination, Network.Graph_Set.CAN2TSNGraphs[nth])
-		if path != nil {
-			// fmt.Println("Best Path:")
-			// path.Show_Path()
-		} else {
-			fmt.Println("No path found.")
+		for _,flow := range method.CAN2TSNFlows{
+			if !path_set.checkListenerAndTalker(flow.Source, flow.Destination){
+				
+				path := saveShortestPathsToGraph(flow.Source, flow.Destination, Network.Graph_Set.GetGarphBySD(flow.Source, flow.Destination))
+				if path != nil {
+					// fmt.Println("Best Path:")
+					// path.Show_Path()
+				} else {
+					fmt.Println("No path found.")
+				}
+	
+				path_set.CAN2TSNPath = append(path_set.CAN2TSNPath, path)
+	
+			}
 		}
-
-		path_set.CAN2TSNPath = append(path_set.CAN2TSNPath, path)
+		
+		
 		// 你可以存到一個 KPath_Set 或印出來
 		// fmt.Printf("KPath: Source=%d, Target=%d, NodeIDs=%v\n", k.Source, k.Target, path)
 
@@ -229,4 +237,17 @@ func findConnectionInNode(node *topology.Node, toID int) *topology.Connection {
 		}
 	}
 	return nil
+}
+
+func (path_set *Path_set)checkListenerAndTalker(source int, destination int)bool{
+
+	for _,path := range path_set.CAN2TSNPath{
+		s := path.GetNodeByID(source)
+		d := path.GetNodeByID(destination)
+		if s.ID == source && d.ID == destination{
+			return true
+		}
+
+	}
+	return false
 }

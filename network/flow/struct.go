@@ -117,11 +117,16 @@ func new_CANFlow(period int, deadline int, datasize float64, HyperPeriod int) *F
 type Flows struct {
 	TSNFlows        []*Flow
 	AVBFlows        []*Flow
-	CAN2TSNFlows    []*Flow
-	CAN2TSN_O1_Drop int
-	CAN2TSN_Delay   time.Duration
+	Encapsulate    []*Method
 }
 
 func new_Flows() *Flows {
 	return &Flows{}
+}
+
+type Method struct{
+	Method_Name		string		
+	CAN2TSNFlows    []*Flow
+	CAN2TSN_O1_Drop int
+	CAN2TSN_Delay   time.Duration
 }

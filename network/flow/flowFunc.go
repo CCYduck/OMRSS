@@ -9,13 +9,6 @@ func (flows *Flows) Input_TSNflow_set() *Flows {
 	return Input_flow_set
 }
 
-func (flows *Flows) Input_CANflow_set() *Flows {
-	Input_flow_set := new_Flows()
-
-	Input_flow_set.CAN2TSNFlows = append(Input_flow_set.CAN2TSNFlows, flows.CAN2TSNFlows...)
-
-	return Input_flow_set
-}
 
 func (flows *Flows) BG_flow_set() *Flows {
 	BG_flow_set := new_Flows()

@@ -59,3 +59,5 @@ func (topology *Topology) AddS2L(destinations []int, cost float64) {
 		topology.Switch[fromNodeID].Connections = append(topology.Switch[fromNodeID].Connections, connection)
 	}
 }
+
+

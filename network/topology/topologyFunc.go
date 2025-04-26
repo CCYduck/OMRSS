@@ -80,3 +80,11 @@ func (t *Topology) RemoveEdge(u, v int) {
 		}
 	}
 }
+
+func (t*Topology) GetListenerAndTalker (source int, destination int) bool{
+
+	if t.Talker[0].ID == source && t.Listener[0].ID ==destination {
+		return true
+	}
+	return false
+}
