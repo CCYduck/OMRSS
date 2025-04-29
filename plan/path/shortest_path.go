@@ -241,13 +241,18 @@ func findConnectionInNode(node *topology.Node, toID int) *topology.Connection {
 
 func (path_set *Path_set)checkListenerAndTalker(source int, destination int)bool{
 
-	for _,path := range path_set.CAN2TSNPath{
-		s := path.GetNodeByID(source)
-		d := path.GetNodeByID(destination)
-		if s.ID == source && d.ID == destination{
-			return true
-		}
+	for _, p := range path_set.CAN2TSNPath {
 
+		s := p.GetNodeByID(source)
+		if s == nil {          // ←★★ 防護：source 不在此 path
+			continue
+		}
+		d := p.GetNodeByID(destination)
+		if d == nil {          // ←★★ 防護：dest 不在此 path
+			continue
+		}
+		// 兩個都存在才算「已經有這條 path」
+		return true
 	}
 	return false
 }

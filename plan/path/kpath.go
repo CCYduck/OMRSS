@@ -1,146 +1,149 @@
 package path
 
-// import (
-// 	// "fmt"
-// 	"src/network"
-// 	"src/network/topology"
-// 	"src/network/flow"
-// 	"container/heap"
-// )
+import (
+	"sort"
+	"fmt"
+	"src/network"
+	// "src/network/topology"
+)
 
-// var k =5
+func KShortestPath(Network *network.Network) *KPath_Set{
+	const k = 3    		// 你要幾條路
+	kpath_set := new_KPath_Set()                   
 
-// func KShortestPath(Network *network.Network) *KPath_Set{
-
-// 	kpath_set:=new_KPath_Set()
-
-// 	appendKPaths(&kpath_set.TSNPaths,  Network.TSNFlow_Set.TSNFlows,Network.TSNGraph_Set.TSNGraphs)
-//     appendKPaths(&kpath_set.AVBPaths,  Network.TSNFlow_Set.AVBFlows,Network.TSNGraph_Set.AVBGraphs)
-    
-// 	return kpath_set
-// }
-
-// func appendKPaths(dst *[]*KPath, flows []*flow.Flow, topos []*topology.Topology) {
-//     for i, f := range flows {
-//         p := KShortestPaths(topos[i], f.Source, f.Destination, k)
-//         *dst = append(*dst, p)
-//     }
-// }
-
-// func shortestIDs(topo *topology.Topology, src, dst int) []int {
-//     g := GetGarph(topo)
-//     Dijkstra(g, dst, src)          // 你的 Dijkstra 反向跑
-//     if len(g.Path) == 0 {
-//         return nil
-//     }
-//     ids := append([]int(nil), g.Path[0]...)
-// 	for i, j := 0, len(ids)-1; i < j; i, j = i+1, j-1 {
-// 		ids[i], ids[j] = ids[j], ids[i]   // 轉成 src→dst
-// 	}
-// 	return ids
-// }
-
-// // ----------------- 優先佇列 -----------------
-// type cand struct {
-//     cost float64
-//     ids  []int
-// }
-// type candPQ []cand
-// func (pq candPQ) Len() int            { return len(pq) }
-// func (pq candPQ) Less(i, j int) bool  { return pq[i].cost < pq[j].cost }
-// func (pq candPQ) Swap(i, j int)       { pq[i], pq[j] = pq[j], pq[i] }
-// func (pq *candPQ) Push(x interface{}) { *pq = append(*pq, x.(cand)) }
-// func (pq *candPQ) Pop() interface{} {
-//     old := *pq
-//     n := len(old)
-//     x  := old[n-1]
-//     *pq = old[:n-1]
-//     return x
-// }
-// // ------------------------------------------------
-
-// // KShortestPaths 取得 K 條最短路，回傳 *KPath
-// func KShortestPaths(topo *topology.Topology, src, dst, K int) *KPath {
-//     kpath := new_KPath(K, src, dst)
-
-//     // 1️⃣ 先求第一條
-//     first := shortestIDs(topo, src, dst)
-//     if first == nil {
-//         return kpath // 無路徑
-//     }
-//     kpath.Paths = append(kpath.Paths, idsToPath(first, topo))
-
-//     // 候選路徑最小堆
-//     pq := &candPQ{}
-//     heap.Init(pq)
-
-//     // 2️⃣ Yen’s 迴圈
-//     for k := 1; k < K; k++ {
-//         prevIDs := make([]int, len(kpath.Paths[k-1].Nodes))
-//         for i, n := range kpath.Paths[k-1].Nodes { prevIDs[i] = n.ID }
-
-//         for i := 0; i < len(prevIDs)-1; i++ {
-//             spurNode := prevIDs[i]
-//             rootIDs  := prevIDs[:i+1]        // s→spur
-
-//             // 2‑1 複製拓樸，移除 rootIDs 之後與既有最短路重疊的邊
-//             // clone & remove
-// 			tCopy := topo.TopologyDeepCopy()
-// 			removeOverlapEdges(tCopy, rootIDs , kpath )
-
-//             // 2‑2 從 spurNode → dst 求最短路
-//             spurIDs := shortestIDs(tCopy, spurNode, dst)
-//             if spurIDs != nil {
-//                 // 合併 root(不含 spurNode 最後一點) + spur
-//                 candIDs := append(append([]int{}, rootIDs[:len(rootIDs)-1]...), spurIDs...)
-//                 cost    := pathCost(topo, candIDs)
-//                 heap.Push(pq, cand{cost: cost, ids: candIDs})
-//             }
-//             // 2‑3 恢復邊 (cloneAndRemove 已複製，不用復原)
-//         }
-
-//         if pq.Len() == 0 {
-//             break // 無更多候選
-//         }
-//         best := heap.Pop(pq).(cand)
-//         kpath.Paths = append(kpath.Paths, idsToPath(best.ids, topo))
-//     }
-//     return kpath
-// }
+	// -------- lookup table，用來判斷 (src,dst) 是否已經建立過 ----------
+    type sd struct{ s, d int }
+	// done := make(map[sd]bool)	// 全域收集
+	tsndone := make(map[sd]bool)	// 全域收集
+	avbdone := make(map[sd]bool)	// 全域收集
+	can2tsndone := make(map[sd]bool)	// 全域收集
 
 
-// // --------- 輔助 ---------
-// func pathIDs(p *Path) []int {
-// 	ids := make([]int, len(p.Nodes))
-// 	for i, n := range p.Nodes { ids[i] = n.ID }
-// 	return ids
-// }
+	for idx, flow := range Network.Flow_Set.TSNFlows {
+		pair := sd{flow.Source, flow.Destination}
+        if tsndone[pair] {                 // 已經做過 → skip
+            continue
+        }
 
-// func removeOverlapEdges(t *topology.Topology, root []int, kp *KPath) {
-// 	for _, p := range kp.Paths {
-// 		ids := pathIDs(p)
-// 		if len(ids) < len(root) || !equalPrefix(ids, root) { continue }
-// 		u, v := ids[len(root)-1], ids[len(root)]
-// 		t.RemoveEdge(u, v) // 你要在 Topology 加此方法
-// 	}
-// }
+		topo := Network.Graph_Set.TSNGraphs[idx]
+		g    := GetGarph(topo)
+		kp   := BuildKPath(k, flow.Source, flow.Destination, g)
+		kpath_set.TSNPaths = append(kpath_set.TSNPaths, kp)
+		// done[pair] = true 
+		tsndone[pair] = true 
+	}
+	
+	// -------- AVB ----------
+	for idx, flow := range Network.Flow_Set.AVBFlows {
+		pair := sd{flow.Source, flow.Destination}
+        if avbdone[pair] {                 // 已經做過 → skip
+            continue
+        }
+		topo := Network.Graph_Set.AVBGraphs[idx]
+		g    := GetGarph(topo)
+		kp   := BuildKPath(k, flow.Source, flow.Destination, g)
+		kpath_set.AVBPaths = append(kpath_set.AVBPaths, kp)
+		// done[pair] = true 
+		avbdone[pair] = true
+	}
+	
+	// -------- CAN→TSN (封裝流) ----------
+	for _, m := range Network.Flow_Set.Encapsulate {   // 每種封裝方法
+		for _, f := range m.CAN2TSNFlows {             // 每條 CAN→TSN flow
+			pair := sd{f.Source, f.Destination}
+            if can2tsndone[pair] { continue }
 
-// func equalPrefix(a, b []int) bool {
-// 	if len(b) > len(a) { return false }
-// 	for i := range b {
-// 		if a[i] != b[i] { return false }
-// 	}
-// 	return true
-// }
+			topo := Network.Graph_Set.GetGarphBySD(f.Source, f.Destination)
+			g    := GetGarph(topo)
+			kp   := BuildKPath(k, f.Source, f.Destination, g)
+			kpath_set.CAN2TSNPaths = append(kpath_set.CAN2TSNPaths, kp)
+			can2tsndone[pair] = true 
+		}
+	}
+	return kpath_set
+}
 
-// // 計算成本
-// func pathCost(t *topology.Topology, ids []int) float64 {
-// 	var c float64
-// 	for i := 0; i < len(ids)-1; i++ {
-// 		n := t.GetNodeByID(ids[i])
-// 		for _, e := range n.Connections {
-// 			if e.ToNodeID == ids[i+1] { c += e.Cost; break }
-// 		}
-// 	}
-// 	return c
-// }
+func BuildKPath(k int, src, dst int, g *Graph) *KPath {
+	kp := new_KPath(k, src, dst)
+	kp.Paths = YenKPaths(g, src, dst, k)
+	return kp
+}
+
+// YenKPaths 回傳 K 條最短簡單路，已依 Weight 由小到大
+func YenKPaths(base *Graph, src, dst, K int) []*Path {
+	A := make([]*Path, 0, K) // 已確定
+	B := make([]*Path, 0)    // 候選
+
+	first := oneShortest(base, src, dst)
+	if first == nil { return nil }
+	A = append(A, first)
+
+	for k := 1; k < K; k++ {
+		last := A[k-1]
+		for i := 0; i < len(last.Nodes)-1; i++ { // 每個 spur node
+			spur := last.Nodes[i].ID
+			rootIDs := last.PrefixIDs(i) 	//把node結構變成list結構
+
+			// 1. 建殘圖
+			g := base.Clone()
+			for _, rid := range rootIDs[:len(rootIDs)-1] {
+				g.RemoveVertex(rid)
+			}
+			for _, p := range A {
+				if len(p.Nodes) <= i { continue }
+				if equalSlice(rootIDs, p.PrefixIDs(i)) {
+					u, v := p.Nodes[i].ID, p.Nodes[i+1].ID
+					g.RemoveEdge(u, v)
+				}
+			}
+
+			// 2. spur → dst 最短路
+			spurPath := oneShortest(g, spur, dst)
+			if spurPath == nil { continue }
+
+			// 3. 組 full path
+			full := join(rootIDs, spurPath)
+			fmt.Println(full.Nodes)
+			B = append(B, full)
+		}
+		if len(B) == 0 { break }
+		sort.Slice(B, func(i, j int) bool { return B[i].Weight < B[j].Weight })
+		A = append(A, B[0])
+		B = B[1:]
+	}
+	return A
+}
+
+// ---------- internal helpers ----------
+
+func oneShortest(g *Graph, s, t int) *Path {
+	ret := Dijkstra(g, s, t)
+	if len(ret.Path) == 0 { return nil }
+
+	ids := ret.Path[0]
+	p := &Path{Weight: float64(len(ids) - 1)}
+
+	for i, id := range ids {
+        n := &Node{ID: id}
+        if i < len(ids)-1 {
+            n.Connections = append(n.Connections, &Connection{
+                FromNodeID: id,
+                ToNodeID:   ids[i+1],
+                Cost:       1,
+            })
+        }
+        // 也可補前向邊、反向邊都行
+        p.Nodes = append(p.Nodes, n)
+    }
+	return p
+}
+
+func join(rootIDs []int, spur *Path) *Path {
+	out := &Path{}
+	for _, id := range rootIDs[:len(rootIDs)-1] {
+		out.Nodes = append(out.Nodes, &Node{ID: id})
+	}
+	out.Nodes = append(out.Nodes, spur.Nodes...)
+	out.Weight = float64(len(out.Nodes) - 1)
+	return out
+}

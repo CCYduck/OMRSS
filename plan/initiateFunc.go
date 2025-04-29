@@ -63,8 +63,8 @@ func (plan *OSRO) Initiate_Plan() {
 	path_set := path.BestPath(plan.Network)
 	path_set.Show_Path_Set()
 
-	// kpath_set:=path.KShortestPath(plan.Network)
-	// kpath_set.Show_KPath_Set()
+	kpath_set:=path.KShortestPath(plan.Network)
+	kpath_set.Show_KPath_Set()
 	// schedule.Testqueue(plan.Network)
 
 }

@@ -105,6 +105,7 @@ func (flows *Flows) Show_TSNFlows() {
 func (flows *Flows) Show_CANFlows() {
 	// Display all flows.
 	for _, flow := range flows.Encapsulate {
-		fmt.Printf(" %s: Total CAN2TSN Flows:%d O1_Drop:%d Delay:%v \n", flow.Method_Name, len(flow.CAN2TSNFlows), flow.CAN2TSN_O1_Drop, flow.CAN2TSN_Delay)
+		fmt.Printf(" %s: Total CAN2TSN Flows: %d StreamSize: %v StreamCount: %v O1_Drop: %d Delay: %v \n", 
+		flow.Method_Name, len(flow.CAN2TSNFlows) , flow.BytesSent, flow.TSNFrameCount , flow.CAN2TSN_O1_Drop, flow.CAN2TSN_Delay)
 	}
 }

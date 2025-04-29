@@ -1,8 +1,9 @@
 package path
 
 type KPath_Set struct {
-	TSNPaths []*KPath
-	AVBPaths []*KPath
+	TSNPaths 		[]*KPath
+	AVBPaths 		[]*KPath
+	CAN2TSNPaths	[]*KPath
 }
 
 func new_KPath_Set() *KPath_Set {

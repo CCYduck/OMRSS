@@ -23,23 +23,38 @@ func (path_set *Path_set) BG_Path_set(bg_tsn_end int, bg_avb_end int) *Path_set 
 	return BG_path_set 
 }
 
-func Get_OSACO_Routing(network *network.Network, SP *Path_set, K int, Method_Number int) *KPath_Set {
+func Get_OSACO_Routing(Network *network.Network, SP *Path_set, K int, Method_Number int) *KPath_Set {
 	kpath_set := new_KPath_Set()
 
-	// for nth, flow := range network.TSNFlow_Set.TSNFlows {
-	// 	Ktrees := KSpanningTree(v2v, SMT.TSNTrees[nth], K, flow.Source, flow.Destination, network.BytesRate, Method_Number)
-	// 	ktrees_set.TSNTrees = append(ktrees_set.TSNTrees, Ktrees)
-	// }
-	// fmt.Printf("Finish OSACO %d TSN streams routing\n", len(ktrees_set.TSNTrees))
-
-	// for nth, flow := range network.TSNFlow_Set.AVBFlows {
-	// 	Ktrees := KSpanningTree(v2v, SMT.AVBTrees[nth], K, flow.Source, flow.Destination, network.BytesRate, Method_Number)
-	// 	ktrees_set.AVBTrees = append(ktrees_set.AVBTrees, Ktrees)
-	// }
-	// fmt.Printf("Finish OSACO %d AVB streams routing\n", len(ktrees_set.AVBTrees))
+	for idx, flow := range Network.Flow_Set.TSNFlows {
+		topo := Network.Graph_Set.TSNGraphs[idx]
+		g    := GetGarph(topo)
+		kp   := BuildKPath(k, flow.Source, flow.Destination, g)
+		kpath_set.TSNPaths = append(kpath_set.TSNPaths, kp)
+	}
+	
+	// -------- AVB ----------
+	for idx, flow := range Network.Flow_Set.AVBFlows {
+		topo := Network.Graph_Set.AVBGraphs[idx]
+		g    := GetGarph(topo)
+		kp   := BuildKPath(k, flow.Source, flow.Destination, g)
+		kpath_set.AVBPaths = append(kpath_set.AVBPaths, kp)
+	}
+	
+	// -------- CAN→TSN (封裝流) ----------
+	for _, m := range Network.Flow_Set.Encapsulate {   // 每種封裝方法
+		for _, f := range m.CAN2TSNFlows {             // 每條 CAN→TSN flow
+			topo := Network.Graph_Set.GetGarphBySD(f.Source, f.Destination)
+			g    := GetGarph(topo)
+			kp   := BuildKPath(k, f.Source, f.Destination, g)
+			kpath_set.CAN2TSNPaths = append(kpath_set.CAN2TSNPaths, kp)
+		}
+	}
 
 	return kpath_set
 }
+
+const k = 3 
 
 func (kpath_set *KPath_Set) Input_kpath_set(bg_tsn_end int, bg_avb_end int) *KPath_Set {
 	Input_kpath_set :=  new_KPath_Set()

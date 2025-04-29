@@ -20,6 +20,28 @@ func (path *Path) GetNodeByID(id int) *Node {
 	return nil
 }
 
+// 回傳節點 id slice
+func (p *Path) NodeIDs() []int {
+	out := make([]int, len(p.Nodes))
+	for i, n := range p.Nodes { out[i] = n.ID }
+	return out
+}
+
+// root prefix（含 i）
+func (p *Path) PrefixIDs(i int) []int {
+	out := make([]int, i+1)
+	for k := 0; k <= i; k++ { out[k] = p.Nodes[k].ID }
+	return out
+}
+
+func equalSlice(a, b []int) bool {
+	if len(a) != len(b) { return false }
+	for i := range a {
+		if a[i] != b[i] { return false }
+	}
+	return true
+}
+
 func Compare_Connections(conn1, conn2 []*Connection) bool {
 	i := 0
 	for _, c1 := range conn1 {

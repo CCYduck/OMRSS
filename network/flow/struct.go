@@ -127,6 +127,8 @@ func new_Flows() *Flows {
 type Method struct{
 	Method_Name		string		
 	CAN2TSNFlows    []*Flow
+	BytesSent	float64
+	TSNFrameCount    int 
 	CAN2TSN_O1_Drop int
 	CAN2TSN_Delay   time.Duration
 }
