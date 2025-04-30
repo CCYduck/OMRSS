@@ -1,54 +1,61 @@
 package path
 
+
+import "src/network/topology"
 // ------------------------------------------------------------
 // Graph deep-clone  -- 只複製 Dijkstra/ Yen 會用到的欄位
 // ------------------------------------------------------------
 func (g *Graph) Clone() *Graph {
-	out := &Graph{ToVertex: g.ToVertex}
-	out.Vertexs = make([]*Vertex, len(g.Vertexs))
-	for i, v := range g.Vertexs {
+	out := &Graph{V: make(map[int]*Vertex, len(g.V))}
+	for id, v := range g.V {
 		nv := *v
 		nv.Edges = make([]*Edge, len(v.Edges))
-		for j, e := range v.Edges {
+		for i, e := range v.Edges {
 			ne := *e
-			nv.Edges[j] = &ne
+			nv.Edges[i] = &ne
 		}
-		out.Vertexs[i] = &nv
+		out.V[id] = &nv
 	}
 	return out
 }
 
 // 刪 (u → v) 單向邊
 func (g *Graph) RemoveEdge(u, v int) {
-	if vert := g.FindVertex(u); vert != nil {
-		keep := vert.Edges[:0]
+	if vert := g.V[u]; vert != nil {
+		e2 := vert.Edges[:0]
 		for _, e := range vert.Edges {
-			if !(e.Strat == u && e.End == v) {
-				keep = append(keep, e)
+			if !(e.Strat == u && e.End== v) {
+				e2 = append(e2, e)
 			}
 		}
-		vert.Edges = keep
+		vert.Edges = e2
 	}
 }
 
 // 刪頂點 + incident edges
-func (g *Graph) RemoveVertex(id int) {
-	// 1. remove vertex
-	v2 := g.Vertexs[:0]
-	for _, v := range g.Vertexs {
-		if v.ID != id {
-			v2 = append(v2, v)
-		}
+func (g *Graph) RemoveVertex(id int) { delete(g.V, id); for _, v := range g.V {
+	e2 := v.Edges[:0]
+	for _, e := range v.Edges {
+		if e.Strat != id { e2 = append(e2, e) }
 	}
-	g.Vertexs = v2
-	// 2. remove edges to that vertex
-	for _, v := range g.Vertexs {
-		e2 := v.Edges[:0]
-		for _, e := range v.Edges {
-			if e.End != id {
-				e2 = append(e2, e)
-			}
-		}
-		v.Edges = e2
+	v.Edges = e2
+} }
+
+// 把 topology 轉成簡單圖（單向邊）
+func BuildGraphFromTopology(t *topology.Topology) *Graph {
+	g := &Graph{V: map[int]*Vertex{}}
+
+	add := func(u,v int, cost float64) {
+		if g.V[u] == nil { g.V[u] = &Vertex{ID:u} }
+		g.V[u].Edges = append(g.V[u].Edges, &Edge{Strat:u, End:v, Cost:int(cost)})
 	}
+
+	iterNode := func(n *topology.Node){
+		for _, c := range n.Connections { add(c.FromNodeID, c.ToNodeID, c.Cost) }
+	}
+	for _, n := range append(append(t.Talker, t.Switch...), t.Listener...) {
+		iterNode(n)
+	}
+
+	return g
 }

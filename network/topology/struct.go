@@ -31,8 +31,9 @@ func new_Topology() *Topology {
 	return &Topology{}
 }
 
+
 type Edge struct {
-	Ends []int `yaml:"ends"`
+	Ends 		[]int `yaml:"ends"`
 }
 
 type Data struct {

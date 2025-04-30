@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	// "path"
+	
 
 	//"src/memorizer"
 	"src/network"
@@ -102,6 +104,7 @@ func main() {
 			Plan.Show_Plan()
 		}
 
+		
 		// 4. Cumulative quantity
 		// ------------------------------------------
 		//Memorizer.M_Cumulative(Plan)

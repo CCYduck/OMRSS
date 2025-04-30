@@ -63,3 +63,5 @@ func define_nodes_connection(topology *Topology, endstation_edges []Edge, cost f
 	}
 
 }
+
+

@@ -28,16 +28,16 @@ func Get_OSACO_Routing(Network *network.Network, SP *Path_set, K int, Method_Num
 
 	for idx, flow := range Network.Flow_Set.TSNFlows {
 		topo := Network.Graph_Set.TSNGraphs[idx]
-		g    := GetGarph(topo)
-		kp   := BuildKPath(k, flow.Source, flow.Destination, g)
+
+		kp   := BuildKPath(k, flow.Source, flow.Destination, topo)
 		kpath_set.TSNPaths = append(kpath_set.TSNPaths, kp)
 	}
 	
 	// -------- AVB ----------
 	for idx, flow := range Network.Flow_Set.AVBFlows {
 		topo := Network.Graph_Set.AVBGraphs[idx]
-		g    := GetGarph(topo)
-		kp   := BuildKPath(k, flow.Source, flow.Destination, g)
+
+		kp   := BuildKPath(k, flow.Source, flow.Destination, topo)
 		kpath_set.AVBPaths = append(kpath_set.AVBPaths, kp)
 	}
 	
@@ -45,8 +45,8 @@ func Get_OSACO_Routing(Network *network.Network, SP *Path_set, K int, Method_Num
 	for _, m := range Network.Flow_Set.Encapsulate {   // 每種封裝方法
 		for _, f := range m.CAN2TSNFlows {             // 每條 CAN→TSN flow
 			topo := Network.Graph_Set.GetGarphBySD(f.Source, f.Destination)
-			g    := GetGarph(topo)
-			kp   := BuildKPath(k, f.Source, f.Destination, g)
+
+			kp   := BuildKPath(k, f.Source, f.Destination, topo)
 			kpath_set.CAN2TSNPaths = append(kpath_set.CAN2TSNPaths, kp)
 		}
 	}

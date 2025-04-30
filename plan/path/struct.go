@@ -11,6 +11,7 @@ func new_KPath_Set() *KPath_Set {
 }
 
 type KPath struct {
+	Method string
 	K      int
 	Source int
 	Target int
@@ -37,8 +38,9 @@ func new_Path_Set() *Path_set {
 }
 
 type Path struct {
-	Nodes  []*Node
-	Weight float64
+	IDs 	[]int
+	Nodes  	[]*Node
+	Weight 	float64
 }
 
 func new_Path() *Path {
@@ -75,10 +77,11 @@ type V2VEdge struct {
 }
 
 type Graph struct {
-	Vertexs  []*Vertex
-	ToVertex int
-	Path     [][]int
-	ConnPath [][]Connection
+	Vertexs  	[]*Vertex
+	V 			map[int]*Vertex
+	ToVertex 	int
+	Path     	[][]int
+	ConnPath 	[][]Connection
 }
 
 type Vertex struct {

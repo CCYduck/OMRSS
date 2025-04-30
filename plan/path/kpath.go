@@ -2,10 +2,18 @@ package path
 
 import (
 	"sort"
-	"fmt"
+	// "fmt"
 	"src/network"
-	// "src/network/topology"
+	"math"
+	"src/network/topology"
 )
+
+func BuildKPath(k, src, dst int, topo *topology.Topology)*KPath{
+	kp := new_KPath(k,src,dst)
+	g  := BuildGraphFromTopology(topo)
+	kp.Paths = YenKPaths(g,src,dst,k)
+	return kp
+}
 
 func KShortestPath(Network *network.Network) *KPath_Set{
 	const k = 3    		// 你要幾條路
@@ -14,128 +22,129 @@ func KShortestPath(Network *network.Network) *KPath_Set{
 	// -------- lookup table，用來判斷 (src,dst) 是否已經建立過 ----------
     type sd struct{ s, d int }
 	// done := make(map[sd]bool)	// 全域收集
-	tsndone := make(map[sd]bool)	// 全域收集
-	avbdone := make(map[sd]bool)	// 全域收集
-	can2tsndone := make(map[sd]bool)	// 全域收集
+	tsnDone := make(map[sd]bool)	// 全域收集
+	avbDone := make(map[sd]bool)	// 全域收集
+	c2tDone	:= make(map[sd]bool)	// 全域收集
 
 
 	for idx, flow := range Network.Flow_Set.TSNFlows {
-		pair := sd{flow.Source, flow.Destination}
-        if tsndone[pair] {                 // 已經做過 → skip
-            continue
-        }
-
-		topo := Network.Graph_Set.TSNGraphs[idx]
-		g    := GetGarph(topo)
-		kp   := BuildKPath(k, flow.Source, flow.Destination, g)
+		key := sd{flow.Source, flow.Destination}
+		if tsnDone[key] {continue}
+		kp := BuildKPath(k, flow.Source, flow.Destination, Network.Graph_Set.TSNGraphs[idx])
 		kpath_set.TSNPaths = append(kpath_set.TSNPaths, kp)
-		// done[pair] = true 
-		tsndone[pair] = true 
+		tsnDone[key]=true
 	}
 	
 	// -------- AVB ----------
 	for idx, flow := range Network.Flow_Set.AVBFlows {
-		pair := sd{flow.Source, flow.Destination}
-        if avbdone[pair] {                 // 已經做過 → skip
-            continue
-        }
-		topo := Network.Graph_Set.AVBGraphs[idx]
-		g    := GetGarph(topo)
-		kp   := BuildKPath(k, flow.Source, flow.Destination, g)
-		kpath_set.AVBPaths = append(kpath_set.AVBPaths, kp)
-		// done[pair] = true 
-		avbdone[pair] = true
+		key := sd{flow.Source, flow.Destination}
+        if avbDone[key]{continue}
+		kp := BuildKPath(k, flow.Source,flow.Destination, Network.Graph_Set.AVBGraphs[idx])
+		kpath_set.AVBPaths = append(kpath_set.AVBPaths,kp)
+		avbDone[key]=true
 	}
-	
+
 	// -------- CAN→TSN (封裝流) ----------
 	for _, m := range Network.Flow_Set.Encapsulate {   // 每種封裝方法
 		for _, f := range m.CAN2TSNFlows {             // 每條 CAN→TSN flow
-			pair := sd{f.Source, f.Destination}
-            if can2tsndone[pair] { continue }
-
-			topo := Network.Graph_Set.GetGarphBySD(f.Source, f.Destination)
-			g    := GetGarph(topo)
-			kp   := BuildKPath(k, f.Source, f.Destination, g)
-			kpath_set.CAN2TSNPaths = append(kpath_set.CAN2TSNPaths, kp)
-			can2tsndone[pair] = true 
+			key := sd{f.Source,f.Destination}
+			if c2tDone[key]{continue}
+			topo := Network.Graph_Set.GetGarphBySD(f.Source,f.Destination)
+			kp   := BuildKPath(k,f.Source,f.Destination, topo)
+			kpath_set.CAN2TSNPaths = append(kpath_set.CAN2TSNPaths,kp)
+			c2tDone[key]=true
 		}
 	}
 	return kpath_set
 }
 
-func BuildKPath(k int, src, dst int, g *Graph) *KPath {
-	kp := new_KPath(k, src, dst)
-	kp.Paths = YenKPaths(g, src, dst, k)
-	return kp
-}
 
 // YenKPaths 回傳 K 條最短簡單路，已依 Weight 由小到大
-func YenKPaths(base *Graph, src, dst, K int) []*Path {
-	A := make([]*Path, 0, K) // 已確定
-	B := make([]*Path, 0)    // 候選
-
-	first := oneShortest(base, src, dst)
-	if first == nil { return nil }
+func YenKPaths(g *Graph, src, dst, K int) []*Path {
+	A := []*Path{}
+	first := oneShortest(g, src, dst)
+	if first==nil { return nil }
 	A = append(A, first)
+	B := []*Path{}
 
-	for k := 1; k < K; k++ {
-		last := A[k-1]
-		for i := 0; i < len(last.Nodes)-1; i++ { // 每個 spur node
-			spur := last.Nodes[i].ID
-			rootIDs := last.PrefixIDs(i) 	//把node結構變成list結構
+	for ki:=1; ki<k; ki++ {
+		last := A[ki-1]
+		for i:=0;i<len(last.IDs)-1;i++ {   // 每個 spur node
+			spurNode := last.IDs[i]
+			rootPath := last.IDs[:i+1]
 
-			// 1. 建殘圖
-			g := base.Clone()
-			for _, rid := range rootIDs[:len(rootIDs)-1] {
-				g.RemoveVertex(rid)
-			}
+			// 殘圖
+			g2 := g.Clone()
 			for _, p := range A {
-				if len(p.Nodes) <= i { continue }
-				if equalSlice(rootIDs, p.PrefixIDs(i)) {
-					u, v := p.Nodes[i].ID, p.Nodes[i+1].ID
-					g.RemoveEdge(u, v)
+				if len(p.IDs)>i && equal(rootPath, p.IDs[:i+1]) {
+					g2.RemoveEdge(p.IDs[i], p.IDs[i+1])
 				}
 			}
+			for _, rid := range rootPath[:len(rootPath)-1] {
+				g2.RemoveVertex(rid)
+			}
+			spur := oneShortest(g2, spurNode, dst)
+			if spur==nil { continue }
 
-			// 2. spur → dst 最短路
-			spurPath := oneShortest(g, spur, dst)
-			if spurPath == nil { continue }
-
-			// 3. 組 full path
-			full := join(rootIDs, spurPath)
-			fmt.Println(full.Nodes)
-			B = append(B, full)
+			full := append(append([]int{}, rootPath[:len(rootPath)-1]...), spur.IDs...)
+			B = append(B, &Path{IDs: full, Weight: float64(len(full)-1)})
 		}
-		if len(B) == 0 { break }
-		sort.Slice(B, func(i, j int) bool { return B[i].Weight < B[j].Weight })
+		if len(B)==0 { break }
+		sort.Slice(B, func(i,j int)bool{ return B[i].Weight<B[j].Weight })
 		A = append(A, B[0])
 		B = B[1:]
 	}
 	return A
 }
 
+func equal(a,b []int)bool{
+	if len(a)!=len(b) { return false }
+	for i:=range a { if a[i]!=b[i] { return false } }
+	return true
+}
 // ---------- internal helpers ----------
 
+
 func oneShortest(g *Graph, s, t int) *Path {
-	ret := Dijkstra(g, s, t)
-	if len(ret.Path) == 0 { return nil }
+	const inf = math.MaxInt32
+	dist := map[int]int{}
+	prev := map[int]int{}
+	for id := range g.V { dist[id] = inf }
+	dist[s] = 0
+	visited := map[int]bool{}
 
-	ids := ret.Path[0]
-	p := &Path{Weight: float64(len(ids) - 1)}
+	for len(visited) < len(g.V) {
+		// 找未訪問且 dist 最小的頂點
+		minID, minV := -1, inf
+		for id, d := range dist {
+			if !visited[id] && d < minV {
+				minV, minID = d, id
+			}
+		}
+		if minID == -1 || minID == t { break }
+		visited[minID] = true
+		for _, e := range g.V[minID].Edges {
+			if visited[e.End] { continue }
+			if alt := dist[minID] + e.Cost; alt < dist[e.End] {
+				dist[e.End] = alt
+				prev[e.End] = minID
+			}
+		}
+	}
 
-	for i, id := range ids {
-        n := &Node{ID: id}
-        if i < len(ids)-1 {
-            n.Connections = append(n.Connections, &Connection{
-                FromNodeID: id,
-                ToNodeID:   ids[i+1],
-                Cost:       1,
-            })
-        }
-        // 也可補前向邊、反向邊都行
-        p.Nodes = append(p.Nodes, n)
-    }
-	return p
+	if _, ok := dist[t]; !ok || dist[t]==inf { return nil }
+
+	// 回溯路徑
+	ids := []int{t}
+	for cur := t; cur != s; {
+		cur = prev[cur]
+		ids = append(ids, cur)
+	}
+	// 反轉
+	for i,j := 0,len(ids)-1; i<j; i,j = i+1,j-1 {
+		ids[i],ids[j] = ids[j],ids[i]
+	}
+	return &Path{IDs: ids, Weight: float64(dist[t])}
 }
 
 func join(rootIDs []int, spur *Path) *Path {
@@ -147,3 +156,4 @@ func join(rootIDs []int, spur *Path) *Path {
 	out.Weight = float64(len(out.Nodes) - 1)
 	return out
 }
+

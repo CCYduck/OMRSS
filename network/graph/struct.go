@@ -11,3 +11,4 @@ type Graphs struct {
 func new_Graphs() *Graphs {
 	return &Graphs{}
 }
+

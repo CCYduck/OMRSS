@@ -3,6 +3,7 @@ package graph
 import (
 	"src/network/flow"
 	"src/network/topology"
+	
 )
 
 func Generate_OSRO_Graphs(topology *topology.Topology, flows *flow.Flows, bytes_rate float64) *Graphs {
@@ -26,7 +27,6 @@ func Generate_OSRO_Graphs(topology *topology.Topology, flows *flow.Flows, bytes_
 	// Generating ImportantCAN Graphs
 	for _, flow := range flows.Encapsulate {	
 		for _,can2tsnflow := range flow.CAN2TSNFlows {
-
 			if !graphs.checkListenerAndTalker(can2tsnflow.Source, can2tsnflow.Destination){
 				t := topology.TopologyDeepCopy()                            // Duplicate of Topology		
 				t.AddN2S2N_For_Path(can2tsnflow.Source, can2tsnflow.Destination, bytes_rate) // Undirected Graph
