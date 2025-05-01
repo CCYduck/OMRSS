@@ -91,6 +91,20 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 				queue.appendQueue(can2tsnFlow.getStreamsByCurrentTime(current_time))
 				queue.sortQueue(method, current_time)
 
+				drop_count := 0
+    			for drop_count < len(queue.Streams) {
+					stream := queue.Streams[drop_count]
+					if current_time > stream.FinishTime {
+						can2tsnFlowSet.O1_Drop += 1
+						drop_count ++
+						continue
+					} 
+					
+				}
+				// 剪掉已處理 head 部分
+				queue.popQueue(drop_count)
+
+				
 				// example:
 				// current_time=0 queue=[0_1, 0_2, 0_3, 0_4, 0_5] if 05 datasize_count>datasize_max, createCAN2TSNStream datasize_count = 0
 				// current_time=5000 queue=[0_5, 5000_1, 5000_2, 5000_3, 5000_4, 5000_5]
@@ -115,6 +129,7 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 				}
 				// 剪掉已處理 head 部分
 				queue.popQueue(head)
+
 				imminent := false
 				for _, stream := range queue.Streams {
 					if stream.FinishTime-current_time <= safe_deadline {
@@ -125,15 +140,23 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 
 				// 3A. 若有快逾期 frame → 把佇列**全部**打包送出
 				if imminent && len(queue.Streams) > 0 {
-					// pack := datasize_count
 					count := 0
-
-					can2tsnFlowSet.flushStream(can2tsnFlow, current_time, datasize_max, deadline)
-					datasize_count = 0
-					queue.popQueue(count)
-
+					
+					for count < len(queue.Streams) && //datasize_least
+					datasize_count + queue.Streams[count].DataSize <= datasize_max {
+							
+						datasize_count += queue.Streams[count].DataSize
+						count++
+            		}
+					// if pack >= minLoad {                 // 夠重才送
+						can2tsnFlowSet.flushStream(can2tsnFlow, current_time, datasize_max, deadline)
+						datasize_count = 0
+						queue.popQueue(count)
+						// break
+					// }
 					continue                          // 跳到下一個刻度
 				}
+				
 
 			}
 			if datasize_count > 0 {				
@@ -217,6 +240,16 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set)flushStream(flow *CAN2TSN_Flow, now int, 
 
 	can2tsnFlowSet.DatasizeCount+= packedSize
 	can2tsnFlowSet.TSNFrameCount+=1
+}
+
+// --------------- helper：判斷佇列中是否還有 imminent stream ---------------
+func hasImminent(q *Queue, now, safe int) bool {
+	for _, s := range q.Streams {
+		if s.FinishTime-now <= safe {
+			return true
+		}
+	}
+	return false
 }
 
 // DeepCopyCAN2TSN returns a deep-cloned *CAN2TSN_Flow_Set.
