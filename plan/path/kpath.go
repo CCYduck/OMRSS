@@ -2,16 +2,21 @@ package path
 
 import (
 	"sort"
-	// "fmt"
+	"fmt"
 	"src/network"
 	"math"
 	"src/network/topology"
 )
 
 func BuildKPath(k, src, dst int, topo *topology.Topology)*KPath{
-	kp := new_KPath(k,src,dst)
+	
 	g  := BuildGraphFromTopology(topo)
-	kp.Paths = YenKPaths(g,src,dst,k)
+	ids := YenKPaths(g,src,dst,k)
+
+	kp := new_KPath(k,src,dst)
+	for _, idPath := range ids {
+		kp.Paths = append(kp.Paths, ConvertIDsToPath_k(idPath.IDs, topo))
+	}
 	return kp
 }
 
@@ -147,13 +152,34 @@ func oneShortest(g *Graph, s, t int) *Path {
 	return &Path{IDs: ids, Weight: float64(dist[t])}
 }
 
-func join(rootIDs []int, spur *Path) *Path {
-	out := &Path{}
-	for _, id := range rootIDs[:len(rootIDs)-1] {
-		out.Nodes = append(out.Nodes, &Node{ID: id})
-	}
-	out.Nodes = append(out.Nodes, spur.Nodes...)
-	out.Weight = float64(len(out.Nodes) - 1)
-	return out
-}
+func ConvertIDsToPath_k(ids []int, topo *topology.Topology) *Path {
+	p := &Path{
+        IDs:    ids,                         // ← (1) 補上
+        Nodes:  make([]*Node, 0, len(ids)),
+        Weight: 0,
+    }
+    for i, id := range ids {
+        real := topo.GetNodeByID(id)
+        if real == nil {                    // ← (2) 直接認定路徑無效
+            fmt.Printf("Node %d not found, abort path\n", id)
+            return nil
+        }
+        node := &Node{
+            ID:    real.ID,
+            Shape: real.Shape,
+        }
+        p.Nodes = append(p.Nodes, node)
 
+        if i < len(ids)-1 {
+            if c := findConnectionInNode(real, ids[i+1]); c != nil {
+                node.Connections = append(node.Connections, &Connection{
+                    FromNodeID: c.FromNodeID,
+                    ToNodeID:   c.ToNodeID,
+                    Cost:       c.Cost,
+                })
+                p.Weight += c.Cost          // ← (3) 累加 hop 成本
+            }
+        }
+    }
+    return p
+}

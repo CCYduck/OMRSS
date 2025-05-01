@@ -34,21 +34,21 @@ func (Paths *KPath_Set) Show_KPath_Set() {
 		fmt.Printf("\nTSN #%d: %d→%d  (K=%d)\n", ind, KPath.Source, KPath.Target, KPath.K)
 		KPath.Show_KPath()
 
-		// break
+		break
 	}
 
 	for ind, KPath := range Paths.AVBPaths {
 		fmt.Printf("\nAVB #%d: %d→%d  (K=%d)\n", ind, KPath.Source, KPath.Target, KPath.K)
 		KPath.Show_KPath()
 
-		// break
+		break
 	}
 
 	for ind, KPath := range Paths.CAN2TSNPaths {
 		fmt.Printf("\nCAN2TSN #%d: %d→%d  (K=%d)\n", ind, KPath.Source, KPath.Target, KPath.K)
 		KPath.Show_KPath()
 
-		// break
+		break
 	}
 
 }
@@ -59,21 +59,21 @@ func (Paths *Path_set) Show_Path_Set() {
 		fmt.Printf("TSN Path %d\n", index)
 		path.Show_Path()
 
-		// break
+		break
 	}
 
 	for index, path := range Paths.AVBPath {
 		fmt.Printf("\nAVB Path %d \n", index)
 		path.Show_Path()
 
-		// break
+		break
 	}
 
 	for index, path := range Paths.CAN2TSNPath {
 		fmt.Printf("\nImportCan Path %d \n", index)
 		path.Show_Path()
 
-		// break
+		break
 	}
 }
 
@@ -90,8 +90,9 @@ func (Path *Path) Show_Path() {
 		fmt.Println(node.ID)
 		for _, c := range node.Connections {
 			fmt.Printf("%d --> %d\n", c.FromNodeID, c.ToNodeID)
-		}
+		}	
 	}
+	fmt.Printf("\n")
 }
 
 func (path *Path) Show_Cycle() {

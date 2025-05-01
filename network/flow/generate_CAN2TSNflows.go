@@ -19,8 +19,6 @@ func (flow_set *Flows) Generate_CAN2TSN_Flows(CANnode []int, importantCAN int, u
 		can2tsnFlowSet.searchCAN2TSNFlow(unimpf)
 	}
 
-	
-
 	// encapsulate 
 	for _, name := range []string{"fifo", "priority", "obo", "wat"} {
 		fsCopy := can2tsnFlowSet.DeepCopyCAN2TSN()   // <- 自己寫或用 github.com/jinzhu/copier
@@ -51,7 +49,6 @@ func (flow_set *Flows) Generate_CAN2TSN_Flows(CANnode []int, importantCAN int, u
 
 func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, method string) {
 	// datasize_least := 64.
-	
 	datasize_max := 100.
 	period := 5000
 	deadline := 5000
@@ -97,6 +94,27 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 				// example:
 				// current_time=0 queue=[0_1, 0_2, 0_3, 0_4, 0_5] if 05 datasize_count>datasize_max, createCAN2TSNStream datasize_count = 0
 				// current_time=5000 queue=[0_5, 5000_1, 5000_2, 5000_3, 5000_4, 5000_5]
+				head := 0
+    			for head < len(queue.Streams) {
+					stream := queue.Streams[head]
+
+					if current_time > stream.FinishTime {
+						can2tsnFlowSet.O1_Drop += 1
+						head ++
+						continue
+					} 
+					datasize_count += stream.DataSize
+					head ++
+					if datasize_count >= datasize_max {
+						can2tsnFlowSet.flushStream(can2tsnFlow, current_time, datasize_max , deadline)
+						datasize_count = 0
+						queue.popQueue(head)
+						head =0
+						
+					}
+				}
+				// 剪掉已處理 head 部分
+				queue.popQueue(head)
 				imminent := false
 				for _, stream := range queue.Streams {
 					if stream.FinishTime-current_time <= safe_deadline {
@@ -117,42 +135,9 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 					continue                          // 跳到下一個刻度
 				}
 
-				head := 0
-    			for head < len(queue.Streams) {
-					stream := queue.Streams[head]
-
-					if current_time > stream.FinishTime {
-						can2tsnFlowSet.O1_Drop += 1
-						head ++
-						continue
-					} 
-					datasize_count += stream.DataSize
-					head ++
-					if datasize_count >= datasize_max {
-						can2tsnFlowSet.flushStream(can2tsnFlow, current_time, datasize_max , deadline)
-						// can2tsnFlowSet.DatasizeCount += datasize_count
-						// can2tsnFlowSet.TSNFrameCount+=1
-						datasize_count = 0
-						queue.popQueue(head)
-						head =0
-						
-					}
-				}
-				// 剪掉已處理 head 部分
-				queue.popQueue(head)
-				// head =0
-				// if datasize_count > 0 && len(queue.Streams) > 0 && current_time % period == 0 {
-				// 	can2tsnFlowSet.flushStream(can2tsnFlow, current_time, datasize_max , deadline)
-				// 	// can2tsnFlowSet.TSNFrameCount+=1
-				// 	// can2tsnFlowSet.DatasizeCount+=datasize_count
-				// 	datasize_count = 0
-				// }
-
 			}
 			if datasize_count > 0 {				
 				can2tsnFlowSet.flushStream(can2tsnFlow, hyperperiod, datasize_max , deadline)
-				// can2tsnFlowSet.DatasizeCount+=datasize_count
-				// can2tsnFlowSet.TSNFrameCount+=1
 				datasize_count = 0
 			}
 		}

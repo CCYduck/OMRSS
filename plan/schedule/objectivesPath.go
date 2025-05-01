@@ -47,6 +47,13 @@ func OBJP(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_pri
 		//fmt.Printf("Input TSN route%d: %b \n", nth, schedulability)
 	}
 
+	for nth, path := range II.CAN2TSNPath {
+		//fmt.Printf("BackGround TSN route%d: %b \n", nth, schedulability)
+		for _ , method :=range S.Encapsulate{
+			schedulability := path_schedulability(0, method.CAN2TSNFlows[nth], path, linkmap, network.Bandwidth, network.HyperPeriod)
+			tsn_can_failed_count += 1 - schedulability
+		}
+	}
 	// O1 and O4
 	// tsn_can_failed_count += network.Flow_Set.CAN2TSN_O1_Drop
 	// wcd_sum += network.Flow_Set.CAN2TSN_Delay
@@ -97,7 +104,7 @@ func path_schedulable(node *path.Node, parentID int, flow *flow.Flow, route *pat
 
 		} else {
 			//// Duplex
-			if !(link.FromNodeID == flow.Source || path_loopcompare(link.ToNodeID, flow.Destination)) {
+			if !(link.FromNodeID == flow.Source || link.ToNodeID == flow.Destination) {
 				key := fmt.Sprintf("%d>%d", link.FromNodeID, link.ToNodeID)
 				linkmap[key] += flow.DataSize * float64((hyperPeriod / flow.Period))
 				if linkmap[key] > bandwidth {
@@ -105,27 +112,27 @@ func path_schedulable(node *path.Node, parentID int, flow *flow.Flow, route *pat
 				}
 			}
 
-			//// Simplex
-			//if !(link.FromNodeID == flow.Source || loopcompare(link.ToNodeID, flow.Destinations)) {
-			//	key := ""
-			//	key1 := fmt.Sprintf("%d>%d", link.FromNodeID, link.ToNodeID)
-			//	key2 := fmt.Sprintf("%d>%d", link.ToNodeID, link.FromNodeID)
-			//	if _, ok := linkmap[key1]; !ok {
-			//		if _, ok := linkmap[key2]; !ok {
-			//			key = key1
-			//		} else {
-			//			key = key2
-			//		}
-			//
-			//	} else {
-			//		key = key1
-			//	}
-			//
-			//	linkmap[key] += flow.DataSize * float64((hyperPeriod / flow.Period))
-			//	if linkmap[key] > bandwidth {
-			//		return false, linkmap
-			//	}
-			//}
+			// Simplex
+			if !(link.FromNodeID == flow.Source || link.ToNodeID == flow.Destination) {
+				key := ""
+				key1 := fmt.Sprintf("%d>%d", link.FromNodeID, link.ToNodeID)
+				key2 := fmt.Sprintf("%d>%d", link.ToNodeID, link.FromNodeID)
+				if _, ok := linkmap[key1]; !ok {
+					if _, ok := linkmap[key2]; !ok {
+						key = key1
+					} else {
+						key = key2
+					}
+			
+				} else {
+					key = key1
+				}
+			
+				linkmap[key] += flow.DataSize * float64((hyperPeriod / flow.Period))
+				if linkmap[key] > bandwidth {
+					return false, linkmap
+				}
+			}
 
 			nextnode := route.GetNodeByID(link.ToNodeID)
 			schedulable, updatedLinkmap := path_schedulable(nextnode, node.ID, flow, route, linkmap, bandwidth, hyperPeriod)
@@ -137,9 +144,3 @@ func path_schedulable(node *path.Node, parentID int, flow *flow.Flow, route *pat
 	return true, linkmap
 }
 
-func path_loopcompare(a int, b int) bool {
-	if a == b {
-		return true
-	}
-	return false
-}
