@@ -20,6 +20,7 @@ func BuildKPath(k, src, dst int, topo *topology.Topology)*KPath{
 	return kp
 }
 
+//跟Get_OSRO_Routing一樣
 func KShortestPath(Network *network.Network) *KPath_Set{
 	const k = 3    		// 你要幾條路
 	kpath_set := new_KPath_Set()                   

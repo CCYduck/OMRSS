@@ -23,7 +23,8 @@ func (path_set *Path_set) BG_Path_set(bg_tsn_end int, bg_avb_end int) *Path_set 
 	return BG_path_set 
 }
 
-func Get_OSACO_Routing(Network *network.Network, KP *KPath_Set, K int, Method_Number int) *KPath_Set {
+
+func Get_OSRO_Routing(Network *network.Network) *KPath_Set {
 	kpath_set := new_KPath_Set()
 
 	for idx, flow := range Network.Flow_Set.TSNFlows {
@@ -53,6 +54,7 @@ func Get_OSACO_Routing(Network *network.Network, KP *KPath_Set, K int, Method_Nu
 
 	return kpath_set
 }
+
 
 const k = 3 
 

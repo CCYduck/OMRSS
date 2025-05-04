@@ -24,3 +24,13 @@ func (SP *SP) SP_Run(network *network.Network) {
 	SP.Path = path.BestPath(network)
 	SP.Timer.TimerStop()
 }
+
+func (KP *KP) KP_Run(network *network.Network) {
+	// 5. DistanceTree
+	KP.Timer = algo_timer.NewTimer()
+	KP.Timer.TimerStart()
+	// mtdc.Trees = routes.Get_DistanceTree_Routing(network)
+	KP.KPath = path.KShortestPath(network)
+	KP.Timer.TimerStop()
+}
+

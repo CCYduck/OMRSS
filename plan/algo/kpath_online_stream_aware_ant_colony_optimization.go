@@ -15,37 +15,36 @@ package algo
 
 // var (
 
-// 	bg_tsn_kp int
-// 	bg_avb_kp int
+// 	bg_tsn int
+// 	bg_avb int
 // )
 
-// func (osaco *OSACO) OSACO_Initial_Settings(network *network.Network, KP *path.KPath_Set) {
+// func (osro *OSRO) OSACO_Initial_Settings(network *network.Network, KP *path.KPath_Set) {
 // 	//// OSACO computing time: Estimate the time it takes to compute routing information
-// 	input_tsn =network.Input_TSN
 
-// 	bg_tsn_kp = network.BG_TSN
-// 	bg_avb_kp = network.BG_AVB
+// 	bg_tsn = network.BG_TSN
+// 	bg_avb = network.BG_AVB
 
 // 	timer := algo_timer.NewTimer()
 // 	timer.TimerStart()
-// 	osaco.KPath = path.Get_OSACO_Routing(network, KP, osaco.K, osaco.Method_Number)
+// 	osro.KPath = path.KShortestPath(network)
 // 	timer.TimerEnd()
 
-// 	osaco.InputKPaths = KP.Input_kpath_set(bg_tsn_kp, bg_avb_kp)
-// 	osaco.BGKPaths = KP.BG_kpath_set(bg_tsn_kp, bg_avb_kp)
-// 	osaco.PRM = compute_prm(osaco.KPath)
-// 	osaco.VB = compute_vb(osaco.KPath, network.Flow_Set)
+// 	osro.InputKPaths = KP.Input_kpath_set(bg_tsn, bg_avb)
+// 	osro.BGKPaths = KP.BG_kpath_set(bg_tsn, bg_avb)
+// 	osro.PRM = compute_prm(osro.KPath)
+// 	osro.VB = compute_vb(osro.KPath, network.Flow_Set)
 
-// 	osaco.Timer[0] = algo_timer.NewTimer()
-// 	osaco.Timer[0].TimerMerge(timer)
-// 	osaco.Timer[1] = algo_timer.NewTimer()
-// 	osaco.Timer[1].TimerMerge(timer)
-// 	osaco.Timer[2] = algo_timer.NewTimer()
-// 	osaco.Timer[2].TimerMerge(timer)
-// 	osaco.Timer[3] = algo_timer.NewTimer()
-// 	osaco.Timer[3].TimerMerge(timer)
-// 	osaco.Timer[4] = algo_timer.NewTimer()
-// 	osaco.Timer[4].TimerMerge(timer)
+// 	osro.Timer[0] = algo_timer.NewTimer()
+// 	osro.Timer[0].TimerMerge(timer)
+// 	osro.Timer[1] = algo_timer.NewTimer()
+// 	osro.Timer[1].TimerMerge(timer)
+// 	osro.Timer[2] = algo_timer.NewTimer()
+// 	osro.Timer[2].TimerMerge(timer)
+// 	osro.Timer[3] = algo_timer.NewTimer()
+// 	osro.Timer[3].TimerMerge(timer)
+// 	osro.Timer[4] = algo_timer.NewTimer()
+// 	osro.Timer[4].TimerMerge(timer)
 // }
 
 // // Ching-Chih Chuang et al., "Online Stream-Aware Routing for TSN-Based Industrial Control Systems"
