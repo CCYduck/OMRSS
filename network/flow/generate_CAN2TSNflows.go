@@ -5,6 +5,7 @@ import (
 	"sort"
 	"time"
 	"encoding/json"
+	"log"
 )
 
 func (flow_set *Flows) Generate_CAN2TSN_Flows(CANnode []int, importantCAN int, unimportantCAN int, hyperperiod int) {
@@ -22,6 +23,7 @@ func (flow_set *Flows) Generate_CAN2TSN_Flows(CANnode []int, importantCAN int, u
 	// encapsulate 
 	for _, name := range []string{"fifo", "priority", "obo", "wat"} {
 		fsCopy := can2tsnFlowSet.DeepCopyCAN2TSN()   // <- 自己寫或用 github.com/jinzhu/copier
+		if fsCopy == nil { log.Println("deep copy failed"); continue }
 		fsCopy.O1_Drop = 0    
 		fsCopy.DatasizeCount = 0
 		fsCopy.TSNFrameCount = 0
@@ -104,38 +106,47 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 				
 				// 2) 只要佇列裡 **還有** imminent stream，就一直封裝
 				for hasImminent(queue, current_time, safe_deadline) && len(queue.Streams) > 0 {
-					// ---- 裝一個 frame ----
-					packSize := 0.0
-					cnt      := 0
-
-					for cnt < len(queue.Streams) &&
-						packSize+queue.Streams[cnt].DataSize <= datasize_max {
-						packSize += queue.Streams[cnt].DataSize
-						cnt++
+					pack := 0.0
+					take := 0                        // 要取走多少個 stream
+			
+					// 2‑1. 把所有 imminent + 可裝得下的湊進來
+					for take < len(queue.Streams) &&
+						  queue.Streams[take].FinishTime-current_time <= safe_deadline &&
+						  pack+queue.Streams[take].DataSize <= datasize_max {
+						pack += queue.Streams[take].DataSize
+						take++
 					}
-
-					// flush 並把佇列前 cnt 個刪掉
-					can2tsnFlowSet.flushStream(can2tsnFlow, current_time, packSize, deadline)
-					queue.popQueue(cnt)
-				}
-
-				// example:
-				// current_time=0 queue=[0_1, 0_2, 0_3, 0_4, 0_5] if 05 datasize_count>datasize_max, createCAN2TSNStream datasize_count = 0
-				// current_time=5000 queue=[0_5, 5000_1, 5000_2, 5000_3, 5000_4, 5000_5]
-				head := 0
-    			for head < len(queue.Streams) {
-					stream := queue.Streams[head]
-					datasize_count += stream.DataSize
-					head ++
-					if datasize_count >= datasize_max {
-						can2tsnFlowSet.flushStream(can2tsnFlow, current_time, datasize_max , deadline)
-						datasize_count = 0
-						queue.popQueue(head)
-						head =0
+			
+					// 2‑2. 若還沒滿 100，再拿後面的 (arrivalTime<=current)
+					j := take
+					for pack < datasize_max && j < len(queue.Streams) &&
+						  queue.Streams[j].ArrivalTime <= current_time &&
+						  pack+queue.Streams[j].DataSize <= datasize_max {
+						pack += queue.Streams[j].DataSize
+						j++
 					}
+					take = j
+			
+					// 2‑3. flush
+					if pack > 0 {
+						can2tsnFlowSet.flushStream(can2tsnFlow, current_time, pack, deadline)
+						queue.popQueue(take)
+					}
+					// head := 0
+					// for head < len(queue.Streams) {
+					// 	stream := queue.Streams[head]
+					// 	datasize_count += stream.DataSize
+					// 	head ++
+					// 	if datasize_count >= datasize_max {
+					// 		can2tsnFlowSet.flushStream(can2tsnFlow, current_time, datasize_max , deadline)
+					// 		datasize_count = 0
+					// 		queue.popQueue(head)
+					// 		head =0
+					// 	}
+					// }
+					// // 剪掉已處理 head 部分
+					// queue.popQueue(head)
 				}
-				// 剪掉已處理 head 部分
-				queue.popQueue(head)
 			}
 			if datasize_count > 0 {				
 				can2tsnFlowSet.flushStream(can2tsnFlow, hyperperiod, datasize_max , deadline)
@@ -170,8 +181,6 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 					head ++
 					if datasize_count >= datasize_max{
 						can2tsnFlowSet.flushStream(can2tsnFlow, current_time, datasize_max , deadline)
-						// can2tsnFlowSet.DatasizeCount+=datasize_count
-						// can2tsnFlowSet.TSNFrameCount+=1
 						datasize_count = 0
 					}
 					
@@ -179,15 +188,11 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 				queue.popQueue(head)
 				if datasize_count > 0 && len(queue.Streams) > 0 && current_time % period == 0 {
 					can2tsnFlowSet.flushStream(can2tsnFlow, current_time, datasize_max , deadline)
-					// can2tsnFlowSet.TSNFrameCount+=1
-					// can2tsnFlowSet.DatasizeCount+=datasize_count
 					datasize_count = 0
 				}
 			}
 			if datasize_count > 0 {				
-				can2tsnFlowSet.flushStream(can2tsnFlow, hyperperiod, datasize_count , deadline)
-				// can2tsnFlowSet.TSNFrameCount+=1
-				// can2tsnFlowSet.DatasizeCount+=datasize_count
+				can2tsnFlowSet.flushStream(can2tsnFlow, hyperperiod, datasize_max , deadline)
 				datasize_count = 0
 			}
 		}
@@ -292,8 +297,6 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) Show_CAN2TSNFlowSet() {
 
 	}
 }
-
-
 
 func createCAN2TSNFlow(source int, destination int , period int, deadline int , datasize float64) *Flow {
 	newFlow := &Flow{
