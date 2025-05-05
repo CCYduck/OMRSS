@@ -32,8 +32,8 @@ type OSRO struct {
 	KP			*algo.KP
 	SMT       	*algo.SMT
 	MDTC      	*algo.MDTC
-	OSACO     	*algo.OSACO
-	OSACO_IAS 	*algo.OSACO
+	OSRO    	*algo.OSRO
+	OSRO_IAS 	*algo.OSRO
 }
 
 // Developing the OMACO plan
@@ -41,8 +41,8 @@ func new_OSRO_Plan(network *network.Network, osaco_timeout int, osaco_K int, osa
 	OSRO := &OSRO{Network: network}
 	OSRO.SP	 = &algo.SP{}
 	OSRO.KP  = &algo.KP{}
-	OSRO.OSACO = &algo.OSACO{Timeout: osaco_timeout, K: osaco_K, P: osaco_P, Method_Number: 0}
-	OSRO.OSACO_IAS = &algo.OSACO{Timeout: osaco_timeout, K: osaco_K, P: osaco_P, Method_Number: 1}
+	OSRO.OSRO = &algo.OSRO{Timeout: osaco_timeout, K: osaco_K, P: osaco_P, Method_Number: 0}
+	OSRO.OSRO_IAS = &algo.OSRO{Timeout: osaco_timeout, K: osaco_K, P: osaco_P, Method_Number: 1}
 
 	return OSRO
 }

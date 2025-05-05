@@ -1,7 +1,7 @@
 package plan
 
 import (
-	// "fmt"
+	"fmt"
 	"src/plan/path"
 	// "src/plan/schedule"
 )
@@ -60,11 +60,13 @@ func (plan *OMACO) Initiate_Plan() {
 
 func (plan *OSRO) Initiate_Plan() {
 	//Imp50 60 70 80 Unmp 250 300 350 400
-	path_set := path.BestPath(plan.Network)
-	path_set.Show_Path_Set()
 
-	kpath_set:=path.KShortestPath(plan.Network)
-	kpath_set.Show_KPath_Set()
+	// path_set := path.BestPath(plan.Network)
+	// path_set.Show_Path_Set()
+
+	// kpath_set:=path.KShortestPath(plan.Network)
+	// kpath_set.Show_KPath_Set()
+
 	// schedule.Testqueue(plan.Network)
 
 	// fmt.Println("KPath")
@@ -75,45 +77,16 @@ func (plan *OSRO) Initiate_Plan() {
 	// fmt.Println("MDTC")
 	// fmt.Println("----------------------------------------")
 	// plan.MDTC.MDTC_Run(plan.Network)
-
-	// fmt.Println()
-	// fmt.Println("OSACO")
-	// fmt.Println("----------------------------------------")
-	// plan.OSACO.OSACO_Initial_Settings(plan.Network, plan.SMT.Trees)
-	// // The timeout of each run is set as 100~1000 ms (200ms, 400ms, 600ms, 800ms, 1000ms)
-	// for i := 0; i < 5; i++ {
-	// 	plan.OSACO.Objs_osaco[i] = plan.OSACO.OSACO_Run(plan.Network, i)
-	// }
-
-	// fmt.Println()
-	// fmt.Println("OSACO_IAS")
-	// fmt.Println("----------------------------------------")
-	// plan.OSACO_IAS.OSACO_Initial_Settings(plan.Network, plan.SMT.Trees)
-	// // The timeout of each run is set as 100~1000 ms (200ms, 400ms, 600ms, 800ms, 1000ms)
-	// for i := 0; i < 5; i++ {
-	// 	plan.OSACO_IAS.Objs_osaco[i] = plan.OSACO_IAS.OSACO_Run(plan.Network, i)
-	// }
-
-	// obj_smt, _ := schedule.OBJ(
-	// 	plan.Network,
-	// 	plan.OSACO.KTrees,
-	// 	plan.SMT.Trees.Input_Tree_set(plan.Network.BG_TSN, plan.Network.BG_AVB),
-	// 	plan.SMT.Trees.BG_Tree_set(plan.Network.BG_TSN, plan.Network.BG_AVB),
-	// )
-
-	// obj_mdt, _ := schedule.OBJ(
-	// 	plan.Network,
-	// 	plan.OSACO.KTrees,
-	// 	plan.MDTC.Trees.Input_Tree_set(plan.Network.BG_TSN, plan.Network.BG_AVB),
-	// 	plan.MDTC.Trees.BG_Tree_set(plan.Network.BG_TSN, plan.Network.BG_AVB),
-	// )
-
-	// plan.SMT.Objs_smt = obj_smt
-	// plan.MDTC.Objs_mdtc = obj_mdt
-
-	// if obj_mdt[0] != 0 || obj_mdt[1] != 0 {
-	// 	plan.MDTC.Timer.TimerMax()
-	// }
+	kp := path.KShortestPath(plan.Network)
+	plan.KP.KPath = kp  
+	fmt.Println()
+	fmt.Println("OSRO")
+	fmt.Println("----------------------------------------")
+	plan.OSRO.OSRO_Initial_Settings(plan.Network,kp)
+	// The timeout of each run is set as 100~1000 ms (200ms, 400ms, 600ms, 800ms, 1000ms)
+	for i := 0; i < 5; i++ {
+		plan.OSRO.Objs_osro[i] = plan.OSRO.OSRO_Run(plan.Network, i)
+	}
 
 }
 

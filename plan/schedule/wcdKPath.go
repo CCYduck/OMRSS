@@ -10,7 +10,7 @@ import (
 )
 
 // Worse-Case Delay
-func WCDKP(z *path.Path, KPath_set *path.KPath_Set, flow *flow.Flow, flow_set *flow.Flows) time.Duration {
+func WCD(z *path.Path, KPath_set *path.KPath_Set, flow *flow.Flow, flow_set *flow.Flows) time.Duration {
 	end2end := time.Duration(0)
 	node := z.GetNodeByID(flow.Source)
 	wcd := end2end_delay(node, -1, end2end, z, KPath_set, flow, flow_set)

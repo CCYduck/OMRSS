@@ -5,7 +5,7 @@ package schedule
 // 	"src/network"
 // 	"src/network/flow"
 // 	"src/plan/path"
-// 	"src/plan/routes"
+// 	// "src/plan/routes"
 
 // 	// "src/plan/path"
 
@@ -36,7 +36,7 @@ package schedule
 
 // 	// O2 and O4
 // 	for nth, route := range II_prime.AVBPath{
-// 		wcd := WCD(route, X, S_prime.AVBFlows[nth], network.Flow_Set)
+// 		wcd := WCDKP(route, X, S_prime.AVBFlows[nth], network.Flow_Set)
 // 		avb_wcd_sum += wcd
 // 		schedulability := schedulability(wcd, S_prime.AVBFlows[nth], route, linkmap, network.Bandwidth, network.HyperPeriod)
 // 		avb_failed_count += 1 - schedulability
@@ -48,15 +48,21 @@ package schedule
 
 // 	// Round2: Schedule Input flow
 // 	// O1
-// 	for nth, route := range II.TSNTrees {
+// 	for nth, route := range II.TSNPath {
+// 		schedulability := schedulability(0, S.TSNFlows[nth], route, linkmap, network.Bandwidth, network.HyperPeriod)
+// 		tsn_failed_count += 1 - schedulability
+// 		//fmt.Printf("Input TSN route%d: %b \n", nth, schedulability)
+// 	}
+
+// 	for nth, route := range II.CAN2TSNPath {
 // 		schedulability := schedulability(0, S.TSNFlows[nth], route, linkmap, network.Bandwidth, network.HyperPeriod)
 // 		tsn_failed_count += 1 - schedulability
 // 		//fmt.Printf("Input TSN route%d: %b \n", nth, schedulability)
 // 	}
 
 // 	// O2 and O4
-// 	for nth, route := range II.AVBTrees {
-// 		wcd := WCD(route, X, S.AVBFlows[nth], network.Flow_Set)
+// 	for nth, route := range II.AVBPath {
+// 		wcd := WCDKP(route, X, S.AVBFlows[nth], network.Flow_Set)
 // 		avb_wcd_sum += wcd
 // 		schedulability := schedulability(wcd, S.AVBFlows[nth], route, linkmap, network.Bandwidth, network.HyperPeriod)
 // 		avb_failed_count += 1 - schedulability

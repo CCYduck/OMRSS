@@ -15,7 +15,10 @@ func BuildKPath(k, src, dst int, topo *topology.Topology)*KPath{
 
 	kp := new_KPath(k,src,dst)
 	for _, idPath := range ids {
-		kp.Paths = append(kp.Paths, ConvertIDsToPath_k(idPath.IDs, topo))
+		p := ConvertIDsToPath_k(idPath.IDs, topo)
+		if p != nil {
+			kp.Paths = append(kp.Paths, p)
+		}
 	}
 	return kp
 }
@@ -73,7 +76,7 @@ func YenKPaths(g *Graph, src, dst, K int) []*Path {
 	A = append(A, first)
 	B := []*Path{}
 
-	for ki:=1; ki<k; ki++ {
+	for ki:=1; ki<K; ki++ {
 		last := A[ki-1]
 		for i:=0;i<len(last.IDs)-1;i++ {   // 每個 spur node
 			spurNode := last.IDs[i]
@@ -94,6 +97,7 @@ func YenKPaths(g *Graph, src, dst, K int) []*Path {
 
 			full := append(append([]int{}, rootPath[:len(rootPath)-1]...), spur.IDs...)
 			B = append(B, &Path{IDs: full, Weight: float64(len(full)-1)})
+			
 		}
 		if len(B)==0 { break }
 		sort.Slice(B, func(i,j int)bool{ return B[i].Weight<B[j].Weight })
@@ -178,7 +182,7 @@ func ConvertIDsToPath_k(ids []int, topo *topology.Topology) *Path {
                     ToNodeID:   c.ToNodeID,
                     Cost:       c.Cost,
                 })
-                p.Weight += c.Cost          // ← (3) 累加 hop 成本
+                // p.Weight += c.Cost          // ← (3) 累加 hop 成本
             }
         }
     }
