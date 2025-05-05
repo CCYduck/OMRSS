@@ -1,8 +1,8 @@
 package plan
 
 import (
-	"fmt"
-	// "src/plan/path"
+	// "fmt"
+	"src/plan/path"
 	// "src/plan/schedule"
 )
 
@@ -61,34 +61,34 @@ func (plan *OMACO) Initiate_Plan() {
 func (plan *OSRO) Initiate_Plan() {
 	//Imp50 60 70 80 Unmp 250 300 350 400
 
-	// path_set := path.BestPath(plan.Network)
-	// path_set.Show_Path_Set()
+	path_set := path.BestPath(plan.Network)
+	path_set.Show_Path_Set()
 
-	// kpath_set:=path.KShortestPath(plan.Network)
-	// kpath_set.Show_KPath_Set()
+	kpath_set:=path.KShortestPath(plan.Network)
+	kpath_set.Show_KPath_Set()
 
 	// schedule.Testqueue(plan.Network)
 
-	fmt.Println("KPath")
-	fmt.Println("----------------------------------------")
-	plan.KP.KP_Run(plan.Network)
-
-	// fmt.Println()
-	// fmt.Println("MDTC")
+	// fmt.Println("KPath")
 	// fmt.Println("----------------------------------------")
-	// plan.MDTC.MDTC_Run(plan.Network)
-	// kp := path.KShortestPath(plan.Network)
 	// plan.KP.KP_Run(plan.Network)
-	// plan.KP.KPath = kp  
+
+	// // fmt.Println()
+	// // fmt.Println("MDTC")
+	// // fmt.Println("----------------------------------------")
+	// // plan.MDTC.MDTC_Run(plan.Network)
+	// // kp := path.KShortestPath(plan.Network)
+	// // plan.KP.KP_Run(plan.Network)
+	// // plan.KP.KPath = kp  
 	
-	fmt.Println()
-	fmt.Println("OSRO")
-	fmt.Println("----------------------------------------")
-	plan.OSRO.OSRO_Initial_Settings(plan.Network,plan.KP.KPath)
-	// The timeout of each run is set as 100~1000 ms (200ms, 400ms, 600ms, 800ms, 1000ms)
-	for i := 0; i < 5; i++ {
-		plan.OSRO.Objs_osro[i] = plan.OSRO.OSRO_Run(plan.Network, i)
-	}
+	// fmt.Println()
+	// fmt.Println("OSRO")
+	// fmt.Println("----------------------------------------")
+	// plan.OSRO.OSRO_Initial_Settings(plan.Network,plan.KP.KPath)
+	// // The timeout of each run is set as 100~1000 ms (200ms, 400ms, 600ms, 800ms, 1000ms)
+	// for i := 0; i < 5; i++ {
+	// 	plan.OSRO.Objs_osro[i] = plan.OSRO.OSRO_Run(plan.Network, i)
+	// }
 
 }
 
