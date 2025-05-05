@@ -30,6 +30,7 @@ func (KP *KP) KP_Run(network *network.Network) {
 	KP.Timer = algo_timer.NewTimer()
 	KP.Timer.TimerStart()
 	// mtdc.Trees = routes.Get_DistanceTree_Routing(network)
+	
 	KP.KPath = path.KShortestPath(network)
 	KP.Timer.TimerStop()
 }

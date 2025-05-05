@@ -2,7 +2,7 @@ package plan
 
 import (
 	"fmt"
-	"src/plan/path"
+	// "src/plan/path"
 	// "src/plan/schedule"
 )
 
@@ -69,20 +69,22 @@ func (plan *OSRO) Initiate_Plan() {
 
 	// schedule.Testqueue(plan.Network)
 
-	// fmt.Println("KPath")
-	// fmt.Println("----------------------------------------")
-	// plan.KP.SMT_Run(plan.Network)
+	fmt.Println("KPath")
+	fmt.Println("----------------------------------------")
+	plan.KP.KP_Run(plan.Network)
 
 	// fmt.Println()
 	// fmt.Println("MDTC")
 	// fmt.Println("----------------------------------------")
 	// plan.MDTC.MDTC_Run(plan.Network)
-	kp := path.KShortestPath(plan.Network)
-	plan.KP.KPath = kp  
+	// kp := path.KShortestPath(plan.Network)
+	// plan.KP.KP_Run(plan.Network)
+	// plan.KP.KPath = kp  
+	
 	fmt.Println()
 	fmt.Println("OSRO")
 	fmt.Println("----------------------------------------")
-	plan.OSRO.OSRO_Initial_Settings(plan.Network,kp)
+	plan.OSRO.OSRO_Initial_Settings(plan.Network,plan.KP.KPath)
 	// The timeout of each run is set as 100~1000 ms (200ms, 400ms, 600ms, 800ms, 1000ms)
 	for i := 0; i < 5; i++ {
 		plan.OSRO.Objs_osro[i] = plan.OSRO.OSRO_Run(plan.Network, i)

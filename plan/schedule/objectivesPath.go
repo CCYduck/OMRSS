@@ -12,6 +12,8 @@ import (
 func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prime *path.Path_set) ([4]float64, int) {
 	S := network.Flow_Set.Input_TSNflow_set()
 	S_prime := network.Flow_Set.BG_flow_set()
+	if II == nil { II = new(path.Path_set) }
+	if II_prime == nil { II_prime = new(path.Path_set) }
 	var (
 		obj                  [4]float64
 		cost                 int

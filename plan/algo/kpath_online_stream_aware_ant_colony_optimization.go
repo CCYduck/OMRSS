@@ -30,7 +30,8 @@ func (osro *OSRO) OSRO_Initial_Settings(network *network.Network, KP *path.KPath
 	osro.KPath = KP
 	timer.TimerEnd()
 
-	
+	osro.InputPath = osro.InputPath.Input_Path_set(bg_tsn, bg_avb)   // ← 新增
+    osro.BGPath    = osro.BGPath.BG_Path_set(bg_tsn, bg_avb)      // ← 新增
 
 	osro.InputKPaths = osro.KPath.Input_kpath_set(bg_tsn, bg_avb)
 	osro.BGKPaths = osro.KPath.BG_kpath_set(bg_tsn, bg_avb)
@@ -211,8 +212,10 @@ func probability(osro *OSRO) (*path.Path_set, *path.Path_set, [2][]int, [2][]int
 
 	II := &path.Path_set{}
 	II_prime := &path.Path_set{}
+	
 	for nth, kpath := range osro.KPath.TSNPaths{
 		Denominator := 0.
+		if len(kpath.Paths) == 0 { continue }
 		for kth := range kpath.Paths {
 			Denominator += osro.VB.TSN_VB[nth][kth] * osro.PRM.TSN_PRM[nth][kth]
 		}

@@ -71,7 +71,7 @@ func (kpath_set *KPath_Set) BG_kpath_set(bg_tsn_end int, bg_avb_end int) *KPath_
 	BG_kpath_set := new_KPath_Set()
 
 	BG_kpath_set.TSNPaths = append(BG_kpath_set.TSNPaths, kpath_set.TSNPaths[:bg_tsn_end]...)
-	BG_kpath_set.AVBPaths = append(BG_kpath_set.TSNPaths, kpath_set.AVBPaths[:bg_avb_end]...)
+	BG_kpath_set.AVBPaths = append(BG_kpath_set.AVBPaths, kpath_set.AVBPaths[:bg_avb_end]...)
 
 	return BG_kpath_set
 }
