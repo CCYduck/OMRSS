@@ -73,8 +73,7 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 				// example:
 				// current_time=0 queue=[0_1, 0_2, 0_3, 0_4, 0_5] if 05 datasize_count>datasize_max, createCAN2TSNStream datasize_count = 0
 				// current_time=5000 queue=[0_5, 5000_1, 5000_2, 5000_3, 5000_4, 5000_5]
-				for len(queue.Streams) > 0 {
-					
+				for len(queue.Streams) > 0 {					
 					// 立即封裝一個 CAN → TSN
 					can2tsnFlowSet.flushStream(can2tsnFlow, current_time, datasize_max, deadline)
 					// can2tsnFlowSet.DatasizeCount+= queue.Streams[0].DataSize
@@ -119,13 +118,9 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 				
 			}
 			// 4. hyperperiod 結束後，佇列可能還有殘留，都打一包送掉
-			if len(queue.Streams) > 0 {
-				pack := 0.0
-				for _, s := range queue.Streams {
-					pack += s.DataSize
-				}
-			 can2tsnFlowSet.flushStream(can2tsnFlow, hyperperiod, pack, deadline)
-			 datasize_count += pack
+			if len(queue.Streams) > 0 {		
+					can2tsnFlowSet.flushStream(can2tsnFlow, hyperperiod, datasize_max , deadline)
+					datasize_count = 0
 		 	}
 		}
 	}else{
