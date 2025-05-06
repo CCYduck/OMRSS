@@ -14,19 +14,37 @@ type Memorizers interface {
 	M_Store_File(string)
 }
 
+type Memorizers_osro interface {
+
+}
+
 func New_Memorizers() map[string]Memorizers {
 	// memorizer1 ...
-	OMACO := new_OMACO_Memorizer()
+	OMACO 	:= new_OMACO_Memorizer()
 
 	// Look-up table method
 	memorizers := map[string]Memorizers{
-		"omaco": OMACO,
+		"omaco"	: OMACO,
 		//memorizer2,
 		//memorizer3,
 		// ...
 	}
 
 	return memorizers
+}
+
+func New_Memorizers_OSRO() map[string]Memorizers_osro {
+	// memorizer1 ...
+	OSRO 	:= new_OSRO_Memorizer()
+
+	memorizer_osro := map[string]Memorizers_osro{
+		"osro"	: OSRO,
+		//memorizer2,
+		//memorizer3,
+		// ...
+	}
+
+	return memorizer_osro
 }
 
 // Create folder and Switch working path

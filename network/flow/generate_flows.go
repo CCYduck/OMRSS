@@ -1,5 +1,6 @@
 package flow
 
+
 var (
 	bg_tsnflows_end int
 	bg_avbflows_end int
@@ -14,8 +15,8 @@ func Generate_OSRO_Flows(CANnode []int, importantCAN int, unimportantCAN int, Nn
 
 	//flow_set.Generate_CAN2TSN_Flows(CANnode, importantCAN, unimportantCAN, HyperPeriod, "FIFO")
 	flow_set.Generate_CAN2TSN_Flows(CANnode, importantCAN, unimportantCAN, HyperPeriod )
-	
-	flow_set.Show_CANFlows()
 
+	SaveExcel("can2tsn_history.xlsx", flow_set.Encapsulate)
+	flow_set.Show_CANFlows()
 	return flow_set
 }

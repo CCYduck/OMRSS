@@ -18,10 +18,9 @@ func (OC *OMACO_Memorizer) M_Average(test_case int) {
 	}
 }
 
-//func (mm2 *Memorizer2) M_Average(p plan.Plans) {
-//
-//}
-
+func (OC *OSRO_Memorizer) OSRO_Encapsulation(test_case int) {
+	
+}
 //func (mm3 *Memorizer3) M_Average(p plan.Plans) {
 //
 //}

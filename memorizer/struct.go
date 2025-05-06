@@ -17,13 +17,13 @@ func new_OMACO_Memorizer() *OMACO_Memorizer {
 	return &OMACO_Memorizer{}
 }
 
-//type Plan2_Computer struct {
+type OSRO_Memorizer struct {
+	can2tsn_stats [4][6]float64 // fifo/priority/obo/wat × {Flows,Size,Count,Drop,DelayMs,Testcases}
+}
 
-//}
-
-//func New_plan2_Memorizer() *Memorizer2 {
-//	return
-//}
+func new_OSRO_Memorizer() *OSRO_Memorizer {
+	return &OSRO_Memorizer{}
+}
 
 //type Plan3_Computer struct {
 

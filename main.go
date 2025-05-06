@@ -4,9 +4,7 @@ import (
 	"flag"
 	"fmt"
 	// "path"
-	
-
-	//"src/memorizer"
+	// "src/memorizer"
 	"src/network"
 	"src/plan"
 )
@@ -78,8 +76,8 @@ func main() {
 
 	// Data storage architecture
 	// ----------------------------------------------
-	//Memorizers := memorizer.New_Memorizers()
-	//Memorizer := Memorizers[plan_name]
+	// Memorizers := memorizer.New_Memorizers_OSRO()
+	// Memorizer := Memorizers[plan_name]
 
 	// Run Test-Case
 	for ts := 0; ts < test_case; ts++ {
@@ -92,7 +90,7 @@ func main() {
 		if show_network {
 			Network.Show_Network()
 		}
-
+		
 		// 2. Create new plans (a.OMACO ... )
 		Plans := plan.New_Plans(Network, osaco_timeout, osaco_K, osaco_P)
 		Plan := Plans[plan_name]
@@ -107,10 +105,10 @@ func main() {
 		
 		// 4. Cumulative quantity
 		// ------------------------------------------
-		//Memorizer.M_Cumulative(Plan)
+		// Memorizer.M_Cumulative(Plan)
 		fmt.Println("\n****************************************")
 	}
-
+	
 	// 5. Average statistical results
 	// ---------------------------------
 	//Memorizer.M_Average(test_case)
