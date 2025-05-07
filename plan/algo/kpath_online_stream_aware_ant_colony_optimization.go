@@ -19,7 +19,7 @@ var (
 	bg_avb int
 )
 
-func (osro *OSRO) OSRO_Initial_Settings(network *network.Network, KP *path.KPath_Set) {
+func (osro *OSRO) OSRO_Initial_Settings(network *network.Network) {
 	//// osro computing time: Estimate the time it takes to compute routing information
 
 	bg_tsn = network.BG_TSN
@@ -27,14 +27,13 @@ func (osro *OSRO) OSRO_Initial_Settings(network *network.Network, KP *path.KPath
 
 	timer := algo_timer.NewTimer()
 	timer.TimerStart()
-	osro.KPath = KP
+	osro.KPath = path.KShortestPath(network)
 	timer.TimerEnd()
 
-	osro.InputPath = osro.InputPath.Input_Path_set(bg_tsn, bg_avb)   // ← 新增
-    osro.BGPath    = osro.BGPath.BG_Path_set(bg_tsn, bg_avb)      // ← 新增
+	fmt.Println(len(osro.KPath.TSNPaths),len(osro.KPath.AVBPaths),len(osro.KPath.CAN2TSNPaths))
+	osro.InputKPaths 	= osro.KPath.Input_kpath_set(bg_tsn, bg_avb)
+	osro.BGKPaths 		= osro.KPath.BG_kpath_set(bg_tsn, bg_avb)
 
-	osro.InputKPaths = osro.KPath.Input_kpath_set(bg_tsn, bg_avb)
-	osro.BGKPaths = osro.KPath.BG_kpath_set(bg_tsn, bg_avb)
 	osro.PRM = compute_prm(osro.KPath)
 	osro.VB = compute_vb(osro.KPath, network.Flow_Set)
 
@@ -54,10 +53,10 @@ func (osro *OSRO) OSRO_Initial_Settings(network *network.Network, KP *path.KPath
 func (osro *OSRO) OSRO_Run(network *network.Network, timeout_index int) [4]float64 {
 	// 6. osro
 	// Repeat the execution of epochs within the timeout
-	initialobj, initialcost := schedule.OBJ(network, osro.KPath, osro.InputPath, osro.BGPath)
+	initialobj, initialcost := schedule.OBJ(network, osro.KPath, osro.InputPath, osro.BGPath,"obo")
 	fmt.Println()
 	fmt.Printf("initial value: %d \n", initialcost)
-	fmt.Printf("O1: %f O2: %f O3: pass O4: %f \n", initialobj[0], initialobj[1], initialobj[3])
+	fmt.Printf("O1: %f O2: %f O3: %f O4: %f \n", initialobj[0], initialobj[1], initialobj[2], initialobj[3])
 
 	timeout := time.Duration(osro.Timeout) * time.Millisecond
 	startTime := time.Now()
@@ -68,8 +67,8 @@ func (osro *OSRO) OSRO_Run(network *network.Network, timeout_index int) [4]float
 		II := epoch(network, osro, timeout_index)
 		osro.Timer[timeout_index].TimerStop()
 
-		_, cost1 := schedule.OBJ(network, osro.KPath, II, osro.BGPath)               // new
-		_, cost2 := schedule.OBJ(network, osro.KPath, osro.InputPath, osro.BGPath) // old
+		_, cost1 := schedule.OBJ(network, osro.KPath, II, osro.BGPath,"obo")               	// new
+		_, cost2 := schedule.OBJ(network, osro.KPath, osro.InputPath, osro.BGPath,"obo") 		// old
 
 		if cost1 < cost2 {
 			osro.InputPath = II
@@ -82,10 +81,10 @@ func (osro *OSRO) OSRO_Run(network *network.Network, timeout_index int) [4]float
 		}
 	}
 
-	resultobj, resultcost := schedule.OBJ(network, osro.KPath, osro.InputPath, osro.BGPath)
+	resultobj, resultcost := schedule.OBJ(network, osro.KPath, osro.InputPath, osro.BGPath,"obo")
 	fmt.Println()
 	fmt.Printf("result value: %d \n", resultcost)
-	fmt.Printf("O1: %f O2: %f O3: pass O4: %f \n", resultobj[0], resultobj[1], resultobj[3])
+	fmt.Printf("O1: %f O2: %f O3: %f O4: %f \n", resultobj[0], resultobj[1], initialobj[2], resultobj[3])
 	fmt.Println()
 
 	if resultobj[0] != 0 || resultobj[1] != 0 {
@@ -307,7 +306,7 @@ func epoch(network *network.Network, osro *OSRO, timeout_index int) *path.Path_s
 	fmt.Printf("Select input routing %v \n", input_k_location)
 	//fmt.Printf("Select background routing %v \n", bg_k_location) // BG ... pass
 	osro.Timer[timeout_index].TimerStop()
-	obj_list, cost := schedule.OBJ(network, osro.KPath, II, osro.BGPath)
+	obj_list, cost := schedule.OBJ(network, osro.KPath, II, osro.BGPath,"obo")
 	//obj, cost := Obj(network, X, II, II_prime) // BG ... pass
 	osro.Timer[timeout_index].TimerStart()
 

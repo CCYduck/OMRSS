@@ -8,9 +8,12 @@ import (
 func (path_set *Path_set) Input_Path_set(bg_tsn_end int, bg_avb_end int) *Path_set {
 	Input_path_set := new_Path_Set()
 
+
 	Input_path_set.TSNPath= append(Input_path_set.TSNPath, path_set.TSNPath[bg_tsn_end:]...)
 	Input_path_set.AVBPath = append(Input_path_set.AVBPath, path_set.AVBPath[bg_avb_end:]...)
+	Input_path_set.CAN2TSNPath =append(Input_path_set.CAN2TSNPath,path_set.CAN2TSNPath... )
 
+	
 	return Input_path_set
 }
 
@@ -48,7 +51,7 @@ func Get_OSRO_Routing(Network *network.Network) *KPath_Set {
 		for _, f := range m.CAN2TSNFlows {             // 每條 CAN→TSN flow
 			topo := Network.Graph_Set.GetGarphBySD(f.Source, f.Destination)
 
-			kp   := BuildKPath(k, f.Source, f.Destination, topo)
+			kp   := BuildKPath(k, f.Source, f.Destination, topo)		
 			kpath_set.CAN2TSNPaths = append(kpath_set.CAN2TSNPaths, kp)
 		}
 	}
@@ -74,4 +77,15 @@ func (kpath_set *KPath_Set) BG_kpath_set(bg_tsn_end int, bg_avb_end int) *KPath_
 	BG_kpath_set.AVBPaths = append(BG_kpath_set.AVBPaths, kpath_set.AVBPaths[:bg_avb_end]...)
 
 	return BG_kpath_set
+}
+
+func (path_set *Path_set)Getpathbymethod(method string) []*Path{
+	method_path_set := new_Path_Set()
+	for _,path := range path_set.CAN2TSNPath{
+		// fmt.Println(path.Method,method)
+		if path.Method == method {
+			method_path_set.CAN2TSNPath =append(method_path_set.CAN2TSNPath, path)
+		}
+	}
+	return method_path_set.CAN2TSNPath
 }

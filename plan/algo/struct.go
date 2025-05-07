@@ -10,7 +10,7 @@ type SP struct{
 	Path		*path.Path_set
 	InputFlow	*path.Path_set
 	BGFlow		*path.Path_set
-	Objs_SP		*[4]float64
+	Objs_SP		[4]float64
 	Timer 		*algo_timer.Timer
 }
 

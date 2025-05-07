@@ -29,39 +29,53 @@ func KShortestPath(Network *network.Network) *KPath_Set{
 	kpath_set := new_KPath_Set()                   
 
 	// -------- lookup table，用來判斷 (src,dst) 是否已經建立過 ----------
-    type sd struct{ s, d int }
-	// done := make(map[sd]bool)	// 全域收集
-	tsnDone := make(map[sd]bool)	// 全域收集
-	avbDone := make(map[sd]bool)	// 全域收集
-	c2tDone	:= make(map[sd]bool)	// 全域收集
+    type sd struct{ s int; d int }
+	userage_path := make(map[sd]*KPath)	// 全域收集
+	// tsnDone := make(map[sd]*KPath)	// 全域收集
+	// avbDone := make(map[sd]*KPath)	// 全域收集
+	// c2tDone	:= make(map[sd]*KPath)	// 全域收集
 
-
+	
 	for idx, flow := range Network.Flow_Set.TSNFlows {
 		key := sd{flow.Source, flow.Destination}
-		if tsnDone[key] {continue}
-		kp := BuildKPath(k, flow.Source, flow.Destination, Network.Graph_Set.TSNGraphs[idx])
-		kpath_set.TSNPaths = append(kpath_set.TSNPaths, kp)
-		tsnDone[key]=true
+
+		// 1. 檢查 key 是否已經存在
+		if kp, ok := userage_path[key]; ok {
+			// 已經算過，直接使用
+			kpath_set.TSNPaths = append(kpath_set.TSNPaths, kp)
+		}else{
+			kp := BuildKPath(k, flow.Source, flow.Destination, Network.Graph_Set.TSNGraphs[idx])
+			kpath_set.TSNPaths = append(kpath_set.TSNPaths, kp)
+			userage_path[key] = kp
+		}
+		
 	}
 	
 	// -------- AVB ----------
 	for idx, flow := range Network.Flow_Set.AVBFlows {
 		key := sd{flow.Source, flow.Destination}
-        if avbDone[key]{continue}
-		kp := BuildKPath(k, flow.Source,flow.Destination, Network.Graph_Set.AVBGraphs[idx])
-		kpath_set.AVBPaths = append(kpath_set.AVBPaths,kp)
-		avbDone[key]=true
+        if kp, ok := userage_path[key]; ok {
+			// 已經算過，直接使用
+			kpath_set.AVBPaths = append(kpath_set.AVBPaths, kp)
+		}else{
+			kp := BuildKPath(k, flow.Source, flow.Destination, Network.Graph_Set.AVBGraphs[idx])
+			kpath_set.AVBPaths = append(kpath_set.AVBPaths, kp)
+			userage_path[key] = kp
+		}
 	}
 
 	// -------- CAN→TSN (封裝流) ----------
 	for _, m := range Network.Flow_Set.Encapsulate {   // 每種封裝方法
-		for _, f := range m.CAN2TSNFlows {             // 每條 CAN→TSN flow
-			key := sd{f.Source,f.Destination}
-			if c2tDone[key]{continue}
-			topo := Network.Graph_Set.GetGarphBySD(f.Source,f.Destination)
-			kp   := BuildKPath(k,f.Source,f.Destination, topo)
-			kpath_set.CAN2TSNPaths = append(kpath_set.CAN2TSNPaths,kp)
-			c2tDone[key]=true
+		for idx, flow := range m.CAN2TSNFlows {             // 每條 CAN→TSN flow
+			key := sd{flow.Source, flow.Destination}
+			if kp, ok := userage_path[key]; ok {
+				// 已經算過，直接使用
+				kpath_set.CAN2TSNPaths = append(kpath_set.CAN2TSNPaths, kp)
+			}else{
+				kp := BuildKPath(k, flow.Source, flow.Destination, Network.Graph_Set.CAN2TSNGraphs[idx])
+				kpath_set.CAN2TSNPaths = append(kpath_set.CAN2TSNPaths, kp)
+				userage_path[key] = kp
+			}
 		}
 	}
 	return kpath_set

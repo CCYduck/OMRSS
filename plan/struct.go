@@ -30,8 +30,8 @@ type OSRO struct {
 	Network   	*network.Network
 	SP		  	*algo.SP
 	KP			*algo.KP
-	SMT       	*algo.SMT
-	MDTC      	*algo.MDTC
+	// SMT       	*algo.SMT
+	// MDTC      	*algo.MDTC
 	OSRO    	*algo.OSRO
 	OSRO_IAS 	*algo.OSRO
 }

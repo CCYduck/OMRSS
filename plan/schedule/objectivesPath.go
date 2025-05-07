@@ -9,18 +9,20 @@ import (
 )
 
 // Objectives
-func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prime *path.Path_set) ([4]float64, int) {
+func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prime *path.Path_set,m string) ([4]float64, int) {
+
 	S := network.Flow_Set.Input_TSNflow_set()
 	S_prime := network.Flow_Set.BG_flow_set()
-	if II == nil { II = new(path.Path_set) }
-	if II_prime == nil { II_prime = new(path.Path_set) }
+
+	fmt.Println(len(II.TSNPath),len(II.AVBPath),len(II.CAN2TSNPath),len(II_prime.TSNPath),len(II_prime.AVBPath))
+	// fmt.Println(len(S.TSNFlows),len(S.AVBFlows),len(S.Encapsulate[0].CAN2TSNFlows),len(S_prime.TSNFlows),len(S_prime.AVBFlows))
 	var (
-		obj                  [4]float64
-		cost                 int
-		tsn_can_failed_count int           = 0 // O1
-		avb_failed_count     int           = 0 // O2
-		bandwidth_userate    int           = 0 // O3 ... pass
-		wcd_sum              time.Duration     // O4
+		obj                  		[4]float64
+		cost                 		int
+		tsn_can_failed_count		int           = 0
+		avb_failed_count     		int           = 0 // O2
+		bandwidth_userate    		int           = 0 // O3 ... pass
+		wcd_sum              		time.Duration     // O4
 	)
 	linkmap := map[string]float64{}
 
@@ -48,13 +50,15 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 		tsn_can_failed_count += 1 - schedulability
 		//fmt.Printf("Input TSN route%d: %b \n", nth, schedulability)
 	}
-
-	for nth, path := range II.CAN2TSNPath {
-		//fmt.Printf("BackGround TSN route%d: %b \n", nth, schedulability)
-		for _ , method :=range S.Encapsulate{
-			schedulability := schedulability(0, method.CAN2TSNFlows[nth], path, linkmap, network.Bandwidth, network.HyperPeriod)
-			tsn_can_failed_count += 1 - schedulability
-		}
+	
+	method_path := II.Getpathbymethod(m)
+	fmt.Println(len(method_path))
+	for nth, path := range method_path {
+		// fmt.Printf("BackGround TSN route%d: %b \n", nth, schedulability)
+		// fmt.Println(len(S.Encapsulate))
+		// fmt.Println()
+		schedulability := schedulability(0, S.FindMethod(m)[nth], path, linkmap, network.Bandwidth, network.HyperPeriod)
+		tsn_can_failed_count += 1 - schedulability
 	}
 
 	// O2 and O4
@@ -81,7 +85,7 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 	cost += int(wcd_sum/time.Microsecond) * 1
 	cost += avb_failed_count * 1000000
 	cost += tsn_can_failed_count * 100000000
-
+	fmt.Println(linkmap)
 	return obj, cost
 }
 
@@ -102,15 +106,17 @@ func schedulable(node *path.Node, parentID int, flow *flow.Flow, route *path.Pat
 			continue
 
 		} else {
-			//// Duplex
-			if !(link.FromNodeID == flow.Source || link.ToNodeID == flow.Destination) {
-				key := fmt.Sprintf("%d>%d", link.FromNodeID, link.ToNodeID)
-				linkmap[key] += flow.DataSize * float64((hyperPeriod / flow.Period))
-				if linkmap[key] > bandwidth {
-					return false, linkmap
-				}
-			}
-
+			// // Duplex
+			// if !(link.FromNodeID == flow.Source || link.ToNodeID == flow.Destination) {
+			// 	key := fmt.Sprintf("%d>%d", link.FromNodeID, link.ToNodeID)
+			// 	for _ ,stream := range flow.Streams{
+			// 		linkmap[key] += stream.DataSize
+			// 	} 
+			// 	if linkmap[key] > bandwidth {
+			// 		return false, linkmap
+			// 	}
+			// }
+			
 			// Simplex
 			if !(link.FromNodeID == flow.Source || link.ToNodeID == flow.Destination) {
 				key := ""
@@ -127,7 +133,9 @@ func schedulable(node *path.Node, parentID int, flow *flow.Flow, route *path.Pat
 					key = key1
 				}
 			
-				linkmap[key] += flow.DataSize * float64((hyperPeriod / flow.Period))
+				for _ ,stream := range flow.Streams{
+					linkmap[key] += stream.DataSize
+				} 
 				if linkmap[key] > bandwidth {
 					return false, linkmap
 				}
@@ -142,4 +150,5 @@ func schedulable(node *path.Node, parentID int, flow *flow.Flow, route *path.Pat
 	}
 	return true, linkmap
 }
+
 

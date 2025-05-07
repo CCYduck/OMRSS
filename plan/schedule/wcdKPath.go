@@ -1,20 +1,17 @@
 package schedule
 
 import (
-
+	// "fmt"
 	"src/network/flow"
 	"time"
-// 	"src/network/flow"
 	"src/plan/path"
-// 	"time"
 )
 
 // Worse-Case Delay
 func WCD(z *path.Path, KPath_set *path.KPath_Set, flow *flow.Flow, flow_set *flow.Flows) time.Duration {
 	end2end := time.Duration(0)
-
+	
 	if z == nil { return 0 } 
-
 	node := z.GetNodeByID(flow.Source)
 
 	if node == nil {                              // ⬅︎ guard‑2
@@ -129,7 +126,7 @@ func interfere_from_tsn(link *path.Connection, KPath_set *path.KPath_Set, flow_s
 func interfere_from_c2t(link *path.Connection, KPath_set *path.KPath_Set, flow_set *flow.Flows) time.Duration {
 	// Occupied bytes by TSN
 	var occupiedbytes float64
-	for nth, c2t_kpath := range KPath_set.CAN2TSNPaths {
+	for _, c2t_kpath := range KPath_set.CAN2TSNPaths {
 		for _, path := range c2t_kpath.Paths {
 			if path == nil { continue } 
 			node := path.GetNodeByID(link.FromNodeID)
@@ -137,8 +134,7 @@ func interfere_from_c2t(link *path.Connection, KPath_set *path.KPath_Set, flow_s
 				for _, conn := range node.Connections {
 					if conn.ToNodeID == link.ToNodeID {
 						// occupiedbytes += datasize * (hyperPeriod / period)
-						occupiedbytes += flow_set.TSNFlows[nth].DataSize *
-							(float64(flow_set.TSNFlows[nth].HyperPeriod) / float64(flow_set.TSNFlows[nth].Period))
+						occupiedbytes += flow_set.Encapsulate[0].BytesSent
 					}
 				}
 			}

@@ -38,6 +38,7 @@ func new_Path_Set() *Path_set {
 }
 
 type Path struct {
+	Method 	string
 	IDs 	[]int
 	Nodes  	[]*Node
 	Weight 	float64

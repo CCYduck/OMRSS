@@ -46,23 +46,31 @@ func BestPath(Network *network.Network) *Path_set {
 
 	}
 
+
+
+
 	for _, method := range Network.Flow_Set.Encapsulate {
+		type sd struct{ s int; d int}
+		userage_path := make(map[sd]*Path)	// 全域收集
+		fmt.Println(method.Method_Name)
 		// fmt.Printf("Flow: Source=%d, Destination=%v, Topology=%v\n", flow.Source, flow.Destination, Network.Graph_Set.TSNGraphs[nth])
 		//fmt.Printf("Flow: Source=%d, Destination=%v", flow.Source, flow.Destination)
 		for _,flow := range method.CAN2TSNFlows{
-			if !path_set.checkListenerAndTalker(flow.Source, flow.Destination){
-				
-				path := saveShortestPathsToGraph(flow.Source, flow.Destination, Network.Graph_Set.GetGarphBySD(flow.Source, flow.Destination))
-				if path != nil {
-					// fmt.Println("Best Path:")
-					// path.Show_Path()
-				} else {
-					fmt.Println("No path found.")
-				}
+			
+			key := sd{flow.Source, flow.Destination}
 	
-				path_set.CAN2TSNPath = append(path_set.CAN2TSNPath, path)
-	
+			// 1. 檢查 key 是否已經存在
+			if sp, ok := userage_path[key]; ok {
+				// 已經算過，直接使用
+				path_set.CAN2TSNPath = append(path_set.CAN2TSNPath, sp)
+			}else{
+				sp := saveShortestPathsToGraph(flow.Source, flow.Destination, Network.Graph_Set.GetGarphBySD(flow.Source, flow.Destination))
+				sp.Method = method.Method_Name
+				fmt.Println(method.Method_Name)
+				path_set.CAN2TSNPath = append(path_set.CAN2TSNPath, sp)
+				userage_path[key] = sp
 			}
+
 		}
 		
 		

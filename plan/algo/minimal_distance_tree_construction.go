@@ -1,10 +1,11 @@
 package algo
 
 import (
+	// "fmt"
 	"src/network"
 	"src/plan/algo_timer"
-	"src/plan/routes"
 	"src/plan/path"
+	"src/plan/routes"
 )
 
 func (mtdc *MDTC) MDTC_Run(network *network.Network) {
@@ -22,6 +23,7 @@ func (SP *SP) SP_Run(network *network.Network) {
 	SP.Timer.TimerStart()
 	// mtdc.Trees = routes.Get_DistanceTree_Routing(network)
 	SP.Path = path.BestPath(network)
+	// fmt.Println(SP.Path)
 	SP.Timer.TimerStop()
 }
 
