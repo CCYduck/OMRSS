@@ -14,7 +14,6 @@ import (
 )
 
 var (
-
 	bg_tsn int
 	bg_avb int
 )
@@ -50,48 +49,86 @@ func (osro *OSRO) OSRO_Initial_Settings(network *network.Network) {
 }
 
 // Ching-Chih Chuang et al., "Online Stream-Aware Routing for TSN-Based Industrial Control Systems"
-func (osro *OSRO) OSRO_Run(network *network.Network, timeout_index int) [4]float64 {
+func (osro *OSRO) OSRO_Run(network *network.Network, timeout_index int) []Result {
+	results := make([]Result, 0, len(network.Flow_Set.Encapsulate))
+
+	// 把每種 Method 各自的 InputPath 存在 map〈method → path set〉
+    inputPathMap := make(map[string]*path.Path_set) // 你自己的型別
 	// 6. osro
 	// Repeat the execution of epochs within the timeout
-	initialobj, initialcost := schedule.OBJ(network, osro.KPath, osro.InputPath, osro.BGPath,"obo")
-	fmt.Println()
-	fmt.Printf("initial value: %d \n", initialcost)
-	fmt.Printf("O1: %f O2: %f O3: %f O4: %f \n", initialobj[0], initialobj[1], initialobj[2], initialobj[3])
+	for _, method := range network.Flow_Set.Encapsulate {
+		method_name := method.Method_Name
 
-	timeout := time.Duration(osro.Timeout) * time.Millisecond
-	startTime := time.Now()
-	i := 1
-	for {
-		fmt.Printf("\nepoch%d:\n", i)
-		osro.Timer[timeout_index].TimerStart()
-		II := epoch(network, osro, timeout_index)
-		osro.Timer[timeout_index].TimerStop()
+		// 1. 先把 InputPath 取出；第一次用 DeepCopy 初始化
+        input, ok := inputPathMap[method_name]
+        if !ok {
+            input = osro.InputPath // 假設有 DeepCopy 方法
+            inputPathMap[method_name] = input
+        }
 
-		_, cost1 := schedule.OBJ(network, osro.KPath, II, osro.BGPath,"obo")               	// new
-		_, cost2 := schedule.OBJ(network, osro.KPath, osro.InputPath, osro.BGPath,"obo") 		// old
+		initialobj, initialcost := schedule.OBJ(network, osro.KPath, osro.InputPath, osro.BGPath, method_name)
+		fmt.Println()
+		fmt.Printf("initial value: %d \n", initialcost)
+		fmt.Printf("O1: %f O2: %f O3: %f O4: %f \n", initialobj[0], initialobj[1], initialobj[2], initialobj[3])
 
-		if cost1 < cost2 {
-			osro.InputPath = II
-			fmt.Println("Change the selected routing !!")
-		}
-		i += 1
+		timeout := time.Duration(osro.Timeout) * time.Millisecond
+		startTime := time.Now()
+		// i := 1
+		// for {
+		// 	fmt.Printf("\nepoch%d:\n", i)
+		// 	osro.Timer[timeout_index].TimerStart()
+		// 	II := epoch(network, osro, timeout_index)
+		// 	osro.Timer[timeout_index].TimerStop()
 
-		if time.Since(startTime) >= timeout {
-			break
+		// 	_, cost1 := schedule.OBJ(network, osro.KPath, II, osro.BGPath,method.Method_Name)               	// new
+		// 	_, cost2 := schedule.OBJ(network, osro.KPath, osro.InputPath, osro.BGPath,method.Method_Name) 		// old
+
+		// 	if cost1 < cost2 {
+		// 		osro.InputPath = II
+		// 		fmt.Println("Change the selected routing !!")
+		// 	}
+		// 	i += 1
+
+		// 	if time.Since(startTime) >= timeout {
+		// 		break
+		// 	}
+		// }
+		for i := 1; ; i++ {
+            II := epoch(network, osro, timeout_index)
+
+            _, newCost := schedule.OBJ(network, osro.KPath, II, osro.BGPath, method_name)
+            _, oldCost := schedule.OBJ(network, osro.KPath, osro.InputPath, osro.BGPath, method_name)
+            if newCost < oldCost {
+                inputPathMap[method_name] = II // 只更新自己的 InputPath
+                osro.InputPath = II
+            }
+            if time.Since(startTime) >= timeout {
+                break
+            }
+        }
+		// resultobj, resultcost := schedule.OBJ(network, osro.KPath, osro.InputPath, osro.BGPath,method.Method_Name)
+		
+		// 3. 記錄最終結果
+        resultObj, resultCost := schedule.OBJ(
+            network, osro.KPath, input, osro.BGPath, method_name)
+        results = append(results, Result{
+            Method: method_name,
+            Obj:    resultObj,
+            Cost:   resultCost,
+        })
+		
+		fmt.Println()
+		fmt.Printf("result value: %d \n", resultCost)
+		fmt.Printf("O1: %f O2: %f O3: %f O4: %f \n", resultObj[0], resultObj[1], initialobj[2], resultObj[3])
+		fmt.Println()
+
+		if resultObj[0] != 0 || resultObj[1] != 0 {
+			osro.Timer[timeout_index].TimerMax()
 		}
 	}
+	
 
-	resultobj, resultcost := schedule.OBJ(network, osro.KPath, osro.InputPath, osro.BGPath,"obo")
-	fmt.Println()
-	fmt.Printf("result value: %d \n", resultcost)
-	fmt.Printf("O1: %f O2: %f O3: %f O4: %f \n", resultobj[0], resultobj[1], initialobj[2], resultobj[3])
-	fmt.Println()
-
-	if resultobj[0] != 0 || resultobj[1] != 0 {
-		osro.Timer[timeout_index].TimerMax()
-	}
-
-	return resultobj
+	return results
 }
 
 func compute_prm(X *path.KPath_Set) *Pheromone {

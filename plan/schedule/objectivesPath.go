@@ -52,7 +52,7 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 	}
 	
 	method_path := II.Getpathbymethod(m)
-	fmt.Println(len(method_path))
+	// fmt.Println(len(method_path))
 	for nth, path := range method_path {
 		// fmt.Printf("BackGround TSN route%d: %b \n", nth, schedulability)
 		// fmt.Println(len(S.Encapsulate))
@@ -85,7 +85,7 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 	cost += int(wcd_sum/time.Microsecond) * 1
 	cost += avb_failed_count * 1000000
 	cost += tsn_can_failed_count * 100000000
-	fmt.Println(linkmap)
+	// fmt.Println(linkmap)
 	return obj, cost
 }
 
@@ -133,9 +133,7 @@ func schedulable(node *path.Node, parentID int, flow *flow.Flow, route *path.Pat
 					key = key1
 				}
 			
-				for _ ,stream := range flow.Streams{
-					linkmap[key] += stream.DataSize
-				} 
+				linkmap[key] += flow.DataSize * float64((hyperPeriod / flow.Period))
 				if linkmap[key] > bandwidth {
 					return false, linkmap
 				}

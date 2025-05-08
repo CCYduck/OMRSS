@@ -98,3 +98,13 @@ type Edge struct {
 	End   int
 	Cost  int
 }
+
+// BuildInputSet 回傳新的 *Path_set
+func BuildInputSet(base *Path_set, c2t []*Path) *Path_set {
+    // 如果 OBJ 內部會修改 slice，請改成 DeepCopy
+    return &Path_set{
+        TSNPath:     base.TSNPath,
+        AVBPath:     base.AVBPath,
+        CAN2TSNPath: c2t,
+    }
+}

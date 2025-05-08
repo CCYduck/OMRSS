@@ -3,15 +3,15 @@ package memorizer
 import (
 	"log"
 	"os"
-	"src/plan"
+	// "src/plan"
 )
 
 type Memorizers interface {
-	M_Cumulative(plan.Plans)
-	M_Average(int)
-	M_Output_Results()
-	M_Store_Data(string, int)
-	M_Store_File(string)
+	// M_Cumulative(plan.Plans)
+	// M_Average(int)
+	// M_Output_Results()
+	// M_Store_Data(string, int)
+	// M_Store_File(string)
 }
 
 type Memorizers_osro interface {

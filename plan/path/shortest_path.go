@@ -8,7 +8,6 @@ import (
 )
 
 //主要的function
-
 func BestPath(Network *network.Network) *Path_set {
 
 	path_set := new_Path_Set()
@@ -19,11 +18,12 @@ func BestPath(Network *network.Network) *Path_set {
 		if path != nil {
 			// fmt.Println("Best Path:")
 			// path.Show_Path()
+			
 		} else {
 			fmt.Println("No path found.")
 		}
-
 		path_set.TSNPath = append(path_set.TSNPath, path)
+		
 		// 你可以存到一個 KPath_Set 或印出來
 		// fmt.Printf("KPath: Source=%d, Target=%d, NodeIDs=%v\n", k.Source, k.Target, path)
 
@@ -36,51 +36,49 @@ func BestPath(Network *network.Network) *Path_set {
 		if path != nil {
 			// fmt.Println("Best Path:")
 			// path.Show_Path()
+			
 		} else {
 			fmt.Println("No path found.")
 		}
-
 		path_set.AVBPath = append(path_set.AVBPath, path)
+		
 		// 你可以存到一個 KPath_Set 或印出來
 		// fmt.Printf("KPath: Source=%d, Target=%d, NodeIDs=%v\n", k.Source, k.Target, path)
 
 	}
 
-
-
-
 	for _, method := range Network.Flow_Set.Encapsulate {
 		type sd struct{ s int; d int}
 		userage_path := make(map[sd]*Path)	// 全域收集
-		fmt.Println(method.Method_Name)
+		// fmt.Println(method.Method_Name)
 		// fmt.Printf("Flow: Source=%d, Destination=%v, Topology=%v\n", flow.Source, flow.Destination, Network.Graph_Set.TSNGraphs[nth])
 		//fmt.Printf("Flow: Source=%d, Destination=%v", flow.Source, flow.Destination)
-		for _,flow := range method.CAN2TSNFlows{
-			
+		for _,flow := range method.CAN2TSNFlows{		
 			key := sd{flow.Source, flow.Destination}
-	
 			// 1. 檢查 key 是否已經存在
 			if sp, ok := userage_path[key]; ok {
 				// 已經算過，直接使用
 				path_set.CAN2TSNPath = append(path_set.CAN2TSNPath, sp)
 			}else{
 				sp := saveShortestPathsToGraph(flow.Source, flow.Destination, Network.Graph_Set.GetGarphBySD(flow.Source, flow.Destination))
-				sp.Method = method.Method_Name
-				fmt.Println(method.Method_Name)
+				if sp != nil {sp.Method = method.Method_Name}
+				// fmt.Println(method.Method_Name)
 				path_set.CAN2TSNPath = append(path_set.CAN2TSNPath, sp)
 				userage_path[key] = sp
 			}
 
 		}
 		
-		
 		// 你可以存到一個 KPath_Set 或印出來
 		// fmt.Printf("KPath: Source=%d, Target=%d, NodeIDs=%v\n", k.Source, k.Target, path)
 
 	}
+	
 
 	return path_set
 }
+
+
 
 func saveShortestPathsToGraph(source int, target int, t *topology.Topology) *Path {
 	// Check if this path has already been taken
@@ -248,20 +246,31 @@ func findConnectionInNode(node *topology.Node, toID int) *topology.Connection {
 	return nil
 }
 
-func (path_set *Path_set)checkListenerAndTalker(source int, destination int)bool{
+// func (path_set *Path_set)checkListenerAndTalker(source int, destination int)bool{
 
-	for _, p := range path_set.CAN2TSNPath {
+// 	for _, p := range path_set.CAN2TSNPath {
 
-		s := p.GetNodeByID(source)
-		if s == nil {          // ←★★ 防護：source 不在此 path
-			continue
-		}
-		d := p.GetNodeByID(destination)
-		if d == nil {          // ←★★ 防護：dest 不在此 path
-			continue
-		}
-		// 兩個都存在才算「已經有這條 path」
-		return true
-	}
-	return false
-}
+// 		s := p.GetNodeByID(source)
+// 		if s == nil {          // ←★★ 防護：source 不在此 path
+// 			continue
+// 		}
+// 		d := p.GetNodeByID(destination)
+// 		if d == nil {          // ←★★ 防護：dest 不在此 path
+// 			continue
+// 		}
+// 		// 兩個都存在才算「已經有這條 path」
+// 		return true
+// 	}
+// 	return false
+// }
+
+// func (ps *Path_set) GetPathByMethod(m string) []*Path {
+//     var ret []*Path
+//     for _, p := range ps.CAN2TSNPath { // 依你的欄位名稱
+//         if p == nil || p.Method == m {
+//             ret = append(ret, p)  // nil 也放
+//         }
+//     }
+//     return ret
+// }
+

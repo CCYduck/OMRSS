@@ -69,12 +69,12 @@ func (Paths *Path_set) Show_Path_Set() {
 		break
 	}
 
-	for index, path := range Paths.CAN2TSNPath {
-		fmt.Printf("\nImportCan Path %d \n", index)
-		path.Show_Path()
+	// for index, path := range Paths.CAN2TSNPath {
+	// 	fmt.Printf("\nImportCan Path %d \n", index)
+	// 	path.Show_Path()
 
-		break
-	}
+	// 	break
+	// }
 }
 
 func (Kpath *KPath) Show_KPath() {
