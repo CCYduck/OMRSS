@@ -10,11 +10,11 @@ import (
 
 // Objectives
 func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prime *path.Path_set,m string) ([4]float64, int) {
-
+	
 	S := network.Flow_Set.Input_TSNflow_set()
 	S_prime := network.Flow_Set.BG_flow_set()
 
-	fmt.Println(len(II.TSNPath),len(II.AVBPath),len(II.CAN2TSNPath),len(II_prime.TSNPath),len(II_prime.AVBPath))
+	// fmt.Println(len(II.TSNPath),len(II.AVBPath),len(II.CAN2TSNPath),len(II_prime.TSNPath),len(II_prime.AVBPath))
 	// fmt.Println(len(S.TSNFlows),len(S.AVBFlows),len(S.Encapsulate[0].CAN2TSNFlows),len(S_prime.TSNFlows),len(S_prime.AVBFlows))
 	var (
 		obj                  		[4]float64
@@ -52,6 +52,7 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 	}
 	
 	method_path := II.Getpathbymethod(m)
+	// fmt.Printf("len(paths)=%d len(flows)=%d  Method=%s\n",len(method_path), len(S.FindMethod(m)), m)
 	// fmt.Println(len(method_path))
 	for nth, path := range method_path {
 		// fmt.Printf("BackGround TSN route%d: %b \n", nth, schedulability)
@@ -91,7 +92,13 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 
 func schedulability(wcd time.Duration, flow *flow.Flow, path *path.Path, linkmap map[string]float64, bandwidth float64, hyperPeriod int) int {
 	r := wcd <= time.Duration(flow.Deadline)*time.Microsecond
-	node := path.GetNodeByID(flow.Source)
+	if path == nil {            // guard-1
+        return 0
+    }
+    node := path.GetNodeByID(flow.Source)
+    if node == nil {            // guard-2
+        return 0
+    }
 	schedulable, _ := schedulable(node, -1, flow, path, linkmap, bandwidth, hyperPeriod)
 
 	if r && schedulable {

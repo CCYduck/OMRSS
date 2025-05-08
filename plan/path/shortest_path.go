@@ -68,17 +68,12 @@ func BestPath(Network *network.Network) *Path_set {
 			}
 
 		}
-		
 		// 你可以存到一個 KPath_Set 或印出來
 		// fmt.Printf("KPath: Source=%d, Target=%d, NodeIDs=%v\n", k.Source, k.Target, path)
 
 	}
-	
-
 	return path_set
 }
-
-
 
 func saveShortestPathsToGraph(source int, target int, t *topology.Topology) *Path {
 	// Check if this path has already been taken
@@ -100,7 +95,7 @@ func saveShortestPathsToGraph(source int, target int, t *topology.Topology) *Pat
 				newfrontConn := &Connection{
 					FromNodeID: id,
 					ToNodeID:   graph.Path[0][count+1], // next
-					Cost:       0,
+					Cost:       1,
 				}
 				newNode.Connections = append(newNode.Connections, newfrontConn)
 			}
@@ -109,7 +104,7 @@ func saveShortestPathsToGraph(source int, target int, t *topology.Topology) *Pat
 				newbackConn := &Connection{
 					FromNodeID: id,
 					ToNodeID:   graph.Path[0][count-1], // before
-					Cost:       0,
+					Cost:       1,
 				}
 				newNode.Connections = append(newNode.Connections, newbackConn)
 			}
@@ -265,11 +260,9 @@ func findConnectionInNode(node *topology.Node, toID int) *topology.Connection {
 // }
 
 // func (ps *Path_set) GetPathByMethod(m string) []*Path {
-//     var ret []*Path
-//     for _, p := range ps.CAN2TSNPath { // 依你的欄位名稱
-//         if p == nil || p.Method == m {
-//             ret = append(ret, p)  // nil 也放
-//         }
+//     ret := make([]*Path, len(ps.CAN2TSNPath))
+//     for i, p := range ps.CAN2TSNPath {
+//         if p != nil && p.Method != m { ret[i] = nil } else { ret[i] = p }
 //     }
 //     return ret
 // }

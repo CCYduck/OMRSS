@@ -6,6 +6,12 @@ import (
 	
 )
 
+type Result struct {
+    Method string
+    Obj    [4]float64
+	Cost	int
+}
+
 type OMACO struct {
 	Network   *network.Network
 	SMT       *algo.SMT

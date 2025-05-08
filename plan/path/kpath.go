@@ -70,6 +70,9 @@ func KShortestPath(Network *network.Network) *KPath_Set{
 			key := sd{flow.Source, flow.Destination}
 			if kp, ok := userage_path[key]; ok {
 				// 已經算過，直接使用
+				// fmt.Println(kp.Method)
+				kp.Method = m.Method_Name
+				// fmt.Println(m.Method_Name)
 				kpath_set.CAN2TSNPaths = append(kpath_set.CAN2TSNPaths, kp)
 			}else{
 				kp := BuildKPath(k, flow.Source, flow.Destination, Network.Graph_Set.CAN2TSNGraphs[idx])

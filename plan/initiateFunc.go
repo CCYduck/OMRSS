@@ -3,8 +3,9 @@ package plan
 import (
 	// "src/plan/path"
 	"fmt"
-	"src/plan/algo"
-	"src/plan/schedule"
+	// "src/plan/algo"
+	// "src/plan/path"
+	// "src/plan/schedule"
 )
 
 func (plan *OMACO) Initiate_Plan() {
@@ -72,31 +73,44 @@ func (plan *OSRO) Initiate_Plan() {
 	// // fmt.Println("MDTC")
 	// fmt.Println("----------------------------------------")
 	// // plan.MDTC.MDTC_Run(plan.Network)
-	plan.SP.SP_Run(plan.Network)
+	
 	// fmt.Println(len(plan.SP.Path.TSNPath),len(plan.SP.Path.AVBPath),len(plan.SP.Path.CAN2TSNPath))
+	plan.SP.SP_Run(plan.Network)
 	plan.KP.KP_Run(plan.Network)
 	
+	fmt.Println()
+	fmt.Println("OSACO")
+	fmt.Println("----------------------------------------")
+	method:= []string{"fifo", "priority", "obo", "wat"}
+	for _,m := range method{
+		plan.OSRO.OSRO_Initial_Settings(plan.Network, plan.SP.Path, m)
+	}
+	// The timeout of each run is set as 100~1000 ms (200ms, 400ms, 600ms, 800ms, 1000ms)
+	plan.OSRO.OSRO_Run(plan.Network,0)
+	fmt.Println(len(plan.OSRO.Objs_osro))
+	for ind,m := range plan.OSRO.Objs_osro[0].Method{
+		fmt.Printf("result value: %v \n", m)
+		fmt.Printf("O1: %f O2: %f O3: %f O4: %f \n", 
+		plan.OSRO.Objs_osro[ind].Obj[0], plan.OSRO.Objs_osro[ind].Obj[1], plan.OSRO.Objs_osro[ind].Obj[2], plan.OSRO.Objs_osro[ind].Obj[3])
+		fmt.Println()
+	}
+	// fmt.Printf("result value: %v \n", plan.OSRO.Objs_osro[0].Method)
+	// fmt.Printf("O1: %f O2: %f O3: %f O4: %f \n", 
+	// plan.OSRO.Objs_osro[0].Obj[0], plan.OSRO.Objs_osro[0].Obj[1], plan.OSRO.Objs_osro[0].Obj[2], plan.OSRO.Objs_osro[0].Obj[3])
 	// fmt.Println()
-	// fmt.Println("OSRO")
-	// fmt.Println("----------------------------------------")
-	// plan.OSRO.OSRO_Initial_Settings(plan.Network)
-	// // The timeout of each run is set as 100~1000 ms (200ms, 400ms, 600ms, 800ms, 1000ms)
 	// for i := 0; i < 5; i++ {
-	// 	plan.OSRO.Objs_osro[i] = plan.OSRO.OSRO_Run(plan.Network, i)
+	// 	plan.OSRO.Objs_osro[i] = plan.OSRO.OSRO_Run(plan.Network,i)
+	// 	fmt.Println()
+	// 	fmt.Printf("result value: %d \n", plan.OSRO.Objs_osro[i].Cost)
+	// 	fmt.Printf("O1: %f O2: %f O3: %f O4: %f \n", 
+	// 	plan.OSRO.Objs_osro[i].Obj[0], plan.OSRO.Objs_osro[i].Obj[1], plan.OSRO.Objs_osro[i].Obj[2], plan.OSRO.Objs_osro[i].Obj[3])
+	// 	fmt.Println()
 	// }
-	// for t, resSlice := range plan.OSRO.Objs_osro {
-	// 	fmt.Printf("=== Timeout index %d ===\n", t)
-	// 	for _, r := range resSlice {
-	// 		fmt.Printf("%s → cost=%d, obj=%v\n", r.Method, r.Cost, r.Obj)
-	// 	}
-	// }
-
-	
 
 	// fmt.Println()
 	// fmt.Println("OSACO_IAS")
 	// fmt.Println("----------------------------------------")
-	// plan.OSACO_IAS.OSACO_Initial_Settings(plan.Network, plan.SMT.Trees)
+	// plan.OSRO.OSRO_Initial_Settings(plan.Network, plan.SMT.Trees)
 	// // The timeout of each run is set as 100~1000 ms (200ms, 400ms, 600ms, 800ms, 1000ms)
 	// for i := 0; i < 5; i++ {
 	// 	plan.OSACO_IAS.Objs_osaco[i] = plan.OSACO_IAS.OSACO_Run(plan.Network, i)
@@ -109,52 +123,30 @@ func (plan *OSRO) Initiate_Plan() {
 	// 	plan.SMT.Trees.BG_Tree_set(plan.Network.BG_TSN, plan.Network.BG_AVB),
 	// )
 
-	// obj_mdt, _ := schedule.OBJ(
-	// 	plan.Network,
-	// 	plan.OSACO.KTrees,
-	// 	plan.MDTC.Trees.Input_Tree_set(plan.Network.BG_TSN, plan.Network.BG_AVB),
-	// 	plan.MDTC.Trees.BG_Tree_set(plan.Network.BG_TSN, plan.Network.BG_AVB),
-	// )
+	
 
-	// plan.SMT.Objs_smt = obj_smt
-	// plan.MDTC.Objs_mdtc = obj_mdt
-
-	// if obj_mdt[0] != 0 || obj_mdt[1] != 0 {
-	// 	plan.MDTC.Timer.TimerMax()
-	// }
-	plan.SP.Objs_SP = make([]algo.Result, 0, 4)   // 4 種 method：fifo/priority/obo/wat
-	method:= []string{"fifo", "priority", "obo", "wat"}
-	// for _,m := range method{
-	// 	Objs_sp, _ := schedule.OBJ(
+	// method:= []string{"fifo", "priority", "obo", "wat"}
+	// plan.SP.Objs_SP = make([]algo.Result, 0, 4)   // 4 種 method：fifo/priority/obo/wat
+	
+	// for ind,m := range method{
+	// 	Objs_sp, cost := schedule.OBJ(
 	// 		plan.Network,
 	// 		plan.KP.KPath,
 	// 		plan.SP.Path.Input_Path_set(plan.Network.BG_TSN, plan.Network.BG_AVB),
 	// 		plan.SP.Path.BG_Path_set(plan.Network.BG_TSN, plan.Network.BG_AVB),
 	// 		m,
 	// 	)
-	// 	plan.SP.Objs_SP = Objs_sp //要改SP 變成4個
+	// 	plan.SP.Objs_SP[ind].Obj = Objs_sp //要改SP 變成4個
+	// 	plan.SP.Objs_SP[ind].Method = m
+	// 	plan.SP.Objs_SP[ind].Cost =cost
 	// 	fmt.Println(plan.SP.Objs_SP)
 	// }
-	for _, m := range method {
-		obj, cost := schedule.OBJ(
-			plan.Network,
-			plan.KP.KPath,
-			plan.SP.Path.Input_Path_set(plan.Network.BG_TSN, plan.Network.BG_AVB),
-			plan.SP.Path.BG_Path_set(plan.Network.BG_TSN, plan.Network.BG_AVB),
-			m,
-		)
-	
-		// 把這一筆結果 append 進 slice
-		plan.SP.Objs_SP = append(plan.SP.Objs_SP, algo.Result{
-			Method: m,
-			Obj:    obj,
-			Cost:   cost,
-		})
-	}
-	for _, r := range plan.SP.Objs_SP {
-    fmt.Printf("Method=%s  cost=%d  O=%v\n", r.Method, r.Cost, r.Obj)
-}
 
+
+	// for _, r := range plan.SP.Objs_SP {
+    // fmt.Printf("Method=%s  cost=%d  O=%v\n", r.Method, r.Cost, r.Obj)
+
+	// }
 }
 
 //func (plan *plan3) Initiate_Plan() {

@@ -2,7 +2,7 @@ package path
 
 import (
 	// "fmt"
-	"src/network"
+	// "src/network"
 )
 
 func (path_set *Path_set) Input_Path_set(bg_tsn_end int, bg_avb_end int) *Path_set {
@@ -11,7 +11,7 @@ func (path_set *Path_set) Input_Path_set(bg_tsn_end int, bg_avb_end int) *Path_s
 
 	Input_path_set.TSNPath= append(Input_path_set.TSNPath, path_set.TSNPath[bg_tsn_end:]...)
 	Input_path_set.AVBPath = append(Input_path_set.AVBPath, path_set.AVBPath[bg_avb_end:]...)
-	Input_path_set.CAN2TSNPath =append(Input_path_set.CAN2TSNPath,path_set.CAN2TSNPath... )
+	// Input_path_set.CAN2TSNPath =append(Input_path_set.CAN2TSNPath,path_set.CAN2TSNPath... )
 
 	
 	return Input_path_set
@@ -27,38 +27,38 @@ func (path_set *Path_set) BG_Path_set(bg_tsn_end int, bg_avb_end int) *Path_set 
 }
 
 
-func Get_OSRO_Routing(Network *network.Network) *KPath_Set {
-	const k = 3 
-	kpath_set := new_KPath_Set()
+// func Get_OSRO_Routing(Network *network.Network) *KPath_Set {
+// 	const k = 3 
+// 	kpath_set := new_KPath_Set()
 
-	for idx, flow := range Network.Flow_Set.TSNFlows {
-		topo := Network.Graph_Set.TSNGraphs[idx]
+// 	for idx, flow := range Network.Flow_Set.TSNFlows {
+// 		topo := Network.Graph_Set.TSNGraphs[idx]
 
-		kp   := BuildKPath(k, flow.Source, flow.Destination, topo)
-		kpath_set.TSNPaths = append(kpath_set.TSNPaths, kp)
-	}
+// 		kp   := BuildKPath(k, flow.Source, flow.Destination, topo)
+// 		kpath_set.TSNPaths = append(kpath_set.TSNPaths, kp)
+// 	}
 	
-	// -------- AVB ----------
-	for idx, flow := range Network.Flow_Set.AVBFlows {
-		topo := Network.Graph_Set.AVBGraphs[idx]
+// 	// -------- AVB ----------
+// 	for idx, flow := range Network.Flow_Set.AVBFlows {
+// 		topo := Network.Graph_Set.AVBGraphs[idx]
 
-		kp   := BuildKPath(k, flow.Source, flow.Destination, topo)
-		kpath_set.AVBPaths = append(kpath_set.AVBPaths, kp)
-	}
+// 		kp   := BuildKPath(k, flow.Source, flow.Destination, topo)
+// 		kpath_set.AVBPaths = append(kpath_set.AVBPaths, kp)
+// 	}
 	
-	// -------- CAN→TSN (封裝流) ----------
-	for _, m := range Network.Flow_Set.Encapsulate {   // 每種封裝方法
-		for _, f := range m.CAN2TSNFlows {             // 每條 CAN→TSN flow
-			topo := Network.Graph_Set.GetGarphBySD(f.Source, f.Destination)
+// 	// -------- CAN→TSN (封裝流) ----------
+// 	for _, m := range Network.Flow_Set.Encapsulate {   // 每種封裝方法
+// 		for _, f := range m.CAN2TSNFlows {             // 每條 CAN→TSN flow
+// 			topo := Network.Graph_Set.GetGarphBySD(f.Source, f.Destination)
 
-			kp   := BuildKPath(k, f.Source, f.Destination, topo)		
-			kpath_set.CAN2TSNPaths = append(kpath_set.CAN2TSNPaths, kp)
-		}
-	}
+// 			kp   := BuildKPath(k, f.Source, f.Destination, topo)		
+// 			kpath_set.CAN2TSNPaths = append(kpath_set.CAN2TSNPaths, kp)
+// 		}
+// 	}
 	
-	return kpath_set
+// 	return kpath_set
 	
-}
+// }
 
 
 func (kpath_set *KPath_Set) Input_kpath_set(bg_tsn_end int, bg_avb_end int) *KPath_Set {
@@ -89,4 +89,15 @@ func (path_set *Path_set)Getpathbymethod(method string) []*Path{
 		}
 	}
 	return method_path_set.CAN2TSNPath
+}
+
+func (kpath_set *KPath_Set)Getkpathbymethod(method string) []*KPath{
+	method_kpath_set := new_KPath_Set()
+	for _,path := range kpath_set.CAN2TSNPaths{
+		// fmt.Println(path.Method,method)
+		if path.Method == method {
+			method_kpath_set.CAN2TSNPaths =append(method_kpath_set.CAN2TSNPaths, path)
+		}
+	}
+	return method_kpath_set.CAN2TSNPaths
 }

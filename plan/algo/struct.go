@@ -10,13 +10,14 @@ type Result struct {
     Method string
     Obj    [4]float64
 	Cost	int
+	Linkmap map[string]float64
 }
 
 type SP struct{
 	Path		*path.Path_set
 	InputFlow	*path.Path_set
 	BGFlow		*path.Path_set
-	Objs_SP		[]Result
+	Objs_SP		map[string]Result
 	Timer 		*algo_timer.Timer
 }
 
