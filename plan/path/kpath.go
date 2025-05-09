@@ -68,17 +68,24 @@ func KShortestPath(Network *network.Network) *KPath_Set{
 	for _, m := range Network.Flow_Set.Encapsulate {   // 每種封裝方法
 		for idx, flow := range m.CAN2TSNFlows {             // 每條 CAN→TSN flow
 			key := sd{flow.Source, flow.Destination}
+			var kToAppend *KPath
 			if kp, ok := userage_path[key]; ok {
-				// 已經算過，直接使用
-				// fmt.Println(kp.Method)
-				kp.Method = m.Method_Name
-				// fmt.Println(m.Method_Name)
-				kpath_set.CAN2TSNPaths = append(kpath_set.CAN2TSNPaths, kp)
+				kToAppend = CloneKPath(kp) 
+				// // 已經算過，直接使用
+				// fmt.Println("# ",idx, kp.Method, m.Method_Name)
+				// // kp.Method = m.Method_Name
+				// method_kpath := kp
+				// method_kpath.Method = m.Method_Name
+				// kpath_set.CAN2TSNPaths = append(kpath_set.CAN2TSNPaths, method_kpath)
 			}else{
 				kp := BuildKPath(k, flow.Source, flow.Destination, Network.Graph_Set.CAN2TSNGraphs[idx])
-				kpath_set.CAN2TSNPaths = append(kpath_set.CAN2TSNPaths, kp)
 				userage_path[key] = kp
+				kToAppend = CloneKPath(kp)
+				// fmt.Println(idx, kp.Method, m.Method_Name)
+				// kpath_set.CAN2TSNPaths = append(kpath_set.CAN2TSNPaths, method_kpath)
 			}
+			kToAppend.Method = m.Method_Name
+			kpath_set.CAN2TSNPaths = append(kpath_set.CAN2TSNPaths, kToAppend)
 		}
 	}
 	return kpath_set

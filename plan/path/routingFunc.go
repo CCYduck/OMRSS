@@ -80,24 +80,43 @@ func (kpath_set *KPath_Set) BG_kpath_set(bg_tsn_end int, bg_avb_end int) *KPath_
 	return BG_kpath_set
 }
 
-func (path_set *Path_set)Getpathbymethod(method string) []*Path{
-	method_path_set := new_Path_Set()
-	for _,path := range path_set.CAN2TSNPath{
-		// fmt.Println(path.Method,method)
-		if path.Method == method {
-			method_path_set.CAN2TSNPath =append(method_path_set.CAN2TSNPath, path)
-		}
-	}
-	return method_path_set.CAN2TSNPath
+// func (path_set *Path_set)Getpathbymethod(method string) []*Path{
+// 	method_path_set := new_Path_Set()
+// 	for _,path := range path_set.CAN2TSNPath{
+// 		// fmt.Println(path.Method,method)
+// 		if path.Method == method {
+// 			method_path_set.CAN2TSNPath =append(method_path_set.CAN2TSNPath, path)
+// 		}
+// 	}
+// 	return method_path_set.CAN2TSNPath
+// }
+
+
+// func (kpath_set *KPath_Set)Getkpathbymethod(method string) []*KPath{
+// 	method_path_set := new_KPath_Set()
+// 	for _,path := range kpath_set.CAN2TSNPaths{
+// 		// fmt.Println(path.Method,method)
+// 		if path.Method == method {
+// 			method_path_set.CAN2TSNPaths =append(method_path_set.CAN2TSNPaths, path)
+// 		}
+// 	}
+// 	return method_path_set.CAN2TSNPaths
+// }
+
+func (ks *KPath_Set) GetKPathByMethod(m string) []*KPath {
+    ret := make([]*KPath, len(ks.CAN2TSNPaths))
+    for i, k := range ks.CAN2TSNPaths {
+        if k != nil && k.Method == m { ret[i] = k }
+    }
+    return ret
 }
 
-func (kpath_set *KPath_Set)Getkpathbymethod(method string) []*KPath{
-	method_kpath_set := new_KPath_Set()
-	for _,path := range kpath_set.CAN2TSNPaths{
-		// fmt.Println(path.Method,method)
-		if path.Method == method {
-			method_kpath_set.CAN2TSNPaths =append(method_kpath_set.CAN2TSNPaths, path)
-		}
-	}
-	return method_kpath_set.CAN2TSNPaths
+func (ps *Path_set) GetPathByMethod(m string) []*Path {
+    ret := make([]*Path, len(ps.CAN2TSNPath))
+    for i, p := range ps.CAN2TSNPath {
+        if p != nil && p.Method == m {
+            ret[i] = p           // 只有滿足條件才放進去
+        }                        // 其餘情況保持預設 nil
+    }
+    return ret
 }

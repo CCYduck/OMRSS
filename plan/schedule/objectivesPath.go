@@ -9,9 +9,10 @@ import (
 )
 
 // Objectives
-func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prime *path.Path_set,m string) ([4]float64, int) {
+func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prime *path.Path_set,m string) ([4]float64,int) {
 	
-	S := network.Flow_Set.Input_TSNflow_set()
+	
+	S := network.Flow_Set.Input_flow_set()
 	S_prime := network.Flow_Set.BG_flow_set()
 
 	// fmt.Println(len(II.TSNPath),len(II.AVBPath),len(II.CAN2TSNPath),len(II_prime.TSNPath),len(II_prime.AVBPath))
@@ -47,19 +48,35 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 	// O1
 	for nth, path := range II.TSNPath {
 		schedulability := schedulability(0, S.TSNFlows[nth], path, linkmap, network.Bandwidth, network.HyperPeriod)
-		tsn_can_failed_count += 1 - schedulability
+		
+
+		if schedulability == 1{
+			addBytes(linkmap, S.TSNFlows[nth], path, network.HyperPeriod)
+		}else{
+			tsn_can_failed_count += 1 - schedulability
+		}
 		//fmt.Printf("Input TSN route%d: %b \n", nth, schedulability)
 	}
-	
-	method_path := II.Getpathbymethod(m)
-	// fmt.Printf("len(paths)=%d len(flows)=%d  Method=%s\n",len(method_path), len(S.FindMethod(m)), m)
+
+	flows := S.FindMethod(m)
+	method_path := II.GetPathByMethod(m)
+
+	fmt.Printf("len(paths)=%d len(flows)=%d Method=%s Method=%s\n",len(method_path), len(S.FindMethod(m)),II.CAN2TSNPath[0].Method, m)
 	// fmt.Println(len(method_path))
 	for nth, path := range method_path {
+		// if path == nil {                     // 這條 flow 找不到可行路
+		// 	tsn_can_failed_count++
+		// 	continue
+		// }
 		// fmt.Printf("BackGround TSN route%d: %b \n", nth, schedulability)
 		// fmt.Println(len(S.Encapsulate))
 		// fmt.Println()
-		schedulability := schedulability(0, S.FindMethod(m)[nth], path, linkmap, network.Bandwidth, network.HyperPeriod)
-		tsn_can_failed_count += 1 - schedulability
+		schedulability := schedulability(0, flows[nth], path, linkmap, network.Bandwidth, network.HyperPeriod)
+		if schedulability == 1{
+			addBytes(linkmap, S.TSNFlows[nth], path, network.HyperPeriod)
+		}else{
+			tsn_can_failed_count += 1 - schedulability
+		}
 	}
 
 	// O2 and O4
@@ -67,14 +84,17 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 		wcd := WCD(path, X, S.AVBFlows[nth], network.Flow_Set)
 		wcd_sum += wcd
 		schedulability := schedulability(wcd, S.AVBFlows[nth], path, linkmap, network.Bandwidth, network.HyperPeriod)
-		avb_failed_count += 1 - schedulability
+		if schedulability == 1{
+			addBytes(linkmap, S.TSNFlows[nth], path, network.HyperPeriod)
+		}else{
+			avb_failed_count += 1 - schedulability
+		}
 		//fmt.Printf("Input AVB route%d: %b \n", nth, schedulability)
 	}
 
 	// O3 bandwidth_userate
-	totalBytes := 0
 	for _, used := range linkmap {
-		totalBytes += int(used)           // linkmap 存的是 bytes
+		bandwidth_userate += int(used)           // linkmap 存的是 bytes
 	}
 
 
@@ -87,7 +107,8 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 	cost += avb_failed_count * 1000000
 	cost += tsn_can_failed_count * 100000000
 	// fmt.Println(linkmap)
-	return obj, cost
+
+	return obj,cost
 }
 
 func schedulability(wcd time.Duration, flow *flow.Flow, path *path.Path, linkmap map[string]float64, bandwidth float64, hyperPeriod int) int {
@@ -125,26 +146,26 @@ func schedulable(node *path.Node, parentID int, flow *flow.Flow, route *path.Pat
 			// }
 			
 			// Simplex
-			if !(link.FromNodeID == flow.Source || link.ToNodeID == flow.Destination) {
-				key := ""
-				key1 := fmt.Sprintf("%d>%d", link.FromNodeID, link.ToNodeID)
-				key2 := fmt.Sprintf("%d>%d", link.ToNodeID, link.FromNodeID)
-				if _, ok := linkmap[key1]; !ok {
-					if _, ok := linkmap[key2]; !ok {
-						key = key1
-					} else {
-						key = key2
-					}
+			// if !(link.FromNodeID == flow.Source || link.ToNodeID == flow.Destination) {
+			// 	// key := ""
+			// 	key1 := fmt.Sprintf("%d>%d", link.FromNodeID, link.ToNodeID)
+			// 	key2 := fmt.Sprintf("%d>%d", link.ToNodeID, link.FromNodeID)
+			// 	if _, ok := linkmap[key1]; !ok {
+			// 		if _, ok := linkmap[key2]; !ok {
+			// 			key = key1
+			// 		} else {
+			// 			key = key2
+			// 		}
 			
-				} else {
-					key = key1
-				}
+			// 	} else {
+			// 		key = key1
+			// 	}
 			
-				linkmap[key] += flow.DataSize * float64((hyperPeriod / flow.Period))
-				if linkmap[key] > bandwidth {
-					return false, linkmap
-				}
-			}
+			// 	// linkmap[key] += flow.DataSize * float64((hyperPeriod / flow.Period))
+			// 	// if linkmap[key] > bandwidth {
+			// 	// 	return false, linkmap
+			// 	// }
+			// }
 
 			nextnode := route.GetNodeByID(link.ToNodeID)
 			schedulable, updatedLinkmap := schedulable(nextnode, node.ID, flow, route, linkmap, bandwidth, hyperPeriod)
@@ -156,4 +177,16 @@ func schedulable(node *path.Node, parentID int, flow *flow.Flow, route *path.Pat
 	return true, linkmap
 }
 
-
+func addBytes(linkmap map[string]float64, flow *flow.Flow, path *path.Path, hyperPeriod int) {
+    if path == nil { return }
+    for _, n := range path.Nodes {
+        for _, c := range n.Connections {
+            // 只記「與路徑方向相同」的 edge
+            if n.ID == c.FromNodeID {
+                key := fmt.Sprintf("%d>%d", c.FromNodeID, c.ToNodeID)
+                if _, ok := linkmap[key]; ok { continue } // 已經算過
+                linkmap[key] = flow.DataSize * float64(hyperPeriod/flow.Period)
+            }
+        }
+    }
+}

@@ -41,7 +41,7 @@ type KP struct {
 	KPath      	*path.KPath_Set
 	InputKPath 	*path.KPath_Set
 	BGKPath    	*path.KPath_Set
-	Objs_kp   	[4]float64
+	Objs_kp   	map[string]Result
 	Timer      	*algo_timer.Timer
 }
 
@@ -56,6 +56,7 @@ type OSRO struct {
 	InputKPaths   	*path.KPath_Set
 	BGPath		  	*path.Path_set
 	BGKPaths 	  	*path.KPath_Set
+	MethodKPaths 	map[string][]*path.KPath
 	Objs_osro   	[5]Result        // 200ms{o1, o2, o3, o4} 400ms{o1, o2, o3, o4} 600ms{o1, o2, o3, o4}, 800ms{o1, o2, o3, o4}, 1000ms{o1, o2, o3, o4}
 	Timer         	[5]*algo_timer.Timer // 200ms{time} 400ms{time} 600ms{time}, 800ms{time}, 1000ms{time}
 	Method_Number 	int                  // 0: TOP K minimum weight 1: Increasing Arithmetic Sequence 2: Average Arithmetic Sequence

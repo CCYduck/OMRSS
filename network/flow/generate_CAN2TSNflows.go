@@ -33,7 +33,6 @@ func (flow_set *Flows) Generate_CAN2TSN_Flows(CANnode []int, importantCAN int, u
 
 		method_struct := &Method{
 			Method_Name:       name,	
-
 			CAN2TSN_Delay:     time.Since(start),
 			CAN2TSN_O1_Drop:   fsCopy.O1_Drop,
 			CAN2TSNFlows:      make([]*Flow, 0, len(fsCopy.CAN2TSN_Flows)),

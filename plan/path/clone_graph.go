@@ -59,3 +59,10 @@ func BuildGraphFromTopology(t *topology.Topology) *Graph {
 
 	return g
 }
+
+func CloneKPath(src *KPath) *KPath {
+    // -------最簡單：淺拷貝--------
+    cp := *src        // value copy
+    // 若還有 slice / map 欄位要深拷，請另外處理
+    return &cp
+}

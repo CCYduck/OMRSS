@@ -259,11 +259,4 @@ func findConnectionInNode(node *topology.Node, toID int) *topology.Connection {
 // 	return false
 // }
 
-// func (ps *Path_set) GetPathByMethod(m string) []*Path {
-//     ret := make([]*Path, len(ps.CAN2TSNPath))
-//     for i, p := range ps.CAN2TSNPath {
-//         if p != nil && p.Method != m { ret[i] = nil } else { ret[i] = p }
-//     }
-//     return ret
-// }
 
