@@ -79,3 +79,25 @@ func loopcompare_complex(a, b []int) bool {
 	}
 	return true
 }
+
+// 回傳這條路徑從 Source → Destination 的有序連線切片
+func (p *Path) GetLinks() []*Connection {
+    var links []*Connection
+    // IDs 裡儲存了節點走訪順序
+    for i := 0; i < len(p.IDs)-1; i++ {
+        fromID := p.IDs[i]
+        toID   := p.IDs[i+1]
+        node := p.GetNodeByID(fromID)
+        if node == nil {
+            continue
+        }
+        // 在這個節點的 Connections 找到正確的那一條
+        for _, c := range node.Connections {
+            if c.ToNodeID == toID {
+                links = append(links, c)
+                break
+            }
+        }
+    }
+    return links
+}

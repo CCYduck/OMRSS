@@ -23,7 +23,6 @@ func (flows *Flows) BG_flow_set() *Flows {
 }
 
 func (flows *Flows) FindMethod(methodname string) []*Flow{
-
 	for _, method :=range flows.Encapsulate{
 		if method.Method_Name == methodname {
 			// fmt.Println(len(method.CAN2TSNFlows))

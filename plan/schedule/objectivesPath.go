@@ -58,10 +58,8 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 		//fmt.Printf("Input TSN route%d: %b \n", nth, schedulability)
 	}
 
-
-	
 	method_flows := S.FindMethod(m)
-	fmt.Println(len(S.Encapsulate[0].CAN2TSNFlows),len(II.CAN2TSNPath))
+	fmt.Println(len(method_flows),len(II.CAN2TSNPath))
 
 	fmt.Printf("len(paths)=%d len(flows)=%d Method=%s Method=%s\n",len(method_flows), len(S.Encapsulate[0].CAN2TSNFlows),II.CAN2TSNPath[0].Method, m)
 	// fmt.Println(len(method_path))
@@ -114,17 +112,26 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 }
 
 func schedulability(wcd time.Duration, flow *flow.Flow, path *path.Path, linkmap map[string]float64, bandwidth float64, hyperPeriod int) int {
-	r := wcd <= time.Duration(flow.Deadline)*time.Microsecond
+	// r := wcd <= time.Duration(flow.Deadline)*time.Microsecond
 	// if path == nil {            // guard-1
     //     return 0
     // }
-    node := path.GetNodeByID(flow.Source)
+    // node := path.GetNodeByID(flow.Source)
     // if node == nil {            // guard-2
     //     return 0
     // }
-	schedulable, _ := schedulable(node, -1, flow, path, linkmap, bandwidth, hyperPeriod)
+	// schedulable, _ := schedulable(node, -1, flow, path, linkmap, bandwidth, hyperPeriod)
 
-	if r && schedulable {
+	// if r && schedulable {
+	// 	return 1
+	// }
+	// return 0
+	if wcd > time.Duration(flow.Deadline)*time.Microsecond {
+        return 0
+    }
+	node := path.GetNodeByID(flow.Source)
+    schedulable, _ := schedulable(node, -1, flow, path, linkmap, bandwidth, hyperPeriod)
+    if schedulable {
 		return 1
 	}
 	return 0
@@ -134,40 +141,35 @@ func schedulable(node *path.Node, parentID int, flow *flow.Flow, route *path.Pat
 	for _, link := range node.Connections {
 		if link.ToNodeID == parentID {
 			continue
-
 		} else {
-			// // Duplex
+			//// Duplex
 			// if !(link.FromNodeID == flow.Source || link.ToNodeID == flow.Destination) {
 			// 	key := fmt.Sprintf("%d>%d", link.FromNodeID, link.ToNodeID)
-			// 	for _ ,stream := range flow.Streams{
-			// 		linkmap[key] += stream.DataSize
-			// 	} 
+			// 	linkmap[key] += flow.DataSize * float64((hyperPeriod / flow.Period))
 			// 	if linkmap[key] > bandwidth {
 			// 		return false, linkmap
 			// 	}
 			// }
-			
 			// Simplex
-			// if !(link.FromNodeID == flow.Source || link.ToNodeID == flow.Destination) {
-			// 	// key := ""
-			// 	key1 := fmt.Sprintf("%d>%d", link.FromNodeID, link.ToNodeID)
-			// 	key2 := fmt.Sprintf("%d>%d", link.ToNodeID, link.FromNodeID)
-			// 	if _, ok := linkmap[key1]; !ok {
-			// 		if _, ok := linkmap[key2]; !ok {
-			// 			key = key1
-			// 		} else {
-			// 			key = key2
-			// 		}
+			if !(link.FromNodeID == flow.Source || link.ToNodeID == flow.Destination) {
+				key := ""
+				key1 := fmt.Sprintf("%d>%d", link.FromNodeID, link.ToNodeID)
+				key2 := fmt.Sprintf("%d>%d", link.ToNodeID, link.FromNodeID)
+				if _, ok := linkmap[key1]; !ok {
+					if _, ok := linkmap[key2]; !ok {
+						key = key1
+					} else {
+						key = key2
+					}
 			
-			// 	} else {
-			// 		key = key1
-			// 	}
-			
-			// 	// linkmap[key] += flow.DataSize * float64((hyperPeriod / flow.Period))
-			// 	// if linkmap[key] > bandwidth {
-			// 	// 	return false, linkmap
-			// 	// }
-			// }
+				} else {
+					key = key1
+				}
+				linkmap[key] += flow.DataSize * float64((hyperPeriod / flow.Period))
+				if linkmap[key] > bandwidth {
+					return false, linkmap
+				}
+			}
 
 			nextnode := route.GetNodeByID(link.ToNodeID)
 			schedulable, updatedLinkmap := schedulable(nextnode, node.ID, flow, route, linkmap, bandwidth, hyperPeriod)
@@ -188,7 +190,7 @@ func addBytes(linkmap map[string]float64, flow *flow.Flow, path *path.Path, hype
 				// fmt.Printf("%d>%d  ", c.FromNodeID, c.ToNodeID)
                 key := fmt.Sprintf("%d>%d", c.FromNodeID, c.ToNodeID)
                 if _, ok := linkmap[key]; ok { continue } // 已經算過
-                linkmap[key] = flow.DataSize * float64(hyperPeriod/flow.Period)
+                linkmap[key] += flow.DataSize * float64(hyperPeriod / flow.Period)
             }
         }
     }

@@ -191,6 +191,7 @@ func (v2vedge *V2VEdge) GetV2VPath(terminal int) [][]int {
 // 依據節點 ID 切片，生成一個 *Path，其中每個節點都是新的 Node 物件
 func ConvertIDsToPath(ids []int, topo *topology.Topology) *Path {
 	p := &Path{
+		IDs:     make([]int, 0, len(ids)),
 		Nodes:  make([]*Node, 0, len(ids)),
 		Weight: 0,
 	}
@@ -200,8 +201,11 @@ func ConvertIDsToPath(ids []int, topo *topology.Topology) *Path {
 		if realNode == nil {
 			// 找不到對應節點，表示資料或路徑不一致，可直接 return p 或 return nil
 			fmt.Printf("Warning: Node with ID=%d not found in topology.\n", id)
-			continue
+			return nil
 		}
+
+		// 1) 塞 IDs
+		p.IDs = append(p.IDs, id)
 
 		// 建立 path.Node，帶入 shape 與必要資訊
 		node := &Node{

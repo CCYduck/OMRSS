@@ -84,6 +84,7 @@ func (path_set *Path_set)Getpathbymethod(method string) *Path_set{
 	method_path_set := new_Path_Set()
 	method_path_set.TSNPath = path_set.TSNPath
 	method_path_set.AVBPath = path_set.AVBPath
+	
 	for _,path := range path_set.CAN2TSNPath{
 		// fmt.Println(path.Method,method)
 		if path.Method == method {

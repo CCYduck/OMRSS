@@ -97,25 +97,26 @@ func (plan *OSRO) Initiate_Plan() {
 	// The timeout of each run is set as 100~1000 ms (200ms, 400ms, 600ms, 800ms, 1000ms)
 	
 	// method:= []string{"fifo", "priority", "obo", "wat"}
+
+	// 1) 先拿出 KPath 及 Path （整個 struct）
 	rawKPS := plan.KP.KPath
 	rawPS := plan.SP.Path
 
 	for ind,m := range method_list{
 
-		// 1) 先拿出 KPath 及 Path （整個 struct）
-		
-	
 		// 2) 用你改好的 Get*ByMethod 回傳一個完整的 struct
 		//    假設你已經把它改成返回 *KPath_Set / *Path_set
 		kpsByM := rawKPS.Getkpathbymethod(m)   
 		psByM  := rawPS.Getpathbymethod(m)
-	
+		// fmt.Println(m, kpsByM.CAN2TSNPaths[0].Method, psByM.CAN2TSNPath[0].Method)
+
 		// 3) 切出 Input / BG 兩份
 		psIn  := psByM.Input_Path_set(plan.Network.BG_TSN, plan.Network.BG_AVB)
 		psBG  := psByM.BG_Path_set(plan.Network.BG_TSN, plan.Network.BG_AVB)
 
 		// 4) 取出對應的 Flow slice，並驗證長度
 		flowsByM := plan.Network.Flow_Set.FindMethod(m)
+		// fmt.Println("flowsByM", len(flowsByM),len(psIn.CAN2TSNPath))
 		if len(flowsByM) != len(psIn.CAN2TSNPath) {
 			log.Fatalf("method %s: Flow 數 (%d) vs Path 數 (%d) 不吻合",
 				m, len(flowsByM), len(psIn.CAN2TSNPath))
@@ -144,13 +145,14 @@ func (plan *OSRO) Initiate_Plan() {
 		plan.SP.Objs_SP[ind].Obj    = objs
 		plan.SP.Objs_SP[ind].Method = m
 		plan.SP.Objs_SP[ind].Cost   = cost
+
 	}
-	fmt.Println(plan.SP.Objs_SP)
 
-	// for _, r := range plan.SP.Objs_SP {
-    // fmt.Printf("Method=%s  cost=%d  O=%v\n", r.Method, r.Cost, r.Obj)
 
-	// }
+	for _, r := range plan.SP.Objs_SP {
+    fmt.Printf("Method=%s  cost=%d  O=%v\n", r.Method, r.Cost, r.Obj)
+
+	}
 }
 
 //func (plan *plan3) Initiate_Plan() {
