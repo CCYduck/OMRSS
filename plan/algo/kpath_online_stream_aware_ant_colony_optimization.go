@@ -53,7 +53,7 @@ func (osro *OSRO) OSRO_Initial_Settings(network *network.Network, sp *path.Path_
 
     /* --- K-Paths --------------------------- */
     osro.KPath   = kp.Input_kpath_set(bg_tsn, bg_avb)   // full slice
-    osro.BGKPaths = kp.BG_kpath_set(bg_tsn, bg_avb)
+    // osro.BGKPaths = kp.BG_kpath_set(bg_tsn, bg_avb)
 
     // 如果要快取「同 method 的 k-path」可另外存
     osro.MethodKPaths = map[string][]*path.KPath{

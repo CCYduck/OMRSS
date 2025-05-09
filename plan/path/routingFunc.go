@@ -11,7 +11,7 @@ func (path_set *Path_set) Input_Path_set(bg_tsn_end int, bg_avb_end int) *Path_s
 
 	Input_path_set.TSNPath= append(Input_path_set.TSNPath, path_set.TSNPath[bg_tsn_end:]...)
 	Input_path_set.AVBPath = append(Input_path_set.AVBPath, path_set.AVBPath[bg_avb_end:]...)
-	// Input_path_set.CAN2TSNPath =append(Input_path_set.CAN2TSNPath,path_set.CAN2TSNPath... )
+	Input_path_set.CAN2TSNPath =append(Input_path_set.CAN2TSNPath,path_set.CAN2TSNPath... )
 
 	
 	return Input_path_set
@@ -80,28 +80,34 @@ func (kpath_set *KPath_Set) BG_kpath_set(bg_tsn_end int, bg_avb_end int) *KPath_
 	return BG_kpath_set
 }
 
-// func (path_set *Path_set)Getpathbymethod(method string) []*Path{
-// 	method_path_set := new_Path_Set()
-// 	for _,path := range path_set.CAN2TSNPath{
-// 		// fmt.Println(path.Method,method)
-// 		if path.Method == method {
-// 			method_path_set.CAN2TSNPath =append(method_path_set.CAN2TSNPath, path)
-// 		}
-// 	}
-// 	return method_path_set.CAN2TSNPath
-// }
+func (path_set *Path_set)Getpathbymethod(method string) *Path_set{
+	method_path_set := new_Path_Set()
+	method_path_set.TSNPath = path_set.TSNPath
+	method_path_set.AVBPath = path_set.AVBPath
+	for _,path := range path_set.CAN2TSNPath{
+		// fmt.Println(path.Method,method)
+		if path.Method == method {
+			method_path_set.CAN2TSNPath =append(method_path_set.CAN2TSNPath, path)
+		}
+	}
+	return method_path_set
+}
 
 
-// func (kpath_set *KPath_Set)Getkpathbymethod(method string) []*KPath{
-// 	method_path_set := new_KPath_Set()
-// 	for _,path := range kpath_set.CAN2TSNPaths{
-// 		// fmt.Println(path.Method,method)
-// 		if path.Method == method {
-// 			method_path_set.CAN2TSNPaths =append(method_path_set.CAN2TSNPaths, path)
-// 		}
-// 	}
-// 	return method_path_set.CAN2TSNPaths
-// }
+func (kpath_set *KPath_Set)Getkpathbymethod(method string) *KPath_Set{
+	method_kpath_set := new_KPath_Set()
+
+	method_kpath_set.TSNPaths = kpath_set.TSNPaths
+	method_kpath_set.AVBPaths = kpath_set.AVBPaths
+
+	for _,kpath := range kpath_set.CAN2TSNPaths{
+		// fmt.Println(path.Method,method)
+		if kpath.Method == method {
+			method_kpath_set.CAN2TSNPaths =append(method_kpath_set.CAN2TSNPaths, kpath)
+		}
+	}
+	return method_kpath_set
+}
 
 func (ks *KPath_Set) GetKPathByMethod(m string) []*KPath {
     ret := make([]*KPath, len(ks.CAN2TSNPaths))

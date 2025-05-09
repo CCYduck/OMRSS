@@ -117,7 +117,7 @@ func new_CANFlow(period int, deadline int, datasize float64, HyperPeriod int) *F
 type Flows struct {
 	TSNFlows        []*Flow
 	AVBFlows        []*Flow
-	Encapsulate    []*Method
+	Encapsulate    	[]*Method
 }
 
 func new_Flows() *Flows {

@@ -17,7 +17,7 @@ type SP struct{
 	Path		*path.Path_set
 	InputFlow	*path.Path_set
 	BGFlow		*path.Path_set
-	Objs_SP		map[string]Result
+	Objs_SP		[4]Result
 	Timer 		*algo_timer.Timer
 }
 

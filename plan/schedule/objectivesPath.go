@@ -11,7 +11,7 @@ import (
 // Objectives
 func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prime *path.Path_set,m string) ([4]float64,int) {
 	
-	
+	// method_kpath :=new_KPath_Set()
 	S := network.Flow_Set.Input_flow_set()
 	S_prime := network.Flow_Set.BG_flow_set()
 
@@ -22,11 +22,12 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 		cost                 		int
 		tsn_can_failed_count		int           = 0
 		avb_failed_count     		int           = 0 // O2
-		bandwidth_userate    		int           = 0 // O3 ... pass
+		bandwidth_userate    		int           = 0 // O3 
 		wcd_sum              		time.Duration     // O4
 	)
 	linkmap := map[string]float64{}
-
+	
+	// method_path := II.Getpathbymethod(m)
 	// Round1: Schedule BG flow
 	// O1
 	for nth, path := range II_prime.TSNPath {
@@ -35,6 +36,7 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 		//fmt.Printf("BackGround TSN route%d: %b \n", nth, schedulability)
 	}
 
+	
 	// O2 and O4
 	for nth, path := range II_prime.AVBPath {
 		wcd := WCD(path, X, S_prime.AVBFlows[nth], network.Flow_Set)
@@ -48,8 +50,6 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 	// O1
 	for nth, path := range II.TSNPath {
 		schedulability := schedulability(0, S.TSNFlows[nth], path, linkmap, network.Bandwidth, network.HyperPeriod)
-		
-
 		if schedulability == 1{
 			addBytes(linkmap, S.TSNFlows[nth], path, network.HyperPeriod)
 		}else{
@@ -58,12 +58,14 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 		//fmt.Printf("Input TSN route%d: %b \n", nth, schedulability)
 	}
 
-	flows := S.FindMethod(m)
-	method_path := II.GetPathByMethod(m)
 
-	fmt.Printf("len(paths)=%d len(flows)=%d Method=%s Method=%s\n",len(method_path), len(S.FindMethod(m)),II.CAN2TSNPath[0].Method, m)
+	
+	method_flows := S.FindMethod(m)
+	fmt.Println(len(S.Encapsulate[0].CAN2TSNFlows),len(II.CAN2TSNPath))
+
+	fmt.Printf("len(paths)=%d len(flows)=%d Method=%s Method=%s\n",len(method_flows), len(S.Encapsulate[0].CAN2TSNFlows),II.CAN2TSNPath[0].Method, m)
 	// fmt.Println(len(method_path))
-	for nth, path := range method_path {
+	for nth, path := range II.CAN2TSNPath {
 		// if path == nil {                     // 這條 flow 找不到可行路
 		// 	tsn_can_failed_count++
 		// 	continue
@@ -71,9 +73,9 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 		// fmt.Printf("BackGround TSN route%d: %b \n", nth, schedulability)
 		// fmt.Println(len(S.Encapsulate))
 		// fmt.Println()
-		schedulability := schedulability(0, flows[nth], path, linkmap, network.Bandwidth, network.HyperPeriod)
+		schedulability := schedulability(0, method_flows[nth], path, linkmap, network.Bandwidth, network.HyperPeriod)
 		if schedulability == 1{
-			addBytes(linkmap, S.TSNFlows[nth], path, network.HyperPeriod)
+			addBytes(linkmap, method_flows[nth], path, network.HyperPeriod)
 		}else{
 			tsn_can_failed_count += 1 - schedulability
 		}
@@ -85,7 +87,7 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 		wcd_sum += wcd
 		schedulability := schedulability(wcd, S.AVBFlows[nth], path, linkmap, network.Bandwidth, network.HyperPeriod)
 		if schedulability == 1{
-			addBytes(linkmap, S.TSNFlows[nth], path, network.HyperPeriod)
+			addBytes(linkmap, S.AVBFlows[nth], path, network.HyperPeriod)
 		}else{
 			avb_failed_count += 1 - schedulability
 		}
@@ -97,10 +99,10 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 		bandwidth_userate += int(used)           // linkmap 存的是 bytes
 	}
 
-
+	
 	obj[0] = float64(tsn_can_failed_count)       // O1
 	obj[1] = float64(avb_failed_count)           // O2
-	obj[2] = float64(bandwidth_userate)          // O3 ... pass
+	obj[2] = float64(bandwidth_userate)          // O3 
 	obj[3] = float64(wcd_sum / time.Microsecond) // O4
 
 	cost += int(wcd_sum/time.Microsecond) * 1
@@ -108,18 +110,18 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 	cost += tsn_can_failed_count * 100000000
 	// fmt.Println(linkmap)
 
-	return obj,cost
+	return obj, cost
 }
 
 func schedulability(wcd time.Duration, flow *flow.Flow, path *path.Path, linkmap map[string]float64, bandwidth float64, hyperPeriod int) int {
 	r := wcd <= time.Duration(flow.Deadline)*time.Microsecond
-	if path == nil {            // guard-1
-        return 0
-    }
+	// if path == nil {            // guard-1
+    //     return 0
+    // }
     node := path.GetNodeByID(flow.Source)
-    if node == nil {            // guard-2
-        return 0
-    }
+    // if node == nil {            // guard-2
+    //     return 0
+    // }
 	schedulable, _ := schedulable(node, -1, flow, path, linkmap, bandwidth, hyperPeriod)
 
 	if r && schedulable {
@@ -183,6 +185,7 @@ func addBytes(linkmap map[string]float64, flow *flow.Flow, path *path.Path, hype
         for _, c := range n.Connections {
             // 只記「與路徑方向相同」的 edge
             if n.ID == c.FromNodeID {
+				// fmt.Printf("%d>%d  ", c.FromNodeID, c.ToNodeID)
                 key := fmt.Sprintf("%d>%d", c.FromNodeID, c.ToNodeID)
                 if _, ok := linkmap[key]; ok { continue } // 已經算過
                 linkmap[key] = flow.DataSize * float64(hyperPeriod/flow.Period)
