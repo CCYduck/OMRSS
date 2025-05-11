@@ -84,7 +84,7 @@ func (path_set *Path_set)Getpathbymethod(method string) []*Path{
 	method_path_set := new_Path_Set()
 	for _,path := range path_set.CAN2TSNPath{
 		// fmt.Printf("%v",path.Nodes[0].ID)
-
+		// fmt.Println(path.Method,method)
 		if path.Method == method {
 			method_path_set.CAN2TSNPath =append(method_path_set.CAN2TSNPath, path)
 		}

@@ -81,10 +81,10 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 		bandwidth_userate += int(used)           // linkmap 存的是 bytes
 	}
 	// fmt.Printf("method=%s, used links=%d, totalBytes=%d\n", m, len(linkmap), bandwidth_userate)
-
+	// fmt.Println(linkmap)
 	obj[0] = float64(tsn_can_failed_count)       // O1
 	obj[1] = float64(avb_failed_count)           // O2
-	obj[2] = float64(bandwidth_userate)          // O3 ... pass
+	obj[2] = float64(bandwidth_userate)          // O3 
 	obj[3] = float64(wcd_sum / time.Microsecond) // O4
 
 	cost += int(wcd_sum/time.Microsecond) * 1
@@ -96,6 +96,7 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 
 func schedulability(wcd time.Duration, flow *flow.Flow, path *path.Path, linkmap map[string]float64, bandwidth float64, hyperPeriod int) int {
 	r := wcd <= time.Duration(flow.Deadline)*time.Microsecond
+	fmt.Println(wcd, time.Duration(flow.Deadline)*time.Microsecond)
 	if path == nil {            // guard-1
         return 0
     }
@@ -104,7 +105,7 @@ func schedulability(wcd time.Duration, flow *flow.Flow, path *path.Path, linkmap
         return 0
     }
 	schedulable, _ := schedulable(node, -1, flow, path, linkmap, bandwidth, hyperPeriod)
-
+	fmt.Printf("wcd: %v  schedule : %v \n",r,schedulable)
 	if r && schedulable {
 		return 1
 	}
@@ -117,27 +118,39 @@ func schedulable(node *path.Node, parentID int, flow *flow.Flow, route *path.Pat
 			continue
 
 		} else {
-			// Simplex
+
+			// Duplex
 			if !(link.FromNodeID == flow.Source || link.ToNodeID == flow.Destination) {
-				key := ""
-				key1 := fmt.Sprintf("%d>%d", link.FromNodeID, link.ToNodeID)
-				key2 := fmt.Sprintf("%d>%d", link.ToNodeID, link.FromNodeID)
-				if _, ok := linkmap[key1]; !ok {
-					if _, ok := linkmap[key2]; !ok {
-						key = key1
-					} else {
-						key = key2
-					}
-			
-				} else {
-					key = key1
+				key := fmt.Sprintf("%d>%d", link.FromNodeID, link.ToNodeID)
+				for _,stream := range flow.Streams{
+					linkmap[key] +=stream.DataSize
 				}
-			
-				linkmap[key] += flow.DataSize * (float64(hyperPeriod) / float64(flow.Period))
 				if linkmap[key] > bandwidth {
 					return false, linkmap
 				}
 			}
+			// // Simplex
+			// if !(link.FromNodeID == flow.Source || link.ToNodeID == flow.Destination) {
+			// 	key := ""
+			// 	key1 := fmt.Sprintf("%d>%d", link.FromNodeID, link.ToNodeID)
+			// 	key2 := fmt.Sprintf("%d>%d", link.ToNodeID, link.FromNodeID)
+			// 	if _, ok := linkmap[key1]; !ok {
+			// 		if _, ok := linkmap[key2]; !ok {
+			// 			key = key1
+			// 		} else {
+			// 			key = key2
+			// 		}
+			
+			// 	} else {
+			// 		key = key1
+			// 	}
+			// 	for _,stream := range flow.Streams{
+			// 		linkmap[key] +=stream.DataSize
+			// 	}
+			// 	if linkmap[key] > bandwidth {
+			// 		return false, linkmap
+			// 	}
+			// }
 			nextnode := route.GetNodeByID(link.ToNodeID)
 			schedulable, updatedLinkmap := schedulable(nextnode, node.ID, flow, route, linkmap, bandwidth, hyperPeriod)
 			if !schedulable {

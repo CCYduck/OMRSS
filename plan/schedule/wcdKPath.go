@@ -2,9 +2,10 @@ package schedule
 
 import (
 	// "fmt"
+	// "fmt"
 	"src/network/flow"
-	"time"
 	"src/plan/path"
+	"time"
 )
 
 // Worse-Case Delay
@@ -125,16 +126,21 @@ func interfere_from_tsn(link *path.Connection, KPath_set *path.KPath_Set, flow_s
 // The known time occupied by TSN packets during transmission
 func interfere_from_c2t(link *path.Connection, KPath_set *path.KPath_Set, flow_set *flow.Flows) time.Duration {
 	// Occupied bytes by TSN
+
+	// fmt.Println(len(KPath_set.CAN2TSNPaths), len(flow_set.Encapsulate[0].CAN2TSNFlows))
 	var occupiedbytes float64
-	for _, c2t_kpath := range KPath_set.CAN2TSNPaths {
+	for nth, c2t_kpath := range KPath_set.CAN2TSNPaths {
 		for _, path := range c2t_kpath.Paths {
+			
 			if path == nil { continue } 
 			node := path.GetNodeByID(link.FromNodeID)
 			if node != nil {
 				for _, conn := range node.Connections {
 					if conn.ToNodeID == link.ToNodeID {
 						// occupiedbytes += datasize * (hyperPeriod / period)
-						occupiedbytes += flow_set.Encapsulate[0].BytesSent
+						for _,stream := range flow_set.Encapsulate[0].CAN2TSNFlows[nth].Streams{
+							occupiedbytes+= stream.DataSize
+						}
 					}
 				}
 			}

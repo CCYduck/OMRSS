@@ -35,6 +35,9 @@ func (osro *OSRO) OSRO_Initial_Settings(network *network.Network, sp *path.Path_
 	// fmt.Println(len(osro.KPath.TSNPaths),len(osro.KPath.AVBPaths),len(osro.KPath.CAN2TSNPaths))
 	osro.InputPath 	= sp.Input_Path_set(bg_tsn, bg_avb)
 	osro.InputPath.CAN2TSNPath =  sp.Getpathbymethod(method)
+	osro.KPath.CAN2TSNPaths = osro.KPath.Getkpathbymethod(method)
+	// fmt.Println(len(osro.KPath.CAN2TSNPaths))
+
 	osro.BGPath 	= sp.BG_Path_set(bg_tsn, bg_avb)
 	// osro.InputPath.Show_Path_Set()
 	

@@ -68,16 +68,20 @@ func KShortestPath(Network *network.Network) *KPath_Set{
 	for _, m := range Network.Flow_Set.Encapsulate {   // 每種封裝方法
 		for idx, flow := range m.CAN2TSNFlows {             // 每條 CAN→TSN flow
 			key := sd{flow.Source, flow.Destination}
+			
 			if kp, ok := userage_path[key]; ok {
 				// 已經算過，直接使用
 				// fmt.Println(kp.Method)
-				kp.Method = m.Method_Name
-				// fmt.Println(m.Method_Name)
-				kpath_set.CAN2TSNPaths = append(kpath_set.CAN2TSNPaths, kp)
+				copyKP := CloneKPath(kp)
+				copyKP.Method = m.Method_Name
+				kpath_set.CAN2TSNPaths = append(kpath_set.CAN2TSNPaths, copyKP)
 			}else{
-				kp := BuildKPath(k, flow.Source, flow.Destination, Network.Graph_Set.CAN2TSNGraphs[idx])
+				kp := BuildKPath(k, flow.Source, flow.Destination,
+					Network.Graph_Set.CAN2TSNGraphs[idx])
+				kp.Method = m.Method_Name
 				kpath_set.CAN2TSNPaths = append(kpath_set.CAN2TSNPaths, kp)
-				userage_path[key] = kp
+
+				userage_path[key] = kp      // 只存「第一份」作為 canonical
 			}
 		}
 	}

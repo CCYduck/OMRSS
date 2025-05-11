@@ -59,3 +59,13 @@ func BuildGraphFromTopology(t *topology.Topology) *Graph {
 
 	return g
 }
+
+func CloneKPath(src *KPath) *KPath {
+    // 1. 複製結構本身（值拷貝）
+    dup := *src                          // 複製成另一份 KPath
+
+    // 2. 再複製 slice，避免 append 時共用底層陣列
+    dup.Paths = append([]*Path(nil), src.Paths...)
+
+    return &dup
+}
