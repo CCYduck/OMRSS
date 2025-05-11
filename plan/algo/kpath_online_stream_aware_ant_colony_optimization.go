@@ -43,7 +43,7 @@ func (osro *OSRO) OSRO_Initial_Settings(network *network.Network, sp *path.Path_
 	
 
 	osro.PRM = compute_prm(osro.KPath)
-	osro.VB = compute_vb(osro.KPath, network.Flow_Set)
+	osro.VB = compute_vb(osro.KPath, network.Flow_Set, method)
 
 	osro.Timer[0] = algo_timer.NewTimer()
 	fmt.Println(method)
@@ -183,7 +183,7 @@ func compute_prm(X *path.KPath_Set) *Pheromone {
 	return pheromone
 }
 
-func compute_vb(X *path.KPath_Set, flow_set *flow.Flows) *Visibility {
+func compute_vb(X *path.KPath_Set, flow_set *flow.Flows, method string) *Visibility {
 	var preference float64 = 2.
 	Input_flow_set := flow_set.Input_TSNflow_set()
 	BG_flow_set := flow_set.BG_flow_set()
@@ -235,12 +235,12 @@ func compute_vb(X *path.KPath_Set, flow_set *flow.Flows) *Visibility {
 
 			if nth >= bg_avb {
 				//fmt.Printf("Input flow%d tree%d \n", nth, kth)
-				value := mult / float64(schedule.WCD(z, X, Input_flow_set.AVBFlows[nth-bg_avb], flow_set))
+				value := mult / float64(schedule.WCD(z, X, Input_flow_set.AVBFlows[nth-bg_avb], flow_set, method))
 				v = append(v, value)
 
 			} else {
 				//fmt.Printf("Backgourd flow%d tree%d \n", nth, kth)
-				value := mult / float64(schedule.WCD(z, X, BG_flow_set.AVBFlows[nth], flow_set))
+				value := mult / float64(schedule.WCD(z, X, BG_flow_set.AVBFlows[nth], flow_set, method))
 				v = append(v, value)
 			}
 		}
@@ -353,7 +353,7 @@ func epoch(network *network.Network, osro *OSRO, timeout_index int, method strin
 	// fmt.Printf("Select input routing %v \n", input_k_location)
 	// fmt.Printf("Select background routing %v \n", bg_k_location) // BG ... pass
 	osro.Timer[timeout_index].TimerStop()
-	obj_list, cost:= schedule.OBJ(network, osro.KPath, II, osro.BGPath,method)
+	obj_list, cost:= schedule.OBJ(network, osro.KPath, II, osro.BGPath, method)
 	//obj, cost := Obj(network, X, II, II_prime) // BG ... pass
 	osro.Timer[timeout_index].TimerStart()
 
@@ -376,8 +376,8 @@ func epoch(network *network.Network, osro *OSRO, timeout_index int, method strin
 			}
 		}
 	}
-
-	for nth, kpath := range osro.KPath.CAN2TSNPaths{
+	// osro.KPath.Getkpathbymethod(method)
+	for nth, kpath := range osro.KPath.Getkpathbymethod(method){
 		for kth := range kpath.Paths {
 			if nth < bg_tsn { // BG ... pass
 				//osro.PRM.TSN_PRM[nth][kth] *= osro.P

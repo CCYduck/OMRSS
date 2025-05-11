@@ -9,7 +9,7 @@ import (
 )
 
 // Worse-Case Delay
-func WCD(z *path.Path, KPath_set *path.KPath_Set, flow *flow.Flow, flow_set *flow.Flows) time.Duration {
+func WCD(z *path.Path, KPath_set *path.KPath_Set, flow *flow.Flow, flow_set *flow.Flows, method string) time.Duration {
 	end2end := time.Duration(0)
 	
 	// if z == nil { return 0 } 
@@ -18,7 +18,7 @@ func WCD(z *path.Path, KPath_set *path.KPath_Set, flow *flow.Flow, flow_set *flo
 	// if node == nil {                              // ⬅︎ guard‑2
     //     return 0          // 路徑不含 Source，直接當 0 (無干擾)
     // }
-	wcd := end2end_delay(node, -1, end2end, z, KPath_set, flow, flow_set)
+	wcd := end2end_delay(node, -1, end2end, z, KPath_set, flow, flow_set, method)
 	//fmt.Printf("max wcd: %v \n", wcd)
 
 	return wcd
@@ -26,7 +26,7 @@ func WCD(z *path.Path, KPath_set *path.KPath_Set, flow *flow.Flow, flow_set *flo
 
 // Use DFS to find all dataflow paths in the Route
 // Calculate the End to End Delay for each dataflow path and select the maximum one
-func end2end_delay(node *path.Node, parentID int, end2end time.Duration, z *path.Path, KPath_Set *path.KPath_Set , flow *flow.Flow, flow_set *flow.Flows) time.Duration {
+func end2end_delay(node *path.Node, parentID int, end2end time.Duration, z *path.Path, KPath_Set *path.KPath_Set , flow *flow.Flow, flow_set *flow.Flows, method string) time.Duration {
 	//fmt.Printf("%d: %v \n", node.ID, end2end)
 
 	// if node == nil { return end2end }  
@@ -42,11 +42,11 @@ func end2end_delay(node *path.Node, parentID int, end2end time.Duration, z *path
 			//per_hop += interfere_from_be(conn.Cost)
 			per_hop += interfere_from_avb(link, KPath_Set, flow.DataSize)
 			per_hop += interfere_from_tsn(link, KPath_Set, flow_set)
-			per_hop += interfere_from_c2t(link, KPath_Set, flow_set)
+			per_hop += interfere_from_c2t(link, KPath_Set, flow_set.FindMethod(method))
 			end2end += per_hop
 
 			nextnode := z.GetNodeByID(link.ToNodeID)
-			nextE2E := end2end_delay(nextnode, node.ID, end2end, z, KPath_Set, flow, flow_set)
+			nextE2E := end2end_delay(nextnode, node.ID, end2end, z, KPath_Set, flow, flow_set, method)
 
 			if maxE2E < nextE2E {
 				maxE2E = nextE2E
@@ -124,7 +124,7 @@ func interfere_from_tsn(link *path.Connection, KPath_set *path.KPath_Set, flow_s
 }
 
 // The known time occupied by TSN packets during transmission
-func interfere_from_c2t(link *path.Connection, KPath_set *path.KPath_Set, flow_set *flow.Flows) time.Duration {
+func interfere_from_c2t(link *path.Connection, KPath_set *path.KPath_Set, c2tflow []*flow.Flow) time.Duration {
 	// Occupied bytes by TSN
 
 	// fmt.Println(len(KPath_set.CAN2TSNPaths), len(flow_set.Encapsulate[0].CAN2TSNFlows))
@@ -138,7 +138,7 @@ func interfere_from_c2t(link *path.Connection, KPath_set *path.KPath_Set, flow_s
 				for _, conn := range node.Connections {
 					if conn.ToNodeID == link.ToNodeID {
 						// occupiedbytes += datasize * (hyperPeriod / period)
-						for _,stream := range flow_set.Encapsulate[0].CAN2TSNFlows[nth].Streams{
+						for _,stream := range c2tflow[nth].Streams{
 							occupiedbytes+= stream.DataSize
 						}
 					}

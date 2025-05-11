@@ -36,7 +36,7 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 
 	// O2 and O4
 	for nth, path := range II_prime.AVBPath {
-		wcd := WCD(path, X, S_prime.AVBFlows[nth], network.Flow_Set)
+		wcd := WCD(path, X, S_prime.AVBFlows[nth], network.Flow_Set , m)
 		wcd_sum += wcd
 		schedulability := schedulability(wcd, S_prime.AVBFlows[nth], path, linkmap, network.Bandwidth, network.HyperPeriod)
 		avb_failed_count += 1 - schedulability
@@ -69,7 +69,7 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 
 	// O2 and O4
 	for nth, path := range II.AVBPath {
-		wcd := WCD(path, X, S.AVBFlows[nth], network.Flow_Set)
+		wcd := WCD(path, X, S.AVBFlows[nth], network.Flow_Set, m)
 		wcd_sum += wcd
 		schedulability := schedulability(wcd, S.AVBFlows[nth], path, linkmap, network.Bandwidth, network.HyperPeriod)
 		avb_failed_count += 1 - schedulability
