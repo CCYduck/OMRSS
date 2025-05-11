@@ -15,33 +15,33 @@ type Result struct {
 
 type SP struct{
 	Path		*path.Path_set
-	InputFlow	*path.Path_set
-	BGFlow		*path.Path_set
-	Objs_SP		map[string]Result
+	InputPath	*path.Path_set
+	BGPath		*path.Path_set
+	Objs_SP		[]*Result
 	Timer 		*algo_timer.Timer
 }
 
-type SMT struct {
-	Trees      *routes.Trees_set
-	InputTrees *routes.Trees_set
-	BGTrees    *routes.Trees_set
-	Objs_smt   *[4]float64
-	Timer      *algo_timer.Timer
-}
+// type SMT struct {
+// 	Trees      *routes.Trees_set
+// 	InputTrees *routes.Trees_set
+// 	BGTrees    *routes.Trees_set
+// 	Objs_smt   *[4]float64
+// 	Timer      *algo_timer.Timer
+// }
 
-type MDTC struct {
-	Trees      *routes.Trees_set
-	InputTrees *routes.Trees_set
-	BGTrees    *routes.Trees_set
-	Objs_mdtc  *Result
-	Timer      *algo_timer.Timer
-}
+// type MDTC struct {
+// 	Trees      *routes.Trees_set
+// 	InputTrees *routes.Trees_set
+// 	BGTrees    *routes.Trees_set
+// 	Objs_mdtc  *Result
+// 	Timer      *algo_timer.Timer
+// }
 
 type KP struct {
 	KPath      	*path.KPath_Set
 	InputKPath 	*path.KPath_Set
 	BGKPath    	*path.KPath_Set
-	Objs_kp   	[4]float64
+	Objs_kp   	[]*Result
 	Timer      	*algo_timer.Timer
 }
 

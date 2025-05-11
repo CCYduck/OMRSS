@@ -11,12 +11,12 @@ import (
 func WCD(z *path.Path, KPath_set *path.KPath_Set, flow *flow.Flow, flow_set *flow.Flows) time.Duration {
 	end2end := time.Duration(0)
 	
-	if z == nil { return 0 } 
+	// if z == nil { return 0 } 
 	node := z.GetNodeByID(flow.Source)
 
-	if node == nil {                              // ⬅︎ guard‑2
-        return 0          // 路徑不含 Source，直接當 0 (無干擾)
-    }
+	// if node == nil {                              // ⬅︎ guard‑2
+    //     return 0          // 路徑不含 Source，直接當 0 (無干擾)
+    // }
 	wcd := end2end_delay(node, -1, end2end, z, KPath_set, flow, flow_set)
 	//fmt.Printf("max wcd: %v \n", wcd)
 
@@ -28,7 +28,7 @@ func WCD(z *path.Path, KPath_set *path.KPath_Set, flow *flow.Flow, flow_set *flo
 func end2end_delay(node *path.Node, parentID int, end2end time.Duration, z *path.Path, KPath_Set *path.KPath_Set , flow *flow.Flow, flow_set *flow.Flows) time.Duration {
 	//fmt.Printf("%d: %v \n", node.ID, end2end)
 
-	if node == nil { return end2end }  
+	// if node == nil { return end2end }  
 	maxE2E := end2end
 	for _, link := range node.Connections {
 		per_hop := time.Duration(0)
@@ -83,7 +83,7 @@ func interfere_from_avb(link *path.Connection, KPath_set *path.KPath_Set, datasi
 	var occupiedbytes float64
 	for _, avb_kpath := range KPath_set.AVBPaths {
 		for _, path := range avb_kpath.Paths {
-			if path == nil { continue } 
+			// if path == nil { continue } 
 			node := path.GetNodeByID(link.FromNodeID)
 			if node != nil {
 				for _, conn := range node.Connections {
@@ -105,7 +105,7 @@ func interfere_from_tsn(link *path.Connection, KPath_set *path.KPath_Set, flow_s
 	var occupiedbytes float64
 	for nth, tsn_kpath := range KPath_set.TSNPaths {
 		for _, path := range tsn_kpath.Paths {
-			if path == nil { continue } 
+			// if path == nil { continue } 
 			node := path.GetNodeByID(link.FromNodeID)
 			if node != nil {
 				for _, conn := range node.Connections {

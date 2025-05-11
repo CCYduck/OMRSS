@@ -3,6 +3,7 @@ package algo
 import (
 	"crypto/rand"
 	"fmt"
+
 	// "fmt"
 	"math"
 	"math/big"
@@ -30,10 +31,13 @@ func (osro *OSRO) OSRO_Initial_Settings(network *network.Network, sp *path.Path_
 	osro.KPath = path.KShortestPath(network)
 	timer.TimerEnd()
 
+	
 	// fmt.Println(len(osro.KPath.TSNPaths),len(osro.KPath.AVBPaths),len(osro.KPath.CAN2TSNPaths))
 	osro.InputPath 	= sp.Input_Path_set(bg_tsn, bg_avb)
-	osro.InputPath.CAN2TSNPath = sp.Getpathbymethod(method)
+	osro.InputPath.CAN2TSNPath =  sp.Getpathbymethod(method)
 	osro.BGPath 	= sp.BG_Path_set(bg_tsn, bg_avb)
+	// osro.InputPath.Show_Path_Set()
+	
 
 	osro.PRM = compute_prm(osro.KPath)
 	osro.VB = compute_vb(osro.KPath, network.Flow_Set)
@@ -97,7 +101,7 @@ func (osro *OSRO) OSRO_Run(network *network.Network, timeout_index int) Result {
 		// 	}
 		// }
 		for i := 1; ; i++ {
-            II := epoch(network, osro, timeout_index)
+            II := epoch(network, osro, timeout_index,method_name)
 
             _, newCost := schedule.OBJ(network, osro.KPath, II, osro.BGPath, method_name)
             _, oldCost := schedule.OBJ(network, osro.KPath, osro.InputPath, osro.BGPath, method_name)
@@ -340,13 +344,13 @@ func probability(osro *OSRO) (*path.Path_set, *path.Path_set, [2][]int, [2][]int
 	return II, II_prime, input_k_location, bg_k_location
 }
 
-func epoch(network *network.Network, osro *OSRO, timeout_index int) *path.Path_set {
+func epoch(network *network.Network, osro *OSRO, timeout_index int, method string) *path.Path_set {
 	II, _, input_k_location, _ := probability(osro)
 	//II, II_prime, input_k_location, bg_k_location := Probability(osro.KTrees, osro.VB, osro.PRM) // BG ... pass
 	// fmt.Printf("Select input routing %v \n", input_k_location)
 	// fmt.Printf("Select background routing %v \n", bg_k_location) // BG ... pass
 	osro.Timer[timeout_index].TimerStop()
-	obj_list, cost := schedule.OBJ(network, osro.KPath, II, osro.BGPath,"obo")
+	obj_list, cost:= schedule.OBJ(network, osro.KPath, II, osro.BGPath,method)
 	//obj, cost := Obj(network, X, II, II_prime) // BG ... pass
 	osro.Timer[timeout_index].TimerStart()
 
