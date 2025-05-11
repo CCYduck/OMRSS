@@ -6,6 +6,7 @@ import (
 	"time"
 	"encoding/json"
 	"log"
+	// "math"
 )
 
 func (flow_set *Flows) Generate_CAN2TSN_Flows(CANnode []int, importantCAN int, unimportantCAN int, hyperperiod int) {
@@ -86,11 +87,11 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 	}else if method=="wat"{
 		// can2tsnFlowSet.Method=method
 		// minLoad := 64.
-		safe_deadline := 1500
+		const guardBase = 500          // µs 讓「何時必須封裝」隨著佇列最緊迫的剩餘時間調整，而保留一段可以把封包真正送出去的 guard
 		for _, can2tsnFlow := range can2tsnFlowSet.CAN2TSN_Flows {
 			queue := &Queue{}
 			datasize_count := 0.
-			
+
 			for current_time := 0; current_time < hyperperiod; current_time += step {
 				queue.appendQueue(can2tsnFlow.getStreamsByCurrentTime(current_time))
 				queue.sortQueue(method, current_time)
@@ -103,6 +104,14 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 				}
 				queue.popQueue(drop)
 				
+				guard := guardBase + len(queue.Streams)*20          // 動態 guard
+				if len(queue.Streams) == 0 { continue }
+
+				safe_deadline := queue.Streams[0].FinishTime - current_time - guard
+				if safe_deadline < 0 { safe_deadline = 0 }
+
+				
+
 				// 2) 只要佇列裡 **還有** imminent stream，就一直封裝
 				for hasImminent(queue, current_time, safe_deadline)  {
 					head := 0
@@ -115,6 +124,24 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 					// 剪掉已處理 head 部分
 					queue.popQueue(head)
 				}
+				// for len(queue.Streams) > 0 {
+				// 	// 1. 更新當前安全期限
+				// 	guard := guardBase + len(queue.Streams)*20           // 動態 guard
+				// 	safeDeadline := queue.Streams[0].FinishTime - current_time - guard
+				// 	if safeDeadline < 0 { safeDeadline = 0 }
+			
+				// 	// 2. 盡量塞，除非即將超過 datasize_max
+				// 	if datasize_count + queue.Streams[0].DataSize > datasize_max ||
+				// 	   safeDeadline <= step {                            // 時間快到了
+				// 		can2tsnFlowSet.flushStream(can2tsnFlow,current_time,
+				// 						math.Max(datasize_count,64),deadline)
+				// 		datasize_count = 0
+				// 		continue
+				// 	}
+				// 	// 累積
+				// 	datasize_count += queue.Streams[0].DataSize
+				// 	queue.popQueue(1)
+				// }
 				
 			}
 			// 4. hyperperiod 結束後，佇列可能還有殘留，都打一包送掉

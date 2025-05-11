@@ -96,7 +96,7 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 
 func schedulability(wcd time.Duration, flow *flow.Flow, path *path.Path, linkmap map[string]float64, bandwidth float64, hyperPeriod int) int {
 	r := wcd <= time.Duration(flow.Deadline)*time.Microsecond
-	fmt.Println(wcd, time.Duration(flow.Deadline)*time.Microsecond)
+	// fmt.Println(wcd, time.Duration(flow.Deadline)*time.Microsecond)
 	if path == nil {            // guard-1
         return 0
     }
@@ -105,7 +105,7 @@ func schedulability(wcd time.Duration, flow *flow.Flow, path *path.Path, linkmap
         return 0
     }
 	schedulable, _ := schedulable(node, -1, flow, path, linkmap, bandwidth, hyperPeriod)
-	fmt.Printf("wcd: %v  schedule : %v \n",r,schedulable)
+	// fmt.Printf("wcd: %v  schedule : %v \n",r,schedulable)
 	if r && schedulable {
 		return 1
 	}

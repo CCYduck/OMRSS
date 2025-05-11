@@ -2,7 +2,7 @@ package plan
 
 import (
 	// "src/plan/path"
-	// "fmt"
+	"fmt"
 	"src/plan/algo"
 	"src/plan/schedule"
 )
@@ -136,9 +136,19 @@ func (plan *OSRO) Initiate_Plan() {
 			Method: m,
 			Cost:   cost,
 		})
+
+		fmt.Printf(" %v : O1: %f O2: %f O3: %f O4: %f \n",m , Objs_sp[0], Objs_sp[1], Objs_sp[2], Objs_sp[3])
+
 		// plan.SP.Objs_SP=append(plan.SP.Objs_SP, result)//要改SP 變成4個
 		// fmt.Printf("method=%s obj=%v\n", m, Objs_sp)
 	}
+	file := "osro_history-safe_deadline guard.xlsx"
+	var all []*algo.Result
+	for _, osro := range plan.OSRO_method {
+		all = append(all, osro.Objs_osro...) // 每種方法可能 append 多筆 epoch 結果
+	}
+	algo.SaveOSROExcel(file, all)
+	fmt.Println("Results appended to", file)
 }
 
 //func (plan *plan3) Initiate_Plan() {
