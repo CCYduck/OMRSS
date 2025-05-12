@@ -142,7 +142,7 @@ func (plan *OSRO) Initiate_Plan() {
 		// plan.SP.Objs_SP=append(plan.SP.Objs_SP, result)//要改SP 變成4個
 		// fmt.Printf("method=%s obj=%v\n", m, Objs_sp)
 	}
-	file := "osro_history-safe_deadline guard.xlsx"
+	file := "osro_history-safe_deadline guard--important_can 100 --unimportant_can 500 --input_tsn 30 --input_avb 70 --bg_tsn 30 --bg_avb 18 .xlsx"
 	var all []*algo.Result
 	for _, osro := range plan.OSRO_method {
 		all = append(all, osro.Objs_osro...) // 每種方法可能 append 多筆 epoch 結果
