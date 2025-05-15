@@ -61,6 +61,7 @@ func new_unimportantCAN(uc_period int, uc_deadline int) *unimportantCAN {
 type Stream struct {
 	Name        string
 	ArrivalTime int
+	SendTime	int
 	DataSize    float64
 	Deadline    int
 	FinishTime  int

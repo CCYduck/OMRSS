@@ -56,12 +56,27 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 	period := 5000
 	deadline := 5000
 	step 	 := 1000
+	canSpeedBps  := 1_000_000.0 	//CAN bandwidth 1 Mbps
+	bytesPerStep := canSpeedBps / 8 * float64(step) / 1_000_000.0 // = 125B
+
 	if method == "obo"{
+
+		send_queue := map[int]*Queue{}
+		getQ := func(dst int) *Queue {
+			if q, ok := send_queue[dst]; ok {
+				return q
+			}
+			q := &Queue{}
+			send_queue[dst] = q
+			return q
+		}
 		// can2tsnFlowSet.Method=method
 		for _, can2tsnFlow := range can2tsnFlowSet.CAN2TSN_Flows {
 			queue := &Queue{}
+
 			for current_time := 0; current_time < hyperperiod; current_time += step {
-				queue.appendQueue(can2tsnFlow.getStreamsByCurrentTime(current_time))
+				stream := can2tsnFlow.getStreamsByCurrentTime(current_time)
+				queue.appendQueue(stream)
 
 				// 1) 先把已逾期的丟掉 (跟你原本一樣)
 				drop := 0
@@ -69,21 +84,60 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 					can2tsnFlowSet.O1_Drop++
 					drop++
 				}
-				queue.popQueue(drop)
+				if drop > 0 {
+					queue.popQueue(drop)
+				}
+				
 	
 				// example:
 				// current_time=0 queue=[0_1, 0_2, 0_3, 0_4, 0_5] if 05 datasize_count>datasize_max, createCAN2TSNStream datasize_count = 0
 				// current_time=5000 queue=[0_5, 5000_1, 5000_2, 5000_3, 5000_4, 5000_5]
-				for len(queue.Streams) > 0 {					
+				for len(queue.Streams) > 0 {						
 					// 立即封裝一個 CAN → TSN
 					can2tsnFlowSet.flushStream(can2tsnFlow, current_time, datasize_max, deadline)
+
+					send_stream := queue.Streams[0]
+					send_stream.ArrivalTime = current_time
+					sq := getQ(can2tsnFlow.Destination)
+					sq.Streams=append(sq.Streams, send_stream)
 					// can2tsnFlowSet.DatasizeCount+= queue.Streams[0].DataSize
 					// can2tsnFlowSet.TSNFrameCount+=1
 					queue.popQueue(1)
 				}
+
 			}	
 		}
-	
+
+		for _,sq := range send_queue{
+			for currentTime := 0; currentTime < hyperperiod; currentTime += step {
+				remaining := bytesPerStep
+
+				i := 0
+				for i < len(sq.Streams) {
+					s := sq.Streams[i]
+
+					if s.FinishTime > 0 && s.FinishTime < currentTime {
+						can2tsnFlowSet.O1_Drop++
+						sq.Streams = append(sq.Streams[:i], sq.Streams[i+1:]...)
+						continue
+					}
+
+					if s.ArrivalTime > currentTime {
+						break
+					}
+
+					if float64(s.DataSize) > remaining {
+						break
+					}
+
+					// 傳送封包
+					remaining -= float64(s.DataSize)
+
+					// 從 queue 中移除
+					sq.Streams = append(sq.Streams[:i], sq.Streams[i+1:]...)
+				}
+			}
+		}
 	}else if method=="wat"{
 		// can2tsnFlowSet.Method=method
 		// minLoad := 64.
@@ -194,6 +248,7 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 			}
 		}
 	}
+	
 	
 
 }
@@ -316,6 +371,11 @@ func createCAN2TSNStream(arrival_time int, deadline int, datasize float64) *Stre
 	}
 
 	return newStream
+}
+
+type FlowKey struct {
+	Source      int
+	Destination int
 }
 
 type Queue struct {
