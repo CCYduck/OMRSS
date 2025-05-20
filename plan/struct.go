@@ -1,7 +1,7 @@
 package plan
 
 import (
-	"fmt"
+	// "fmt"
 	"src/network"
 	"src/plan/algo"
 )
@@ -53,7 +53,7 @@ func new_OSRO_Plan(network *network.Network, osaco_timeout int, osaco_K int, osa
 	OSRO.OSRO_IAS = &algo.OSRO{Timeout: osaco_timeout, K: osaco_K, P: osaco_P, Method_Number: 1}
 	for i:=0; i<4 ;i++{
 		OSRO.OSRO_method =append(OSRO.OSRO_method, &algo.OSRO{Timeout: osaco_timeout, K: osaco_K, P: osaco_P, Method_Number: 0})
-		fmt.Println(i)
+		// fmt.Println(i)
 	}
 	
 
