@@ -112,15 +112,18 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 		}
 
 		for _,sq := range send_queue{
+			fmt.Println(method, len(sq.Streams))
+			fmt.Println("Before ",can2tsnFlowSet.O1_Drop)
 			for currentTime := 0; currentTime < hyperperiod; currentTime += step {
 				sq.sortQueue(method, currentTime)
 				remaining := bytesPerStep
-
+				
 				i := 0
 				for i < len(sq.Streams) {
 					s := sq.Streams[i]
 
 					if s.FinishTime > 0 && s.FinishTime < currentTime {
+						fmt.Println(s.ArrivalTime)
 						can2tsnFlowSet.O1_Drop++
 						sq.Streams = append(sq.Streams[:i], sq.Streams[i+1:]...)
 						continue
@@ -139,12 +142,14 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 					// 從 queue 中移除
 					sq.Streams = append(sq.Streams[:i], sq.Streams[i+1:]...)
 				}
+				
 			}
+			fmt.Println("After ",can2tsnFlowSet.O1_Drop)
 		}
 	}else if method=="wat"{
 		// can2tsnFlowSet.Method=method
 		// minLoad := 64.
-		const guardBase = 500        // µs 讓「何時必須封裝」隨著佇列最緊迫的剩餘時間調整，而保留一段可以把封包真正送出去的 guard
+		const guardBase = 2000       // µs 讓「何時必須封裝」隨著佇列最緊迫的剩餘時間調整，而保留一段可以把封包真正送出去的 guard
 		
 		send_queue := map[int]*Queue{}
 		getQ := func(dst int) *Queue {
@@ -172,7 +177,7 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 				queue.popQueue(drop)
 				
 
-				guard := guardBase + len(queue.Streams)*50          // 動態 guard
+				guard := guardBase + len(queue.Streams) * 50          // 動態 guard
 				if len(queue.Streams) == 0 { continue }
 
 				// extra := int(float64(queue.Streams[0].FinishTime - current_time) * 0.30)
@@ -182,24 +187,25 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 				// 	guard = 1500
 				// }
 
-				safe_deadline := queue.Streams[0].FinishTime - current_time - guard
-				if safe_deadline < 0 { safe_deadline = 0 }
+				// safe_deadline := queue.Streams[0].FinishTime - current_time - guard
+				// if safe_deadline < 0 { safe_deadline = 0 }
 
 				
 
 				// 2) 只要佇列裡 **還有** imminent stream，就一直封裝
-				for hasImminent(queue, current_time, safe_deadline)  {
+				for hasImminent(queue, current_time, guard)  {
 					head := 0
 					for head < len(queue.Streams) && datasize_count + queue.Streams[head].DataSize < datasize_max{
 						datasize_count +=  queue.Streams[head].DataSize
 						send_stream := queue.Streams[head]
 						send_stream.ArrivalTime = current_time
 						sq := getQ(can2tsnFlow.Destination)
-						sq.Streams=append(sq.Streams, send_stream)
+						sq.Streams=append(sq.Streams, send_stream)			
 						head ++
 					}
 
-					can2tsnFlowSet.flushStream(can2tsnFlow, current_time, datasize_max , deadline)				
+					can2tsnFlowSet.flushStream(can2tsnFlow, current_time, datasize_max , deadline)	
+					
 					// 剪掉已處理 head 部分
 					queue.popQueue(head)
 					datasize_count = 0
@@ -217,9 +223,12 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 		 	}
 		}
 		for _,sq := range send_queue{
+			fmt.Println(method, len(sq.Streams))
+			fmt.Println("Before ",can2tsnFlowSet.O1_Drop)
 			for currentTime := 0; currentTime < hyperperiod; currentTime += step {
 				sq.sortQueue(method, currentTime)
 				remaining := bytesPerStep
+				
 
 				i := 0
 				for i < len(sq.Streams) {
@@ -227,6 +236,7 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 
 					if s.FinishTime > 0 && s.FinishTime < currentTime {
 						can2tsnFlowSet.O1_Drop++
+						fmt.Println(s.ArrivalTime)
 						sq.Streams = append(sq.Streams[:i], sq.Streams[i+1:]...)
 						continue
 					}
@@ -244,7 +254,9 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 					// 從 queue 中移除
 					sq.Streams = append(sq.Streams[:i], sq.Streams[i+1:]...)
 				}
+				
 			}
+			fmt.Println("After ",can2tsnFlowSet.O1_Drop)
 		}
 	}else{
 		send_queue := map[int]*Queue{}
@@ -331,6 +343,7 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 					s := sq.Streams[i]
 
 					if s.FinishTime > 0 && s.FinishTime < currentTime {
+						fmt.Println(s.ArrivalTime)
 						can2tsnFlowSet.O1_Drop++
 						sq.Streams = append(sq.Streams[:i], sq.Streams[i+1:]...)
 						continue
