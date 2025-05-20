@@ -24,6 +24,11 @@ func (flow_set *Flows) Generate_CAN2TSN_Flows(CANnode []int, importantCAN int, u
 	// encapsulate 
 	for _, name := range []string{"fifo", "priority", "obo", "wat"} {
 		fsCopy := can2tsnFlowSet.DeepCopyCAN2TSN()   // <- 自己寫或用 github.com/jinzhu/copier
+		// a := can2tsnFlowSet.CAN2TSN_Flows[0].CAN_Streams[0]
+		// b := fsCopy.CAN2TSN_Flows[0].CAN_Streams[0]
+
+		// fmt.Println("Same pointer?", a == b)
+
 		if fsCopy == nil { log.Println("deep copy failed"); continue }
 		fsCopy.O1_Drop = 0    
 		fsCopy.DatasizeCount = 0
@@ -34,7 +39,6 @@ func (flow_set *Flows) Generate_CAN2TSN_Flows(CANnode []int, importantCAN int, u
 
 		method_struct := &Method{
 			Method_Name:       name,	
-
 			CAN2TSN_Delay:     time.Since(start),
 			CAN2TSN_O1_Drop:   fsCopy.O1_Drop,
 			CAN2TSNFlows:      make([]*Flow, 0, len(fsCopy.CAN2TSN_Flows)),
@@ -109,7 +113,7 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 
 		for _,sq := range send_queue{
 			for currentTime := 0; currentTime < hyperperiod; currentTime += step {
-				sq.sortQueue("fifo", currentTime)
+				sq.sortQueue(method, currentTime)
 				remaining := bytesPerStep
 
 				i := 0
@@ -123,7 +127,8 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 					}
 
 					if s.ArrivalTime > currentTime {
-						break
+						i++
+						continue
 					}
 
 					if float64(s.DataSize) > remaining {
@@ -139,7 +144,7 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 	}else if method=="wat"{
 		// can2tsnFlowSet.Method=method
 		// minLoad := 64.
-		const guardBase = 3000        // µs 讓「何時必須封裝」隨著佇列最緊迫的剩餘時間調整，而保留一段可以把封包真正送出去的 guard
+		const guardBase = 500        // µs 讓「何時必須封裝」隨著佇列最緊迫的剩餘時間調整，而保留一段可以把封包真正送出去的 guard
 		
 		send_queue := map[int]*Queue{}
 		getQ := func(dst int) *Queue {
@@ -166,8 +171,16 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 				}
 				queue.popQueue(drop)
 				
+
 				guard := guardBase + len(queue.Streams)*50          // 動態 guard
 				if len(queue.Streams) == 0 { continue }
+
+				// extra := int(float64(queue.Streams[0].FinishTime - current_time) * 0.30)
+				// guard := guardBase + extra
+
+				// if guard > 1500 {
+				// 	guard = 1500
+				// }
 
 				safe_deadline := queue.Streams[0].FinishTime - current_time - guard
 				if safe_deadline < 0 { safe_deadline = 0 }
@@ -194,13 +207,13 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 			}
 			// 4. hyperperiod 結束後，佇列可能還有殘留，都打一包送掉
 			if len(queue.Streams) > 0 {	
-				    for _, stream := range queue.Streams {
-						stream.ArrivalTime = hyperperiod
-						sq := getQ(can2tsnFlow.Destination)
-						sq.Streams = append(sq.Streams, stream)
-					}	
-					can2tsnFlowSet.flushStream(can2tsnFlow, hyperperiod, datasize_max , deadline)
-					datasize_count = 0
+				for _, stream := range queue.Streams {
+					stream.ArrivalTime = hyperperiod
+					sq := getQ(can2tsnFlow.Destination)
+					sq.Streams = append(sq.Streams, stream)
+				}	
+				can2tsnFlowSet.flushStream(can2tsnFlow, hyperperiod, datasize_max , deadline)
+				datasize_count = 0
 		 	}
 		}
 		for _,sq := range send_queue{
@@ -219,7 +232,8 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 					}
 
 					if s.ArrivalTime > currentTime {
-						break
+						i++
+						continue
 					}
 
 					if float64(s.DataSize) > remaining {
@@ -245,7 +259,6 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 		for _, can2tsnFlow := range can2tsnFlowSet.CAN2TSN_Flows {
 			// can2tsnFlowSet.Method=method
 			queue := &Queue{}
-
 			datasize_count := 0.
 			// i := 0
 			for current_time := 0; current_time < hyperperiod; current_time += step {
@@ -283,10 +296,14 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 					}
 				}
 				
-
 				// if datasize_count > 0 && len(queue.Streams) > 0 && current_time % period == 0 {
 				if datasize_count > 0  && current_time % period == 0 {
 					can2tsnFlowSet.flushStream(can2tsnFlow, current_time, datasize_max , deadline)
+					for _, stream := range queue.Streams[:head] {
+							stream.ArrivalTime = current_time
+							sq := getQ(can2tsnFlow.Destination)
+							sq.Streams = append(sq.Streams, stream)
+					}
 					datasize_count = 0
 					queue.popQueue(head)
 					head = 0
@@ -294,11 +311,17 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 			}
 			if datasize_count > 0 {				
 				can2tsnFlowSet.flushStream(can2tsnFlow, hyperperiod, datasize_max , deadline)
+				for _, stream := range queue.Streams {
+					stream.ArrivalTime = hyperperiod
+					sq := getQ(can2tsnFlow.Destination)
+					sq.Streams = append(sq.Streams, stream)
+				}	
 				datasize_count = 0
-				
 			}
 		}
 		for _,sq := range send_queue{
+			fmt.Println(method, len(sq.Streams))
+			fmt.Println("Before ",can2tsnFlowSet.O1_Drop)
 			for currentTime := 0; currentTime < hyperperiod; currentTime += step {
 				sq.sortQueue(method, currentTime)
 				remaining := bytesPerStep
@@ -314,7 +337,8 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 					}
 
 					if s.ArrivalTime > currentTime {
-						break
+						i++
+						continue
 					}
 
 					if float64(s.DataSize) > remaining {
@@ -326,6 +350,7 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 					sq.Streams = append(sq.Streams[:i], sq.Streams[i+1:]...)
 				}
 			}
+			fmt.Println("After ",can2tsnFlowSet.O1_Drop)
 		}
 	}
 
@@ -348,8 +373,6 @@ type CAN2TSN_Flow struct {
 }
 
 func (can2tsnFlowSet *CAN2TSN_Flow_Set)flushStream(flow *CAN2TSN_Flow, now int, packedSize float64, dl int) {
-	
-	if packedSize < 64 {packedSize = 64}
 
 	stream := createCAN2TSNStream(now, dl, packedSize)
 	flow.CAN2TSN_Flow.Streams = append(flow.CAN2TSN_Flow.Streams, stream)
