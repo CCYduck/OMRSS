@@ -127,7 +127,7 @@ func (osro *OSRO) OSRO_Run(network *network.Network, timeout_index int) Result {
 		
 		fmt.Println()
 		fmt.Printf("result value: %v \n", result.Method)
-		fmt.Printf("O1: %f O2: %f O3: %f O4: %f \n", resultObj[0], resultObj[1], resultObj[2], resultObj[3])
+		fmt.Printf("O1-TSN Area Drop: %f O2: %f O3: %f O4: %f \n", resultObj[0], resultObj[1], resultObj[2], resultObj[3])
 		fmt.Println()
 
 		if resultObj[0] != 0 || resultObj[1] != 0 {

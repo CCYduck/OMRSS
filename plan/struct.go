@@ -8,7 +8,7 @@ import (
 
 type Result struct {
     Method string
-    Obj    [4]float64
+    Obj    [5]float64
 	Cost	int
 	Linkmap map[string]float64
 }

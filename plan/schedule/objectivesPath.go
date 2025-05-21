@@ -21,7 +21,7 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 		cost                 		int			  
 		tsn_can_failed_count		int           = 0
 		avb_failed_count     		int           = 0 // O2
-		bandwidth_userate    		int           = 0 // O3 ... pass
+		// bandwidth_userate    		int           = 0 // O3 ... pass
 		wcd_sum              		time.Duration     // O4
 	)
 	linkmap := map[string]float64{}
@@ -63,7 +63,7 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 		// fmt.Printf("BackGround TSN route%d: %b \n", nth, schedulability)
 		// fmt.Println(len(S.Encapsulate))
 		// fmt.Println()
-		schedulability := schedulability(0, method_flow[nth], path, linkmap, network.Bandwidth, network.HyperPeriod)
+		schedulability := schedulability(0, method_flow.CAN2TSNFlows[nth], path, linkmap, network.Bandwidth, network.HyperPeriod)
 		tsn_can_failed_count += 1 - schedulability
 	}
 
@@ -76,20 +76,18 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 		//fmt.Printf("Input AVB route%d: %b \n", nth, schedulability)
 	}
 
-	// O3 bandwidth_userate
-	for _, used := range linkmap {
-		bandwidth_userate += int(used)           // linkmap 存的是 bytes
-	}
 	// fmt.Printf("method=%s, used links=%d, totalBytes=%d\n", m, len(linkmap), bandwidth_userate)
 	// fmt.Println(linkmap)
-	obj[0] = float64(tsn_can_failed_count)       // O1
-	obj[1] = float64(avb_failed_count)           // O2
-	obj[2] = float64(bandwidth_userate)          // O3 
-	obj[3] = float64(wcd_sum / time.Microsecond) // O4
+	obj[0] = float64(tsn_can_failed_count + method_flow.CAN2TSN_O1_Drop + method_flow.CAN_Area_O1_Drop)       // O1
+	obj[1] = float64(avb_failed_count)           		// O2
+	obj[2] = float64(method_flow.BytesSent)          	// O3 
+	obj[3] = float64(wcd_sum / time.Microsecond) 		// O4
+
+
 
 	cost += int(wcd_sum/time.Microsecond) * 1
 	cost += avb_failed_count * 1000000
-	cost += tsn_can_failed_count * 100000000
+	cost += tsn_can_failed_count+ method_flow.CAN2TSN_O1_Drop + method_flow.CAN_Area_O1_Drop * 100000000
 	// fmt.Println(linkmap)
 	return obj, cost
 }

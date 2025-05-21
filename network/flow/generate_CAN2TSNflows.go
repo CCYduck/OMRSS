@@ -30,7 +30,8 @@ func (flow_set *Flows) Generate_CAN2TSN_Flows(CANnode []int, importantCAN int, u
 		// fmt.Println("Same pointer?", a == b)
 
 		if fsCopy == nil { log.Println("deep copy failed"); continue }
-		fsCopy.O1_Drop = 0    
+		fsCopy.O1_Encap_Drop = 0    
+
 		fsCopy.DatasizeCount = 0
 		fsCopy.TSNFrameCount = 0
 
@@ -40,7 +41,8 @@ func (flow_set *Flows) Generate_CAN2TSN_Flows(CANnode []int, importantCAN int, u
 		method_struct := &Method{
 			Method_Name:       name,	
 			CAN2TSN_Delay:     time.Since(start),
-			CAN2TSN_O1_Drop:   fsCopy.O1_Drop,
+			CAN2TSN_O1_Drop:   fsCopy.O1_Encap_Drop,
+			CAN_Area_O1_Drop:  fsCopy.O1_Decap_Drop,
 			CAN2TSNFlows:      make([]*Flow, 0, len(fsCopy.CAN2TSN_Flows)),
 		}
 		
@@ -85,7 +87,7 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 				// 1) 先把已逾期的丟掉 (跟你原本一樣)
 				drop := 0
 				for drop < len(queue.Streams) && current_time > queue.Streams[drop].FinishTime {
-					can2tsnFlowSet.O1_Drop++
+					can2tsnFlowSet.O1_Encap_Drop++
 					drop++
 				}
 				if drop > 0 {
@@ -112,8 +114,8 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 		}
 
 		for _,sq := range send_queue{
-			fmt.Println(method, len(sq.Streams))
-			fmt.Println("Before ",can2tsnFlowSet.O1_Drop)
+			// fmt.Println(method, len(sq.Streams))
+			// fmt.Println("Before ",can2tsnFlowSet.O1_Decap_Drop)
 			for currentTime := 0; currentTime < hyperperiod; currentTime += step {
 				sq.sortQueue(method, currentTime)
 				remaining := bytesPerStep
@@ -123,8 +125,8 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 					s := sq.Streams[i]
 
 					if s.FinishTime > 0 && s.FinishTime < currentTime {
-						fmt.Println(s.ArrivalTime)
-						can2tsnFlowSet.O1_Drop++
+						// fmt.Println(s.ArrivalTime)
+						can2tsnFlowSet.O1_Decap_Drop++
 						sq.Streams = append(sq.Streams[:i], sq.Streams[i+1:]...)
 						continue
 					}
@@ -144,12 +146,12 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 				}
 				
 			}
-			fmt.Println("After ",can2tsnFlowSet.O1_Drop)
+			// fmt.Println("After ",can2tsnFlowSet.O1_Decap_Drop)
 		}
 	}else if method=="wat"{
 		// can2tsnFlowSet.Method=method
 		// minLoad := 64.
-		const guardBase = 2000       // µs 讓「何時必須封裝」隨著佇列最緊迫的剩餘時間調整，而保留一段可以把封包真正送出去的 guard
+		const guardBase = 1500       // µs 讓「何時必須封裝」隨著佇列最緊迫的剩餘時間調整，而保留一段可以把封包真正送出去的 guard
 		
 		send_queue := map[int]*Queue{}
 		getQ := func(dst int) *Queue {
@@ -171,13 +173,13 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 				// 1) 先把已逾期的丟掉
 				drop := 0
 				for drop < len(queue.Streams) && current_time > queue.Streams[drop].FinishTime {
-					can2tsnFlowSet.O1_Drop++
+					can2tsnFlowSet.O1_Encap_Drop++
 					drop++
 				}
 				queue.popQueue(drop)
 				
 
-				guard := guardBase + len(queue.Streams) * 50          // 動態 guard
+				guard := guardBase + len(queue.Streams) * 100          // 動態 guard
 				if len(queue.Streams) == 0 { continue }
 
 				// extra := int(float64(queue.Streams[0].FinishTime - current_time) * 0.30)
@@ -223,8 +225,8 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 		 	}
 		}
 		for _,sq := range send_queue{
-			fmt.Println(method, len(sq.Streams))
-			fmt.Println("Before ",can2tsnFlowSet.O1_Drop)
+			// fmt.Println(method, len(sq.Streams))
+			// fmt.Println("Before ",can2tsnFlowSet.O1_Decap_Drop)
 			for currentTime := 0; currentTime < hyperperiod; currentTime += step {
 				sq.sortQueue(method, currentTime)
 				remaining := bytesPerStep
@@ -235,8 +237,8 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 					s := sq.Streams[i]
 
 					if s.FinishTime > 0 && s.FinishTime < currentTime {
-						can2tsnFlowSet.O1_Drop++
-						fmt.Println(s.ArrivalTime)
+						can2tsnFlowSet.O1_Decap_Drop++
+						// fmt.Println(s.ArrivalTime)
 						sq.Streams = append(sq.Streams[:i], sq.Streams[i+1:]...)
 						continue
 					}
@@ -256,7 +258,7 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 				}
 				
 			}
-			fmt.Println("After ",can2tsnFlowSet.O1_Drop)
+			// fmt.Println("After ",can2tsnFlowSet.O1_Decap_Drop)
 		}
 	}else{
 		send_queue := map[int]*Queue{}
@@ -280,7 +282,7 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 				// 1) 先把已逾期的丟掉 (跟你原本一樣)
 				drop := 0
 				for drop < len(queue.Streams) && current_time > queue.Streams[drop].FinishTime {
-					can2tsnFlowSet.O1_Drop++
+					can2tsnFlowSet.O1_Encap_Drop++
 					drop++
 				}
 				queue.popQueue(drop)
@@ -332,10 +334,10 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 			}
 		}
 		for _,sq := range send_queue{
-			fmt.Println(method, len(sq.Streams))
-			fmt.Println("Before ",can2tsnFlowSet.O1_Drop)
+			// fmt.Println(method, len(sq.Streams))
+			// fmt.Println("Before ",can2tsnFlowSet.O1_Decap_Drop)
 			for currentTime := 0; currentTime < hyperperiod; currentTime += step {
-				sq.sortQueue(method, currentTime)
+				sq.sortQueue("fifo", currentTime)
 				remaining := bytesPerStep
 
 				i := 0
@@ -343,8 +345,8 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 					s := sq.Streams[i]
 
 					if s.FinishTime > 0 && s.FinishTime < currentTime {
-						fmt.Println(s.ArrivalTime)
-						can2tsnFlowSet.O1_Drop++
+						// fmt.Println(s.ArrivalTime)
+						can2tsnFlowSet.O1_Decap_Drop++
 						sq.Streams = append(sq.Streams[:i], sq.Streams[i+1:]...)
 						continue
 					}
@@ -363,18 +365,19 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 					sq.Streams = append(sq.Streams[:i], sq.Streams[i+1:]...)
 				}
 			}
-			fmt.Println("After ",can2tsnFlowSet.O1_Drop)
+			// fmt.Println("After ",can2tsnFlowSet.O1_Decap_Drop)
 		}
 	}
 
 }
 
 type CAN2TSN_Flow_Set struct {
-	Method			string
-	CAN2TSN_Flows 	[]*CAN2TSN_Flow
-	DatasizeCount	float64
-	TSNFrameCount	int
-	O1_Drop       	int
+	Method				string
+	CAN2TSN_Flows 		[]*CAN2TSN_Flow
+	DatasizeCount		float64
+	TSNFrameCount		int
+	O1_Encap_Drop       int
+	O1_Decap_Drop		int
 }
 
 type CAN2TSN_Flow struct {

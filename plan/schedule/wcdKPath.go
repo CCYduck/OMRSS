@@ -42,7 +42,7 @@ func end2end_delay(node *path.Node, parentID int, end2end time.Duration, z *path
 			//per_hop += interfere_from_be(conn.Cost)
 			per_hop += interfere_from_avb(link, KPath_Set, flow.DataSize)
 			per_hop += interfere_from_tsn(link, KPath_Set, flow_set)
-			per_hop += interfere_from_c2t(link, KPath_Set, flow_set.FindMethod(method))
+			per_hop += interfere_from_c2t(link, KPath_Set, flow_set.FindMethod(method).CAN2TSNFlows)
 			end2end += per_hop
 
 			nextnode := z.GetNodeByID(link.ToNodeID)

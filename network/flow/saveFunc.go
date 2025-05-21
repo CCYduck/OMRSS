@@ -22,7 +22,7 @@ func SaveCSV(file string, encaps []*Method) {
     if needHeader {
         w.Write([]string{
             "TimeStamp","Method","TotalFlows",
-            "StreamBytes","StreamCount","O1_Drop","Delay_ms",
+            "StreamBytes","TSN_StreamCount","O1_Encap_Drop","O1_Decap_Drop","Delay_ms",
         })
     }
     now := time.Now().Format("2006-01-02 15:04:05")
@@ -34,6 +34,7 @@ func SaveCSV(file string, encaps []*Method) {
             strconv.Itoa(int(m.BytesSent)),
             strconv.Itoa(m.TSNFrameCount),
             strconv.Itoa(m.CAN2TSN_O1_Drop),
+            strconv.Itoa(m.CAN_Area_O1_Drop),
             strconv.FormatFloat(m.CAN2TSN_Delay.Seconds()*1000,
                                 'f', 6, 64),
         })
@@ -57,7 +58,7 @@ func SaveExcel(file string, encaps []*Method) {
         // 表頭
         headers := []string{
             "TimeStamp", "Method", "TotalFlows",
-            "StreamBytes", "StreamCount", "O1_Drop", "Delay_ms",
+            "StreamBytes", "TSN_StreamCount","O1_Encap_Drop","O1_Decap_Drop", "Delay_ms",
         }
         for i, h := range headers {
             cell, _ := excelize.CoordinatesToCellName(i+1, 1)
@@ -78,6 +79,7 @@ func SaveExcel(file string, encaps []*Method) {
             int(m.BytesSent),
             m.TSNFrameCount,
             m.CAN2TSN_O1_Drop,
+            m.CAN_Area_O1_Drop,
             m.CAN2TSN_Delay.Seconds() * 1000,
         }
         f.SetSheetRow(sheet, fmt.Sprintf("A%d", startRow), &row)

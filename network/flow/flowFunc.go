@@ -22,11 +22,11 @@ func (flows *Flows) BG_flow_set() *Flows {
 	return BG_flow_set
 }
 
-func (flows *Flows) FindMethod(methodname string) []*Flow{
+func (flows *Flows) FindMethod(methodname string) *Method{
 	for _,method :=range flows.Encapsulate{
 		if method.Method_Name ==methodname {
 			// fmt.Println(len(method.CAN2TSNFlows))
-			return method.CAN2TSNFlows
+			return method
 		}
 	}
 	return nil

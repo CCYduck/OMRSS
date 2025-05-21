@@ -47,7 +47,7 @@ func SaveOSROExcel(file string, results []*Result) {
 		row := []interface{}{
 			now,
 			r.Method,
-			r.Obj[0], // O1
+			r.Obj[0], // O1-TSN Area
 			r.Obj[1], // O2
 			r.Obj[2], // O3
 			r.Obj[3], // O4

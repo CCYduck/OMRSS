@@ -131,5 +131,6 @@ type Method struct{
 	BytesSent	float64
 	TSNFrameCount    int 
 	CAN2TSN_O1_Drop int
+	CAN_Area_O1_Drop int
 	CAN2TSN_Delay   time.Duration
 }
