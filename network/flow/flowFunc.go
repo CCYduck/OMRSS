@@ -2,7 +2,7 @@ package flow
 
 // import "fmt"
 
-func (flows *Flows) Input_TSNflow_set() *Flows {
+func (flows *Flows) Input_flow_set() *Flows {
 	Input_flow_set := new_Flows()
 
 	Input_flow_set.TSNFlows = append(Input_flow_set.TSNFlows, flows.TSNFlows[bg_tsnflows_end:]...)

@@ -11,7 +11,7 @@ import (
 // Objectives
 func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prime *path.Path_set, m string) ([4]float64, int) {
 	
-	S := network.Flow_Set.Input_TSNflow_set()
+	S := network.Flow_Set.Input_flow_set()
 	S_prime := network.Flow_Set.BG_flow_set()
 
 	// fmt.Println(len(II.TSNPath),len(II.AVBPath),len(II.CAN2TSNPath),len(II_prime.TSNPath),len(II_prime.AVBPath))
