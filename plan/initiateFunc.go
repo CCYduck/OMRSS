@@ -66,7 +66,8 @@ func (plan *OSRO) Initiate_Plan() {
 
 	plan.SP.SP_Run(plan.Network)
 	plan.KP.KP_Run(plan.Network)
-
+	fmt.Println("Shortest Path")
+	fmt.Println("----------------------------------------")
 	method:= []string{"fifo", "priority", "obo", "wat"}
 	plan.SP.Objs_SP = make([]*algo.Result, 0, 4)   // 4 種 method：fifo/priority/obo/wat
 	// fmt.Println(len(plan.SP.Path.TSNPath), len(plan.SP.Path.Input_Path_set(plan.Network.BG_TSN, plan.Network.BG_AVB).TSNPath), len(plan.SP.Path.BG_Path_set(plan.Network.BG_TSN, plan.Network.BG_AVB).TSNPath))
@@ -94,9 +95,11 @@ func (plan *OSRO) Initiate_Plan() {
 		// plan.SP.Objs_SP=append(plan.SP.Objs_SP, result)//要改SP 變成4個
 		// fmt.Printf("method=%s obj=%v\n", m, Objs_sp)
 	}
-
+	
+	fmt.Println()
+	fmt.Println("OSRO")
+	fmt.Println("----------------------------------------")
 	plan.KP.Objs_kp = make([]*algo.Result, 0, 4)   // 4 種 method：fifo/priority/obo/wat
-
 	for ind,m := range method{
 		plan.OSRO_method[ind].OSRO_Initial_Settings(plan.Network, plan.SP.Path, m)
 		

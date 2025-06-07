@@ -42,8 +42,8 @@ func (osro *OSRO) OSRO_Initial_Settings(network *network.Network, sp *path.Path_
 	osro.VB = compute_vb(osro.KPath, network.Flow_Set, method)
 
 	osro.Timer[0] = algo_timer.NewTimer()
-	fmt.Println(method)
-	osro.Timer[0].TimerMerge(timer)
+	// fmt.Println(method)
+	// osro.Timer[0].TimerMerge(timer)
 	// osro.Timer[1] = algo_timer.NewTimer()
 	// osro.Timer[1].TimerMerge(timer)
 	// osro.Timer[2] = algo_timer.NewTimer()
@@ -92,11 +92,10 @@ func (osro *OSRO) OSRO_Run(network *network.Network, timeout_index int, method_i
 	result.Obj=  resultObj
 	result.Cost=   resultCost
 
-	
-	fmt.Println()
+	// fmt.Println()
 	fmt.Printf("result value: %v \n", result.Method)
 	fmt.Printf("O1-TSN Area Drop: %f O2: %f O3: %f O4: %f \n", resultObj[0], resultObj[1], resultObj[2], resultObj[3])
-	fmt.Println()
+	// fmt.Println()
 
 	if resultObj[0] != 0 || resultObj[1] != 0 {
 		osro.Timer[timeout_index].TimerMax()
