@@ -21,7 +21,7 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 		cost                 		int			  
 		tsn_can_failed_count		int           = 0
 		avb_failed_count     		int           = 0 // O2
-		// bandwidth_userate    		int           = 0 // O3 ... pass
+		bandwidth_userate    		int           = 0 // O3 ... pass
 		wcd_sum              		time.Duration     // O4
 	)
 	linkmap := map[string]float64{}
@@ -51,18 +51,9 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 		//fmt.Printf("Input TSN route%d: %b \n", nth, schedulability)
 	}
 	
-	// fmt.Printf("len(paths)=%d len(flows)=%d  Method=%s\n",len(method_path), len(S.FindMethod(m)), m)
-	// fmt.Println(len(method_path))
-
-	// fmt.Println(II.TSNPath[0].IDs, II.AVBPath[0].IDs, II.CAN2TSNPath[0].IDs)
 	method_flow := S.FindMethod(m)
-	// fmt.Print(method_flow[0].Source, method_flow[0].Destination)
-	// fmt.Println(method_path[0].IDs)
-	// fmt.Printf("method=%s  #paths=%d  addr=%p\n", m, len(method_path), method_path)
+
 	for nth, path := range II.CAN2TSNPath {
-		// fmt.Printf("BackGround TSN route%d: %b \n", nth, schedulability)
-		// fmt.Println(len(S.Encapsulate))
-		// fmt.Println()
 		schedulability := schedulability(0, method_flow.CAN2TSNFlows[nth], path, linkmap, network.Bandwidth, network.HyperPeriod)
 		tsn_can_failed_count += 1 - schedulability
 	}
@@ -76,11 +67,16 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 		//fmt.Printf("Input AVB route%d: %b \n", nth, schedulability)
 	}
 
+	// O3 bandwidth_userateMore actions
+	// for _, used := range linkmap {
+	// 	bandwidth_userate += int(used)           // linkmap 存的是 bytes
+	// }
+
 	// fmt.Printf("method=%s, used links=%d, totalBytes=%d\n", m, len(linkmap), bandwidth_userate)
 	// fmt.Println(linkmap)
 	obj[0] = float64(tsn_can_failed_count + method_flow.CAN2TSN_O1_Drop + method_flow.CAN_Area_O1_Drop)       // O1
 	obj[1] = float64(avb_failed_count)           		// O2
-	obj[2] = float64(method_flow.BytesSent)          	// O3 
+	obj[2] = float64(bandwidth_userate)          	// O3 
 	obj[3] = float64(wcd_sum / time.Microsecond) 		// O4
 
 

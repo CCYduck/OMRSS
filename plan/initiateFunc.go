@@ -71,11 +71,12 @@ func (plan *OSRO) Initiate_Plan() {
 	method:= []string{"fifo", "priority", "obo", "wat"}
 	plan.SP.Objs_SP = make([]*algo.Result, 0, 4)   // 4 種 method：fifo/priority/obo/wat
 	// fmt.Println(len(plan.SP.Path.TSNPath), len(plan.SP.Path.Input_Path_set(plan.Network.BG_TSN, plan.Network.BG_AVB).TSNPath), len(plan.SP.Path.BG_Path_set(plan.Network.BG_TSN, plan.Network.BG_AVB).TSNPath))
-	plan.SP.InputPath = plan.SP.Path.Input_Path_set(plan.Network.BG_TSN, plan.Network.BG_AVB)
-	plan.SP.BGPath = plan.SP.Path.BG_Path_set(plan.Network.BG_TSN, plan.Network.BG_AVB)
+	// plan.SP.InputPath = plan.SP.Path.Input_Path_set(plan.Network.BG_TSN, plan.Network.BG_AVB)
+	// plan.SP.BGPath = plan.SP.Path.BG_Path_set(plan.Network.BG_TSN, plan.Network.BG_AVB)
 	
 	for ind,m := range method{
 		plan.OSRO_method[ind].OSRO_Initial_Settings(plan.Network, plan.SP.Path, m)
+		// plan.OSRO_method[ind].OSRO_Run(plan.Network, 0, ind, m)
 
 		Objs_sp, cost := schedule.OBJ(
 			plan.Network,
@@ -84,18 +85,26 @@ func (plan *OSRO) Initiate_Plan() {
 			plan.OSRO_method[ind].BGPath ,
 			m,
 		)
-		plan.OSRO_method[ind].Objs_osro = append(plan.OSRO_method[ind].Objs_osro, &algo.Result{
+		plan.SP.Objs_SP = append(plan.SP.Objs_SP, &algo.Result{
 			Obj:    Objs_sp,
 			Method: m,
 			Cost:   cost,
 		})
 
-		fmt.Printf(" %v : O1: %f O2: %f O3: %f O4: %f Cost: %v \n",m , Objs_sp[0], Objs_sp[1], Objs_sp[2], Objs_sp[3], cost)
+		fmt.Printf("%v : O1: %f O2: %f O3: %f O4: %f Cost: %v \n",m , Objs_sp[0], Objs_sp[1], Objs_sp[2], Objs_sp[3], cost)
 
 		// plan.SP.Objs_SP=append(plan.SP.Objs_SP, result)//要改SP 變成4個
 		// fmt.Printf("method=%s obj=%v\n", m, Objs_sp)
 	}
+	file_sp := "sp_history0612.xlsx"
+	var all_sp []*algo.Result
 	
+	for _, sp := range plan.SP.Objs_SP {
+		all_sp = append(all_sp, sp) // 每種方法可能 append 多筆 epoch 結果
+	}
+	algo.SaveOSROExcel(file_sp, all_sp)
+	fmt.Println("Results appended to", file_sp)
+
 	fmt.Println()
 	fmt.Println("OSRO")
 	fmt.Println("----------------------------------------")
@@ -125,13 +134,13 @@ func (plan *OSRO) Initiate_Plan() {
 		// plan.SP.Objs_SP=append(plan.SP.Objs_SP, result)//要改SP 變成4個
 		// fmt.Printf("method=%s obj=%v\n", m, Objs_sp)
 	}
-	// file := "osro_history-safe_deadline guard--important_can 100 --unimportant_can 500 --input_tsn 30 --input_avb 70 --bg_tsn 30 --bg_avb 18 .xlsx"
-	// var all []*algo.Result
-	// for _, osro := range plan.OSRO_method {
-	// 	all = append(all, osro.Objs_osro...) // 每種方法可能 append 多筆 epoch 結果
-	// }
-	// algo.SaveOSROExcel(file, all)
-	// fmt.Println("Results appended to", file)
+	file_osro := "osro_history0612.xlsx"
+	var all []*algo.Result
+	for _, osro := range plan.OSRO_method {
+		all = append(all, osro.Objs_osro...) // 每種方法可能 append 多筆 epoch 結果
+	}
+	algo.SaveOSROExcel(file_osro, all)
+	fmt.Println("Results appended to", file_osro)
 }
 
 //func (plan *plan3) Initiate_Plan() {
