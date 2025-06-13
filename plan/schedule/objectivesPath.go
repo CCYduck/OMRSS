@@ -76,7 +76,7 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 
 	// fmt.Printf("method=%s, used links=%d, totalBytes=%d\n", m, len(linkmap), bandwidth_userate)
 	// fmt.Println(linkmap)
-	obj[0] = float64(tsn_can_failed_count + method_flow.CAN2TSN_O1_Drop + method_flow.CAN_Area_O1_Drop)       // O1
+	obj[0] = float64(tsn_can_failed_count)       // O1
 	obj[1] = float64(avb_failed_count)           		// O2
 	obj[2] = bandwidth_userate   // O3 
 	obj[3] = float64(wcd_sum / time.Microsecond) 		// O4
