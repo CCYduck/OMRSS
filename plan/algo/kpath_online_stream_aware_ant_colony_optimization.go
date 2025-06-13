@@ -29,6 +29,7 @@ func (osro *OSRO) OSRO_Initial_Settings(network *network.Network, sp *path.Path_
 	osro.KPath = path.KShortestPath(network)
 	timer.TimerEnd()
 
+	// osro.InputKPaths =osro.KPath.Input_kpath_set(bg_tsn, bg_avb)
 	// fmt.Println(len(osro.KPath.TSNPaths),len(osro.KPath.AVBPaths),len(osro.KPath.CAN2TSNPaths))
 	osro.InputPath 	= sp.Input_Path_set(bg_tsn, bg_avb)
 	osro.BGPath 	= sp.BG_Path_set(bg_tsn, bg_avb)
@@ -64,10 +65,10 @@ func (osro *OSRO) OSRO_Run(network *network.Network, timeout_index int, method_i
 	// Repeat the execution of epochs within the timeout
 
 	// inputpath:= &path.Path_set{}
-	// initialobj, initialcost := schedule.OBJ(network, osro.KPath, osro.InputPath, osro.BGPath, method_name)
-	// fmt.Println()
-	// fmt.Printf("initial value: %d \n", initialcost)
-	// fmt.Printf("O1: %f O2: %f O3: %f O4: %f \n", initialobj[0], initialobj[1], initialobj[2], initialobj[3])
+	initialobj, initialcost := schedule.OBJ(network, osro.KPath, osro.InputPath, osro.BGPath, method_name)
+	fmt.Println()
+	fmt.Printf("initial value: %d \n", initialcost)
+	fmt.Printf("O1: %f O2: %f O3: %f O4: %f \n", initialobj[0], initialobj[1], initialobj[2], initialobj[3])
 
 	timeout := time.Duration(osro.Timeout) * time.Millisecond
 	startTime := time.Now()
@@ -77,8 +78,10 @@ func (osro *OSRO) OSRO_Run(network *network.Network, timeout_index int, method_i
 
 		_, newCost := schedule.OBJ(network, osro.KPath, II, osro.BGPath, method_name)
 		_, oldCost := schedule.OBJ(network, osro.KPath, osro.InputPath, osro.BGPath, method_name)
+
 		if newCost < oldCost {
 			osro.InputPath = II
+			fmt.Println("Change the selected routing !!")
 		}
 		if time.Since(startTime) >= timeout {
 			break

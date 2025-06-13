@@ -2,7 +2,6 @@ package schedule
 
 import (
 	// "fmt"
-	// "fmt"
 	"src/network/flow"
 	"src/plan/path"
 	"time"
@@ -39,9 +38,13 @@ func end2end_delay(node *path.Node, parentID int, end2end time.Duration, z *path
 		} else {
 			// Calculation of latency for a single link
 			per_hop += transmit_avb_itself(flow.DataSize, link.Cost)
+			
+			// fmt.Printf("transmit_avb_itself: %v ,",per_hop)
 			//per_hop += interfere_from_be(conn.Cost)
 			per_hop += interfere_from_avb(link, KPath_Set, flow.DataSize)
+			// fmt.Printf("interfere_from_avb: %v ,",per_hop)
 			per_hop += interfere_from_tsn(link, KPath_Set, flow_set)
+			// fmt.Printf("interfere_from_tsn: %v \n",per_hop)
 			per_hop += interfere_from_c2t(link, KPath_Set, flow_set.FindMethod(method).CAN2TSNFlows)
 			end2end += per_hop
 
@@ -119,7 +122,7 @@ func interfere_from_tsn(link *path.Connection, KPath_set *path.KPath_Set, flow_s
 			}
 		}
 	}
-
+	// fmt.Println(link.Cost)
 	return transmit_avb_itself(occupiedbytes, link.Cost)
 }
 

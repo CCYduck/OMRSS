@@ -63,28 +63,33 @@ func (plan *OSRO) Initiate_Plan() {
 	//Imp50 60 70 80 Unmp 250 300 350 400
 
 	// schedule.Testqueue(plan.Network)
-
 	plan.SP.SP_Run(plan.Network)
 	plan.KP.KP_Run(plan.Network)
+	
+	// plan.Network.Graph_Set.Show_Graphs()
+
+
 	fmt.Println("Shortest Path")
 	fmt.Println("----------------------------------------")
 	method:= []string{"fifo", "priority", "obo", "wat"}
 	plan.SP.Objs_SP = make([]*algo.Result, 0, 4)   // 4 種 method：fifo/priority/obo/wat
 	// fmt.Println(len(plan.SP.Path.TSNPath), len(plan.SP.Path.Input_Path_set(plan.Network.BG_TSN, plan.Network.BG_AVB).TSNPath), len(plan.SP.Path.BG_Path_set(plan.Network.BG_TSN, plan.Network.BG_AVB).TSNPath))
-	// plan.SP.InputPath = plan.SP.Path.Input_Path_set(plan.Network.BG_TSN, plan.Network.BG_AVB)
-	// plan.SP.BGPath = plan.SP.Path.BG_Path_set(plan.Network.BG_TSN, plan.Network.BG_AVB)
+	plan.SP.InputPath = plan.SP.Path.Input_Path_set(plan.Network.BG_TSN, plan.Network.BG_AVB)
+	plan.SP.BGPath = plan.SP.Path.BG_Path_set(plan.Network.BG_TSN, plan.Network.BG_AVB)
 	
-	for ind,m := range method{
-		plan.OSRO_method[ind].OSRO_Initial_Settings(plan.Network, plan.SP.Path, m)
+	for _,m := range method{
+		plan.SP.InputPath.CAN2TSNPath = plan.SP.Path.Getpathbymethod(m)
+		plan.KP.KPath.CAN2TSNPaths =plan.KP.KPath.Getkpathbymethod(m)
 		// plan.OSRO_method[ind].OSRO_Run(plan.Network, 0, ind, m)
 
 		Objs_sp, cost := schedule.OBJ(
 			plan.Network,
-			plan.OSRO_method[ind].KPath,
-			plan.OSRO_method[ind].InputPath ,
-			plan.OSRO_method[ind].BGPath ,
+			plan.KP.KPath,
+			plan.SP.InputPath ,
+			plan.SP.BGPath,
 			m,
 		)
+
 		plan.SP.Objs_SP = append(plan.SP.Objs_SP, &algo.Result{
 			Obj:    Objs_sp,
 			Method: m,
@@ -96,22 +101,22 @@ func (plan *OSRO) Initiate_Plan() {
 		// plan.SP.Objs_SP=append(plan.SP.Objs_SP, result)//要改SP 變成4個
 		// fmt.Printf("method=%s obj=%v\n", m, Objs_sp)
 	}
-	file_sp := "sp_history0612--important_can 100 --unimportant_can 500 --input_tsn 30 --input_avb 70 --bg_tsn 30 --bg_avb 18.xlsx"
-	var all_sp []*algo.Result
+	// file_sp := "sp_history0612--important_can 100 --unimportant_can 500 --input_tsn 30 --input_avb 70 --bg_tsn 30 --bg_avb 18.xlsx"
+	// var all_sp []*algo.Result
 
-	for _, sp := range plan.SP.Objs_SP {
-		all_sp = append(all_sp, sp) // 每種方法可能 append 多筆 epoch 結果
-	}
-	algo.SaveOSROExcel(file_sp, all_sp)
-	fmt.Println("Results appended to", file_sp)
+	// for _, sp := range plan.SP.Objs_SP {
+	// 	all_sp = append(all_sp, sp) // 每種方法可能 append 多筆 epoch 結果
+	// }
+	// algo.SaveOSROExcel(file_sp, all_sp)
+	// fmt.Println("Results appended to", file_sp)
 
 	fmt.Println()
 	fmt.Println("OSRO")
 	fmt.Println("----------------------------------------")
 	plan.KP.Objs_kp = make([]*algo.Result, 0, 4)   // 4 種 method：fifo/priority/obo/wat
 	for ind,m := range method{
+
 		plan.OSRO_method[ind].OSRO_Initial_Settings(plan.Network, plan.SP.Path, m)
-		
 		plan.OSRO_method[ind].OSRO_Run(plan.Network, 0, ind, m)
 		// fmt.Println(plan.Network.Flow_Set.Encapsulate[ind].Method_Name,m)
 		
@@ -134,13 +139,13 @@ func (plan *OSRO) Initiate_Plan() {
 		// plan.SP.Objs_SP=append(plan.SP.Objs_SP, result)//要改SP 變成4個
 		// fmt.Printf("method=%s obj=%v\n", m, Objs_sp)
 	}
-	file_osro := "osro_history0612--important_can 100 --unimportant_can 500 --input_tsn 30 --input_avb 70 --bg_tsn 30 --bg_avb 18.xlsx"
-	var all []*algo.Result
-	for _, osro := range plan.OSRO_method {
-		all = append(all, osro.Objs_osro...) // 每種方法可能 append 多筆 epoch 結果
-	}
-	algo.SaveOSROExcel(file_osro, all)
-	fmt.Println("Results appended to", file_osro)
+	// file_osro := "osro_history0612--important_can 100 --unimportant_can 500 --input_tsn 30 --input_avb 70 --bg_tsn 30 --bg_avb 18.xlsx"
+	// var all []*algo.Result
+	// for _, osro := range plan.OSRO_method {
+	// 	all = append(all, osro.Objs_osro...) // 每種方法可能 append 多筆 epoch 結果
+	// }
+	// algo.SaveOSROExcel(file_osro, all)
+	// fmt.Println("Results appended to", file_osro)
 }
 
 //func (plan *plan3) Initiate_Plan() {
