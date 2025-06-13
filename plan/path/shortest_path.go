@@ -14,7 +14,7 @@ func BestPath(Network *network.Network) *Path_set {
 	for nth, flow := range Network.Flow_Set.TSNFlows {
 		// fmt.Printf("Flow: Source=%d, Destination=%v, Topology=%v\n", flow.Source, flow.Destination, Network.Graph_Set.TSNGraphs[nth])
 		//fmt.Printf("Flow: Source=%d, Destination=%v", flow.Source, flow.Destination)
-		path := saveShortestPathsToGraph(flow.Source, flow.Destination, Network.Graph_Set.TSNGraphs[nth])
+		path := saveShortestPathsToGraph(flow.Source, flow.Destination, Network.Graph_Set.TSNGraphs[nth], Network.BytesRate)
 		if path != nil {
 			// fmt.Println("Best Path:")
 			// path.Show_Path()
@@ -32,7 +32,7 @@ func BestPath(Network *network.Network) *Path_set {
 	for nth, flow := range Network.Flow_Set.AVBFlows {
 		// fmt.Printf("Flow: Source=%d, Destination=%v, Topology=%v\n", flow.Source, flow.Destination, Network.Graph_Set.TSNGraphs[nth])
 		//fmt.Printf("Flow: Source=%d, Destination=%v", flow.Source, flow.Destination)
-		path := saveShortestPathsToGraph(flow.Source, flow.Destination, Network.Graph_Set.AVBGraphs[nth])
+		path := saveShortestPathsToGraph(flow.Source, flow.Destination, Network.Graph_Set.AVBGraphs[nth], Network.BytesRate)
 		if path != nil {
 			// fmt.Println("Best Path:")
 			// path.Show_Path()
@@ -60,7 +60,7 @@ func BestPath(Network *network.Network) *Path_set {
 				// 已經算過，直接使用
 				path_set.CAN2TSNPath = append(path_set.CAN2TSNPath, sp)
 			}else{
-				sp := saveShortestPathsToGraph(flow.Source, flow.Destination, Network.Graph_Set.GetGarphBySD(flow.Source, flow.Destination))
+				sp := saveShortestPathsToGraph(flow.Source, flow.Destination, Network.Graph_Set.GetGarphBySD(flow.Source, flow.Destination), Network.BytesRate)
 				if sp != nil {sp.Method = method.Method_Name}
 				// fmt.Println(method.Method_Name)
 				path_set.CAN2TSNPath = append(path_set.CAN2TSNPath, sp)
@@ -75,7 +75,7 @@ func BestPath(Network *network.Network) *Path_set {
 	return path_set
 }
 
-func saveShortestPathsToGraph(source int, target int, t *topology.Topology) *Path {
+func saveShortestPathsToGraph(source int, target int, t *topology.Topology, cost float64) *Path {
 	// Check if this path has already been taken
 	graph := GetGarph(t)
 	graph.ToVertex = target
@@ -95,7 +95,7 @@ func saveShortestPathsToGraph(source int, target int, t *topology.Topology) *Pat
 				newfrontConn := &Connection{
 					FromNodeID: id,
 					ToNodeID:   graph.Path[0][count+1], // next
-					Cost:       1,
+					Cost:       cost,
 				}
 				newNode.Connections = append(newNode.Connections, newfrontConn)
 			}
@@ -104,7 +104,7 @@ func saveShortestPathsToGraph(source int, target int, t *topology.Topology) *Pat
 				newbackConn := &Connection{
 					FromNodeID: id,
 					ToNodeID:   graph.Path[0][count-1], // before
-					Cost:       1,
+					Cost:       cost,
 				}
 				newNode.Connections = append(newNode.Connections, newbackConn)
 			}

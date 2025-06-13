@@ -1,5 +1,7 @@
 package topology
 
+import "fmt"
+
 func (topology *Topology) AddS2S(fromNodeID int, toNodeID int, cost float64) {
 	connection1 := new_Connection(fromNodeID, toNodeID, cost)
 	connection2 := new_Connection(toNodeID, fromNodeID, cost)
@@ -20,8 +22,10 @@ func (topology *Topology) AddN2S2N_For_Path(source int, destinations int, cost f
 	sfromNode.ID = source
 	sfromNode.Connections[0].FromNodeID = source
 	topology.Talker = append(topology.Talker, sfromNode)
+
 	stoNodeID := sfromNode.Connections[0].ToNodeID
 	connection2 := new_Connection(stoNodeID, source, cost)
+
 	topology.Switch[stoNodeID].Connections = append(topology.Switch[stoNodeID].Connections, connection2)
 
 	did := destinations % 1000
@@ -48,6 +52,7 @@ func (topology *Topology) AddT2S(source int, cost float64) {
 
 // Directed Graph function
 func (topology *Topology) AddS2L(destinations []int, cost float64) {
+	fmt.Println(len(destinations))
 	for i := 0; i < len(destinations); i++ {
 		id := destinations[i] % 1000
 		toNode := topology.GetNodeByID(id + 3000)

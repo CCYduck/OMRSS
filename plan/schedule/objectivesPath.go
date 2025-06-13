@@ -13,7 +13,6 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 	
 	S := network.Flow_Set.Input_flow_set()
 	S_prime := network.Flow_Set.BG_flow_set()
-
 	// fmt.Println(len(II.TSNPath),len(II.AVBPath),len(II.CAN2TSNPath),len(II_prime.TSNPath),len(II_prime.AVBPath))
 	// fmt.Println(len(S.TSNFlows),len(S.AVBFlows),len(S.Encapsulate[0].CAN2TSNFlows),len(S_prime.TSNFlows),len(S_prime.AVBFlows))
 	var (
@@ -57,6 +56,7 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 	for nth, path := range II.CAN2TSNPath {
 		schedulability := schedulability(0, method_flow.CAN2TSNFlows[nth], path, linkmap, network.Bandwidth, network.HyperPeriod)
 		tsn_can_failed_count += 1 - schedulability
+		// fmt.Printf("Input CAN2TSN route%d: %b \n", nth, schedulability)
 	}
 
 	// O2 and O4
@@ -85,7 +85,7 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 
 	cost += int(wcd_sum/time.Microsecond) * 1
 	cost += avb_failed_count * 1000000
-	cost += tsn_can_failed_count+ method_flow.CAN2TSN_O1_Drop + method_flow.CAN_Area_O1_Drop * 100000000
+	cost += tsn_can_failed_count * 100000000
 	// fmt.Println(linkmap)
 	return obj, cost
 }
@@ -107,26 +107,30 @@ func schedulability(wcd time.Duration, flow *flow.Flow, path *path.Path, linkmap
 	if r && schedulable {
 		return 1
 	}
-	fmt.Printf("guard-3 ")
+	// fmt.Printf("guard-3 ")
 	return 0
 }
 
 func schedulable(node *path.Node, parentID int, flow *flow.Flow, route *path.Path, linkmap map[string]float64, bandwidth float64, hyperPeriod int) (bool, map[string]float64) {
+	total := 0.0
+	for _, s := range flow.Streams {
+		total += s.DataSize
+	}
+	// fmt.Printf("flow %d -> %d, total stream size: %.2f\n", flow.Source, flow.Destination, total)
 	for _, link := range node.Connections {
 		if link.ToNodeID == parentID {
 			continue
 
 		} else {
-
 			// Duplex
+			
 			if !(link.FromNodeID == flow.Source || link.ToNodeID == flow.Destination) {
 				key := fmt.Sprintf("%d>%d", link.FromNodeID, link.ToNodeID)
 				for _,stream := range flow.Streams{
 					linkmap[key] +=stream.DataSize
-					fmt.Printf("link %s += %.2f → total = %.2f (bw = %.2f)\n", key, stream.DataSize, linkmap[key], bandwidth)
 				}
 				if linkmap[key] > bandwidth {
-					fmt.Printf("❌ Link %s exceeded bandwidth: %.2f > %.2f\n", key, linkmap[key], bandwidth)
+					// fmt.Printf("❌ Overloaded link: %s used %.2f > %.2f\n", key, linkmap[key], bandwidth)
 					return false, linkmap
 				}
 			}
