@@ -15,9 +15,20 @@ func SaveOSROExcel(file string, results []*Result) {
 	var f *excelize.File
 	var err error
 
+	// 確保 output 資料夾存在
+	outputDir := "output"
+	if _, err := os.Stat(outputDir); os.IsNotExist(err) {
+		err := os.Mkdir(outputDir, os.ModePerm)
+		if err != nil {
+			fmt.Println("mkdir:", err)
+			return
+		}
+	}
+	fullPath := outputDir + "/" + file
+
 	// ① 開啟或建立 Excel
-	if _, err = os.Stat(file); err == nil {
-		f, err = excelize.OpenFile(file)
+	if _, err = os.Stat(fullPath); err == nil {
+		f, err = excelize.OpenFile(fullPath)
 		if err != nil {
 			fmt.Println("open:", err)
 			return
@@ -59,7 +70,7 @@ func SaveOSROExcel(file string, results []*Result) {
 	}
 
 	// ④ 儲存
-	if err = f.SaveAs(file); err != nil {
+	if err = f.SaveAs(fullPath); err != nil {
 		fmt.Println("save:", err)
 	}
 }
