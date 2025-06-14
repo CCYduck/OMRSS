@@ -83,8 +83,8 @@ func (plan *OSRO) Initiate_Plan() {
 		// plan.OSRO_method[ind].OSRO_Run(plan.Network, 0, ind, m)
 
 		Objs_sp, cost := schedule.OBJ(
-			plan.Network,
-			plan.KP.KPath,
+			plan.Network, 
+			plan.KP.KPath, 
 			plan.SP.InputPath ,
 			plan.SP.BGPath,
 			m,
@@ -101,14 +101,14 @@ func (plan *OSRO) Initiate_Plan() {
 		// plan.SP.Objs_SP=append(plan.SP.Objs_SP, result)//要改SP 變成4個
 		// fmt.Printf("method=%s obj=%v\n", m, Objs_sp)
 	}
-	// file_sp := "sp_history0612--important_can 100 --unimportant_can 500 --input_tsn 30 --input_avb 70 --bg_tsn 30 --bg_avb 18.xlsx"
-	// var all_sp []*algo.Result
+	file_sp := "sp_history0614--important_can 100 --unimportant_can 500 --input_tsn 18 --input_avb 42 DUPLX.xlsx"
+	var all_sp []*algo.Result
 
-	// for _, sp := range plan.SP.Objs_SP {
-	// 	all_sp = append(all_sp, sp) // 每種方法可能 append 多筆 epoch 結果
-	// }
-	// algo.SaveOSROExcel(file_sp, all_sp)
-	// fmt.Println("Results appended to", file_sp)
+	for _, sp := range plan.SP.Objs_SP {
+		all_sp = append(all_sp, sp) // 每種方法可能 append 多筆 epoch 結果
+	}
+	algo.SaveOSROExcel(file_sp, all_sp)
+	fmt.Println("Results appended to", file_sp)
 
 	fmt.Println()
 	fmt.Println("OSRO")
@@ -139,13 +139,13 @@ func (plan *OSRO) Initiate_Plan() {
 		// plan.SP.Objs_SP=append(plan.SP.Objs_SP, result)//要改SP 變成4個
 		// fmt.Printf("method=%s obj=%v\n", m, Objs_sp)
 	}
-	// file_osro := "osro_history0612--important_can 100 --unimportant_can 500 --input_tsn 30 --input_avb 70 --bg_tsn 30 --bg_avb 18.xlsx"
-	// var all []*algo.Result
-	// for _, osro := range plan.OSRO_method {
-	// 	all = append(all, osro.Objs_osro...) // 每種方法可能 append 多筆 epoch 結果
-	// }
-	// algo.SaveOSROExcel(file_osro, all)
-	// fmt.Println("Results appended to", file_osro)
+	file_osro := "osro_history0614--important_can 100 --unimportant_can 500 --input_tsn 18 --input_avb 42 DUPLX.xlsx"
+	var all []*algo.Result
+	for _, osro := range plan.OSRO_method {
+		all = append(all, osro.Objs_osro...) // 每種方法可能 append 多筆 epoch 結果
+	}
+	algo.SaveOSROExcel(file_osro, all)
+	fmt.Println("Results appended to", file_osro)
 }
 
 //func (plan *plan3) Initiate_Plan() {
