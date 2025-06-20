@@ -40,7 +40,7 @@ func new_importantCAN() *importantCAN {
 	return &importantCAN{
 		Period:   5000, // 5000us
 		Deadline: 5000, // Period = Deadline
-		DataSize: 8,    // 8bytes
+		DataSize: 16,    // 16bytes
 	}
 }
 
@@ -54,7 +54,7 @@ func new_unimportantCAN(uc_period int, uc_deadline int) *unimportantCAN {
 	return &unimportantCAN{
 		Period:   uc_period,   // 50000~150000us up 50000us
 		Deadline: uc_deadline, // 10000~20000us up 2000us
-		DataSize: 8,           // 8bytes
+		DataSize: 16,           // 16bytes
 	}
 }
 

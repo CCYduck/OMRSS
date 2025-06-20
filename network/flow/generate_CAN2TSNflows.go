@@ -22,7 +22,7 @@ func (flow_set *Flows) Generate_CAN2TSN_Flows(CANnode []int, importantCAN int, u
 	}
 
 	// encapsulate 
-	for _, name := range []string{"fifo", "priority", "obo", "wat"} {
+	for _, name := range []string{"fifo", "priority", "obo", "wst", "mao"} {
 		fsCopy := can2tsnFlowSet.DeepCopyCAN2TSN()   // <- 自己寫或用 github.com/jinzhu/copier
 		// a := can2tsnFlowSet.CAN2TSN_Flows[0].CAN_Streams[0]
 		// b := fsCopy.CAN2TSN_Flows[0].CAN_Streams[0]
@@ -57,8 +57,8 @@ func (flow_set *Flows) Generate_CAN2TSN_Flows(CANnode []int, importantCAN int, u
 }
 
 func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, method string) {
-	// datasize_least := 64.
-	datasize_max := 100.
+	datasize_least := 64.
+	datasize_max := 1500.
 	period := 5000
 	deadline := 5000
 	step 	 := 1000
@@ -66,7 +66,6 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 	bytesPerStep := canSpeedBps / 8 * float64(step) / 1_000_000.0 // = 125B
 
 	if method == "obo"{
-
 		send_queue := map[int]*Queue{}
 		getQ := func(dst int) *Queue {
 			if q, ok := send_queue[dst]; ok {
@@ -99,7 +98,7 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 				// current_time=5000 queue=[0_5, 5000_1, 5000_2, 5000_3, 5000_4, 5000_5]
 				for len(queue.Streams) > 0 {						
 					// 立即封裝一個 CAN → TSN
-					can2tsnFlowSet.flushStream(can2tsnFlow, current_time, datasize_max, deadline)
+					can2tsnFlowSet.flushStream(can2tsnFlow, current_time, datasize_least, deadline)
 					// fmt.Println(queue.Streams[0].DataSize)
 					send_stream := queue.Streams[0]
 					send_stream.ArrivalTime = current_time
@@ -112,12 +111,11 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 
 			}	
 		}
-
 		for _,sq := range send_queue{
 			// fmt.Println(method, len(sq.Streams))
 			// fmt.Println("Before ",can2tsnFlowSet.O1_Decap_Drop)
 			for currentTime := 0; currentTime < hyperperiod; currentTime += step {
-				sq.sortQueue(method, currentTime)
+				// sq.sortQueue(method, currentTime)
 				remaining := bytesPerStep
 				
 				i := 0
@@ -148,10 +146,10 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 			}
 			// fmt.Println("After ",can2tsnFlowSet.O1_Decap_Drop)
 		}
-	}else if method=="wat"{
+	}else if method=="wst"{
 		// can2tsnFlowSet.Method=method
 		// minLoad := 64.
-		const guardBase = 1500       // µs 讓「何時必須封裝」隨著佇列最緊迫的剩餘時間調整，而保留一段可以把封包真正送出去的 guard
+		const guardBase = 1200       // µs 讓「何時必須封裝」隨著佇列最緊迫的剩餘時間調整，而保留一段可以把封包真正送出去的 guard
 		
 		send_queue := map[int]*Queue{}
 		getQ := func(dst int) *Queue {
@@ -165,10 +163,18 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 		for _, can2tsnFlow := range can2tsnFlowSet.CAN2TSN_Flows {
 			queue := &Queue{}
 			datasize_count := 0.
+			a:=0
+			for _, stream := range can2tsnFlow.CAN_Streams {
+				if stream.ArrivalTime <=  hyperperiod{
+					a++
+				}
+				
+			}
+			// fmt.Printf("can2tsnFlow S: %v , D: %v , Count: %v \n", can2tsnFlow.Source, can2tsnFlow.Destination, a)
 
 			for current_time := 0; current_time < hyperperiod; current_time += step {
 				queue.appendQueue(can2tsnFlow.getStreamsByCurrentTime(current_time))
-				queue.sortQueue(method, current_time)
+				// queue.sortQueue(method, current_time)
 
 				// 1) 先把已逾期的丟掉
 				drop := 0
@@ -178,22 +184,9 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 				}
 				queue.popQueue(drop)
 				
+				guard := guardBase + len(queue.Streams) * 520      // 動態 guard
 
-				guard := guardBase + len(queue.Streams) * 100          // 動態 guard
 				if len(queue.Streams) == 0 { continue }
-
-				// extra := int(float64(queue.Streams[0].FinishTime - current_time) * 0.30)
-				// guard := guardBase + extra
-
-				// if guard > 1500 {
-				// 	guard = 1500
-				// }
-
-				// safe_deadline := queue.Streams[0].FinishTime - current_time - guard
-				// if safe_deadline < 0 { safe_deadline = 0 }
-
-				
-
 				// 2) 只要佇列裡 **還有** imminent stream，就一直封裝
 				for hasImminent(queue, current_time, guard)  {
 					head := 0
@@ -206,7 +199,7 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 						head ++
 					}
 
-					can2tsnFlowSet.flushStream(can2tsnFlow, current_time, datasize_max , deadline)	
+					can2tsnFlowSet.flushStream(can2tsnFlow, current_time, datasize_count , deadline)	
 					
 					// 剪掉已處理 head 部分
 					queue.popQueue(head)
@@ -220,7 +213,7 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 					sq := getQ(can2tsnFlow.Destination)
 					sq.Streams = append(sq.Streams, stream)
 				}	
-				can2tsnFlowSet.flushStream(can2tsnFlow, hyperperiod, datasize_max , deadline)
+				can2tsnFlowSet.flushStream(can2tsnFlow, hyperperiod, datasize_count , deadline)
 				datasize_count = 0
 		 	}
 		}
@@ -228,10 +221,9 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 			// fmt.Println(method, len(sq.Streams))
 			// fmt.Println("Before ",can2tsnFlowSet.O1_Decap_Drop)
 			for currentTime := 0; currentTime < hyperperiod; currentTime += step {
-				sq.sortQueue(method, currentTime)
+				// sq.sortQueue(method, currentTime)
 				remaining := bytesPerStep
 				
-
 				i := 0
 				for i < len(sq.Streams) {
 					s := sq.Streams[i]
@@ -260,6 +252,65 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 			}
 			// fmt.Println("After ",can2tsnFlowSet.O1_Decap_Drop)
 		}
+	}else if method=="mao"{
+		// mtuLimit := 1500.0 / 2          // MTU 限定為 750 Bytes
+		
+		// type clusterKey struct {
+		// 	Source int
+		// 	Dest   int
+		// 	Period int
+		// }	
+		
+		// clusters := make(map[clusterKey][]*Stream)
+
+		// // 建立聚合群：同 source, dest, period 的 stream
+		// for _, flow := range can2tsnFlowSet.CAN2TSN_Flows {
+		// 	key := clusterKey{flow.Source, flow.Destination, flow.CAN2TSN_Flow.Period}
+		// 	clusters[key] = append(clusters[key], flow.CAN_Streams...)
+		// }
+
+		// for key, streams := range clusters {
+		// 	// 依 deadline 排序（急的先封裝）
+		// 	sort.Slice(streams, func(i, j int) bool {
+		// 		return streams[i].Deadline < streams[j].Deadline
+		// 	})
+
+		// 	frame := []*Stream{}
+		// 	payload := 0.0
+
+		// 	for _, s := range streams {
+		// 		if payload+s.DataSize <= mtuLimit {
+		// 			frame = append(frame, s)
+		// 			payload += s.DataSize
+		// 		} else {
+		// 			// 送出 TSN Frame
+		// 			fullSize := payload
+		// 			if !schedulable(frame, fullSize, bytesPerStep) {
+		// 				// EMSO 拆解重封裝
+		// 				frame1, frame2 := disaggregateByDeadline(frame)
+		// 				repackAndInsert(frame1, key, can2tsnFlowSet, bytesPerStep)
+		// 				repackAndInsert(frame2, key, can2tsnFlowSet, bytesPerStep)
+		// 			} else {
+		// 				repackAndInsert(frame, key, can2tsnFlowSet, bytesPerStep)
+		// 			}
+		// 			// 開始新 frame
+		// 			frame = []*Stream{s}
+		// 			payload = s.DataSize
+		// 		}
+		// 	}
+
+		// 	// 收尾未滿 MTU 的 frame
+		// 	if len(frame) > 0 {
+		// 		fullSize := payload
+		// 		if !schedulable(frame, fullSize, bytesPerStep) {
+		// 			frame1, frame2 := disaggregateByDeadline(frame)
+		// 			repackAndInsert(frame1, key, can2tsnFlowSet, bytesPerStep)
+		// 			repackAndInsert(frame2, key, can2tsnFlowSet, bytesPerStep)
+		// 		} else {
+		// 			repackAndInsert(frame, key, can2tsnFlowSet, bytesPerStep)
+		// 		}
+		// 	}
+		// }
 	}else{
 		send_queue := map[int]*Queue{}
 		getQ := func(dst int) *Queue {
@@ -298,7 +349,7 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 					head ++
 
 					if datasize_count >= datasize_max{
-						can2tsnFlowSet.flushStream(can2tsnFlow, current_time, datasize_max , deadline)
+						can2tsnFlowSet.flushStream(can2tsnFlow, current_time, datasize_count , deadline)
 						for _, stream := range queue.Streams[:head] {
 							stream.ArrivalTime = current_time
 							sq := getQ(can2tsnFlow.Destination)
@@ -312,7 +363,7 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 				
 				// if datasize_count > 0 && len(queue.Streams) > 0 && current_time % period == 0 {
 				if datasize_count > 0  && current_time % period == 0 {
-					can2tsnFlowSet.flushStream(can2tsnFlow, current_time, datasize_max , deadline)
+					can2tsnFlowSet.flushStream(can2tsnFlow, current_time, datasize_count , deadline)
 					for _, stream := range queue.Streams[:head] {
 							stream.ArrivalTime = current_time
 							sq := getQ(can2tsnFlow.Destination)
@@ -324,7 +375,7 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 				}
 			}
 			if datasize_count > 0 {				
-				can2tsnFlowSet.flushStream(can2tsnFlow, hyperperiod, datasize_max , deadline)
+				can2tsnFlowSet.flushStream(can2tsnFlow, hyperperiod, datasize_count , deadline)
 				for _, stream := range queue.Streams {
 					stream.ArrivalTime = hyperperiod
 					sq := getQ(can2tsnFlow.Destination)
@@ -334,10 +385,10 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 			}
 		}
 		for _,sq := range send_queue{
-			// fmt.Println(method, len(sq.Streams))
+			fmt.Println(method, len(sq.Streams))
 			// fmt.Println("Before ",can2tsnFlowSet.O1_Decap_Drop)
 			for currentTime := 0; currentTime < hyperperiod; currentTime += step {
-				sq.sortQueue("fifo", currentTime)
+				// sq.sortQueue("fifo", currentTime)
 				remaining := bytesPerStep
 
 				i := 0
@@ -389,7 +440,9 @@ type CAN2TSN_Flow struct {
 }
 
 func (can2tsnFlowSet *CAN2TSN_Flow_Set)flushStream(flow *CAN2TSN_Flow, now int, packedSize float64, dl int) {
-
+	if packedSize < 64 {
+		packedSize = 64
+	}
 	stream := createCAN2TSNStream(now, dl, packedSize)
 	flow.CAN2TSN_Flow.Streams = append(flow.CAN2TSN_Flow.Streams, stream)
 
@@ -521,7 +574,7 @@ func (q *Queue) sortQueue(method string, current_time int) {
 			return q.Streams[i].Deadline < q.Streams[j].Deadline
 		})
 
-	case "wat":
+	case "wst":
 		// WAT 根據剩餘時間
 		sort.Slice(q.Streams, func(i, j int) bool {
 			ti := q.Streams[i].FinishTime - current_time
@@ -535,4 +588,54 @@ func (q *Queue) sortQueue(method string, current_time int) {
 			return q.Streams[i].ArrivalTime < q.Streams[j].ArrivalTime
 		})
 	}
+}
+
+// ----- 輔助函數 -----
+func schedulable(streams []*Stream, fullSize float64, bytesPerUs float64) bool {
+	sendTime := int(fullSize / bytesPerUs)
+	for _, s := range streams {
+		if s.ArrivalTime+s.Deadline < s.ArrivalTime+sendTime {
+			return false
+		}
+	}
+	return true
+}
+
+func disaggregateByDeadline(streams []*Stream) ([]*Stream, []*Stream) {
+	if len(streams) <= 1 {
+		return streams, nil
+	}
+	sort.Slice(streams, func(i, j int) bool {
+		return streams[i].Deadline < streams[j].Deadline
+	})
+	mid := len(streams) / 2
+	return streams[:mid], streams[mid:]
+}
+
+func repackAndInsert(streams []*Stream, key struct{ Source, Dest, Period int }, flowSet *CAN2TSN_Flow_Set, bytesPerUs float64) {
+	if len(streams) == 0 {
+		return
+	}
+
+	payload := 0.0
+	for _, s := range streams {
+		payload += s.DataSize
+	}
+	fullSize := payload
+	sendTime := int(fullSize / bytesPerUs)
+
+	for _, s := range streams {
+		s.SendTime = s.ArrivalTime
+		s.FinishTime = s.SendTime + sendTime
+		if s.FinishTime > s.ArrivalTime+s.Deadline {
+			flowSet.O1_Encap_Drop++
+		}
+	}
+
+	f := createCAN2TSNFlow(key.Source, key.Dest, key.Period, 5000, fullSize)
+	f.Streams = append(f.Streams, streams...)
+	flowSet.addNewCAN2TSNFlowToSet(f)
+	flowSet.searchCAN2TSNFlow(f)
+	flowSet.DatasizeCount += fullSize
+	flowSet.TSNFrameCount++
 }
