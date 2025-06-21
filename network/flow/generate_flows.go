@@ -16,7 +16,7 @@ func Generate_OSRO_Flows(CANnode []int, importantCAN int, unimportantCAN int, Nn
 	//flow_set.Generate_CAN2TSN_Flows(CANnode, importantCAN, unimportantCAN, HyperPeriod, "FIFO")
 	flow_set.Generate_CAN2TSN_Flows(CANnode, importantCAN, unimportantCAN, HyperPeriod )
 
-	// SaveExcel("can2tsn_history important_can 50 unimportant_can 250-3.xlsx", flow_set.Encapsulate)
+	// SaveExcel("0622 can2tsn_history important_can 100 unimportant_can 500.xlsx", flow_set.Encapsulate)
 	flow_set.Show_CANFlows()
 	return flow_set
 }
