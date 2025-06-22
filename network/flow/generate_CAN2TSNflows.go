@@ -257,7 +257,7 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 	}else if method=="mao"{
 		// MAO + EMSO 封裝邏輯（考慮 ArrivalTime，並於封裝時設定）
 		send_queue := map[int]*Queue{}
-		getQ := func(dst int) *Queue {
+		getQ := func(dst int)*Queue {
 			if q, ok := send_queue[dst]; ok {
 				return q
 			}
@@ -276,11 +276,12 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 			return q
 		}
 
-		mtuLimit := 1500.0 / 2 // MTU 限定為 750 Bytes
+		mtuLimit := 64. // MTU 限定為 750 Bytes
 		// frameOverhead := 42.0
 		for _, can2tsnFlow  := range can2tsnFlowSet.CAN2TSN_Flows {
 			c_q := c_getQ(can2tsnFlow.Source, can2tsnFlow.Destination, can2tsnFlow.CAN2TSN_Flow.Period)
 			c_q.Streams = append(c_q.Streams, can2tsnFlow.CAN_Streams...)
+			
 		}
 
 		frame := &Queue{}
@@ -300,7 +301,6 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 					can2tsnFlowSet.O1_Encap_Drop++
 					drop++
 				}
-
 				frame.popQueue(drop)
 
 
@@ -310,10 +310,12 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 					}
 				}
 
-				eligible.sortQueue("wst", currentTime)
+				// eligible.sortQueue("fifo", currentTime)
 
-				for _,s := range eligible.Streams {
-					if !schedulable(frame.Streams, datasize_count, bytesPerStep, currentTime) {
+				for ind,s := range eligible.Streams {
+					if !schedulable(ind, frame.Streams, datasize_count, bytesPerStep, currentTime) {
+						
+						// send_queue.Streams=frame.Streams
 						repackAndInsert(frame.Streams, key, can2tsnFlowSet, currentTime)
 						sq.Streams = append(sq.Streams, frame.Streams...)
 						frame.Streams = []*Stream{}
@@ -328,7 +330,7 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 
 					} else {
 						fullSize := datasize_count
-						if !schedulable(frame.Streams, fullSize, bytesPerStep, currentTime) {
+						if !schedulable(ind, frame.Streams, fullSize, bytesPerStep, currentTime) {
 							f1, f2 := disaggregateByDeadline(frame.Streams)
 							repackAndInsert(f1, key, can2tsnFlowSet, currentTime)
 							repackAndInsert(f2, key, can2tsnFlowSet, currentTime)
@@ -517,10 +519,10 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set)flushStream(flow *CAN2TSN_Flow, now int, 
 	if packedSize < 64 {
 		packedSize = 64
 	}
-	stream := createCAN2TSNStream(now, dl, packedSize+42)
+	stream := createCAN2TSNStream(now, dl, packedSize)
 	flow.CAN2TSN_Flow.Streams = append(flow.CAN2TSN_Flow.Streams, stream)
 
-	can2tsnFlowSet.DatasizeCount+= packedSize+42
+	can2tsnFlowSet.DatasizeCount+= packedSize
 	can2tsnFlowSet.TSNFrameCount+=1
 }
 
@@ -671,11 +673,11 @@ func (q *Queue) sortQueue(method string, current_time int) {
 }
 
 // ----- 輔助函數 -----
-func schedulable(streams []*Stream, fullSize float64, bytesPerUs float64, current_time int) bool {
+func schedulable(ind int, streams []*Stream, fullSize float64, bytesPerUs float64, current_time int) bool {
 	sendTime := int(fullSize / bytesPerUs)
 	for _, s := range streams {
 		if s.FinishTime-current_time <= 1000 + sendTime {
-			fmt.Println("sche",s.FinishTime, current_time+sendTime)
+			fmt.Println("sche", ind ,s.ArrivalTime, s.FinishTime, current_time+sendTime)
 			return false
 		}
 	}
