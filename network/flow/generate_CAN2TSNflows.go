@@ -276,7 +276,7 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 			return q
 		}
 
-		mtuLimit := 64. // MTU 限定為 750 Bytes
+		mtuLimit := 750. // MTU 限定為 750 Bytes
 		// frameOverhead := 42.0
 		for _, can2tsnFlow  := range can2tsnFlowSet.CAN2TSN_Flows {
 			c_q := c_getQ(can2tsnFlow.Source, can2tsnFlow.Destination, can2tsnFlow.CAN2TSN_Flow.Period)
@@ -312,34 +312,16 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 
 				// eligible.sortQueue("fifo", currentTime)
 
-				for ind,s := range eligible.Streams {
-					if !schedulable(ind, frame.Streams, datasize_count, bytesPerStep, currentTime) {
-						
-						// send_queue.Streams=frame.Streams
-						repackAndInsert(frame.Streams, key, can2tsnFlowSet, currentTime)
-						sq.Streams = append(sq.Streams, frame.Streams...)
-						frame.Streams = []*Stream{}
-						datasize_count = 0
-
-
-					}
+				for _,s := range eligible.Streams {
 					if datasize_count+s.DataSize <= mtuLimit {
 						// fmt.Println(s.DataSize, s.ArrivalTime, s.Deadline, s.FinishTime)
 						frame.Streams = append(frame.Streams, s)
 						datasize_count += s.DataSize
 
-					} else {
-						fullSize := datasize_count
-						if !schedulable(ind, frame.Streams, fullSize, bytesPerStep, currentTime) {
-							f1, f2 := disaggregateByDeadline(frame.Streams)
-							repackAndInsert(f1, key, can2tsnFlowSet, currentTime)
-							repackAndInsert(f2, key, can2tsnFlowSet, currentTime)
-							sq.Streams = append(sq.Streams, f1...)
-							sq.Streams = append(sq.Streams, f2...)
-						} else {
-							repackAndInsert(frame.Streams, key, can2tsnFlowSet, currentTime)
-							sq.Streams = append(sq.Streams, frame.Streams...)
-						}
+					} else {					
+						repackAndInsert(frame.Streams, key, can2tsnFlowSet, currentTime)
+						sq.Streams = append(sq.Streams, frame.Streams...)
+
 						frame.Streams = []*Stream{}
 						datasize_count = s.DataSize
 					}
