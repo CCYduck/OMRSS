@@ -1,11 +1,11 @@
 package flow
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"sort"
 	"time"
-	"encoding/json"
-	"log"
 	// "math"
 )
 
@@ -150,8 +150,17 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 		// can2tsnFlowSet.Method=method
 		// minLoad := 64.
 		
-		const guardBase = 1200      // µs 讓「何時必須封裝」隨著佇列最緊迫的剩餘時間調整，而保留一段可以把封包真正送出去的 guard
-		
+		const guardBase = 1800      // µs 讓「何時必須封裝」隨著佇列最緊迫的剩餘時間調整，而保留一段可以把封包真正送出去的 guard
+		frame_queue := map[FlowKey]*Queue{}
+		f_getQ := func(s int, d int)*Queue {
+			Key := FlowKey{s, d}
+			if q, ok := frame_queue[Key]; ok {
+				return q
+			}
+			q := &Queue{}
+			frame_queue[Key] = q
+			return q
+		}
 		send_queue := map[int]*Queue{}
 		getQ := func(dst int) *Queue {
 			if q, ok := send_queue[dst]; ok {
@@ -162,7 +171,7 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 			return q
 		}
 		for _, can2tsnFlow := range can2tsnFlowSet.CAN2TSN_Flows {
-			queue := &Queue{}
+			queue := f_getQ(can2tsnFlow.Source,can2tsnFlow.Destination)
 			datasize_count := 0.
 
 			for current_time := 0; current_time < hyperperiod; current_time += step {
@@ -185,7 +194,7 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 				// }
 
 
-				guard := guardBase + len(queue.Streams) * 620      // 動態 guard1
+				guard := guardBase + len(queue.Streams) * 600      // 動態 guard1
 				// guard := len(queue.Streams) * 640     // 動態 guard2
 
 				if len(queue.Streams) == 0 { continue }
@@ -278,7 +287,7 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 		}
 		clusters := make(map[clusterKey]*Queue)
 		c_getQ := func(s int, d int, p int) *Queue {
-			key := clusterKey{s, d, p}
+			key := clusterKey{Source: s, Dest: d, Period: p}
 			if q, ok := clusters[key]; ok {
 				return q
 			}
@@ -295,13 +304,15 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 		}
 
 		// frame := &Queue{}
-		datasize_count := 0.
+		// datasize_count := 0.
 		// 模擬時間進行封裝
 		for currentTime := 0; currentTime < hyperperiod; currentTime += step {
+			
 			for key, allStreams := range clusters {
+				datasize_count := 0.
 				fq := f_getQ(key.Source,key.Dest)
 				sq := getQ(key.Dest)
-
+				
 				// 選出可封裝的 stream（arrivalTime <= now）
 				eligible := &Queue{}
 
@@ -313,7 +324,6 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 					drop++
 				}
 				fq.popQueue(drop)
-
 
 				for _, s := range allStreams.Streams {
 					if s.ArrivalTime == currentTime {
@@ -330,27 +340,71 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 						// fmt.Println(s.DataSize, s.ArrivalTime, s.Deadline, s.FinishTime)
 						datasize_count += stream.DataSize
 						head ++
-					} else {					
-						can2tsnFlowSet.repackAndInsert(fq.Streams, key, currentTime, deadline, datasize_count)
-						sq.Streams = append(sq.Streams, eligible.Streams[head:]...)
+					} else {			
+						fmt.Println(key.Source, key.Dest, key.Period)		
+						for _,st := range eligible.Streams[:head]{
+							st.ArrivalTime =currentTime
+							sq.Streams = append(sq.Streams, st)
+						}
+						can2tsnFlowSet.repackAndInsert(eligible.Streams[:head], key, currentTime, deadline)
+						datasize_count = 0
 						eligible.popQueue(head)
 						head =0
-						datasize_count = stream.DataSize
 					}
 				}
-				if head > 0 {
+
+				if datasize_count > 0  && currentTime % period == 0{
 					fq.Streams = append(fq.Streams, eligible.Streams...)
 					eligible.popQueue(head)
+					datasize_count =0
 				}
 
-				// 收尾
-				if datasize_count > 0 && currentTime+step == hyperperiod{					
-					can2tsnFlowSet.repackAndInsert(fq.Streams, key, currentTime, deadline, datasize_count)
-					sq.Streams = append(sq.Streams, fq.Streams...)				
+
+				for _,st := range fq.Streams{
+					st.ArrivalTime =currentTime
+					sq.Streams = append(sq.Streams, st)
 				}
+				can2tsnFlowSet.repackAndInsert(fq.Streams, key, period, deadline)
+
+				fq.Streams = nil
 			}
+			
 		}
-		
+		for _,sq := range send_queue{
+			// fmt.Println(method, dst, len(sq.Streams))
+			// fmt.Println("Before ",can2tsnFlowSet.O1_Decap_Drop)
+			for currentTime := 0; currentTime < hyperperiod; currentTime += step {
+				// sq.sortQueue(method, currentTime)
+				remaining := bytesPerStep
+				
+				i := 0
+				for i < len(sq.Streams) {
+					s := sq.Streams[i]
+
+					if s.FinishTime > 0 && s.FinishTime < currentTime {
+						can2tsnFlowSet.O1_Decap_Drop++
+						// fmt.Println(s.ArrivalTime)
+						sq.Streams = append(sq.Streams[:i], sq.Streams[i+1:]...)
+						continue
+					}
+
+					if s.ArrivalTime > currentTime {
+						i++
+						continue
+					}
+
+					if float64(s.DataSize) > remaining {
+						break
+					}
+					// 傳送封包
+					remaining -= float64(s.DataSize)
+					// 從 queue 中移除
+					sq.Streams = append(sq.Streams[:i], sq.Streams[i+1:]...)
+				}
+				
+			}
+			// fmt.Println("After ",can2tsnFlowSet.O1_Decap_Drop)
+		}
 	}else{
 		send_queue := map[int]*Queue{}
 		// queue :=  map[int]*Queue{}
@@ -487,7 +541,7 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set)flushStream(flow *CAN2TSN_Flow, now int, 
 	if packedSize < 64 {
 		packedSize = 64
 	}
-	stream := createCAN2TSNStream(now, dl, packedSize)
+	stream := createCAN2TSNStream(now, dl, packedSize+42)
 	flow.CAN2TSN_Flow.Streams = append(flow.CAN2TSN_Flow.Streams, stream)
 
 	can2tsnFlowSet.DatasizeCount+= packedSize
@@ -663,15 +717,19 @@ func (q *Queue) sortQueue(method string, current_time int) {
 // 	return streams[:mid], streams[mid:]
 // }
 
-func (can2tsnFlowSet *CAN2TSN_Flow_Set)repackAndInsert(streams []*Stream, key clusterKey, now int, dl int, packedSize float64) {
+func (can2tsnFlowSet *CAN2TSN_Flow_Set)repackAndInsert(streams []*Stream, key clusterKey, now int, dl int) {
 	if len(streams) == 0 {
 		return
+	}
+	packedSize :=0.
+	for _, stream:= range streams{
+		packedSize+= stream.DataSize
 	}
 	if packedSize < 64 {
 		packedSize = 64
 	}
+	
 	payload := packedSize+42.
-
 
 	f := createCAN2TSNFlow(key.Source, key.Dest, key.Period, dl, payload)
 	f.Streams = append(f.Streams, streams...)
