@@ -5,7 +5,7 @@ import (
 	"src/network/flow"
 	"src/network/graph"
 	"src/network/topology"
-	
+	"time"
 )
 
 func (network *Network) Generate_Network() {
@@ -34,7 +34,10 @@ func (network *Network) Generate_Network() {
 	network.Graph_Set = graph.Generate_OSRO_Graphs(network.Topology, network.Flow_Set, network.BytesRate)
 	fmt.Println("Complete Simulating Graphs.")
 	fmt.Println()
+	md := time.Now().Format("0102")
 
+	name := fmt.Sprintf("%v can2tsn_history important_can %v unimportant_can %v .xlsx",md ,network.Important_CAN ,network.Unimportant_CAN)
+	flow.SaveExcel(name, network.Flow_Set.Encapsulate)
 }
 
 //func (network *Network) Generate_Network() *Network {

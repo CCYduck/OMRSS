@@ -17,7 +17,8 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 	// fmt.Println(len(S.TSNFlows),len(S.AVBFlows),len(S.Encapsulate[0].CAN2TSNFlows),len(S_prime.TSNFlows),len(S_prime.AVBFlows))
 	var (
 		obj                  		[4]float64
-		cost                 		int			  
+		cost                 		int		
+		avb_count					float64	  =0.
 		tsn_can_failed_count		int           = 0
 		avb_failed_count     		int           = 0 // O2
 		bandwidth_userate    		float64           = 0. // O3 ... pass
@@ -40,6 +41,7 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 		wcd_sum += wcd
 		schedulability := schedulability(wcd, S_prime.AVBFlows[nth], path, linkmap, network.Bandwidth, network.HyperPeriod)
 		avb_failed_count += 1 - schedulability
+		avb_count ++
 		// fmt.Printf("BackGround AVB route%d: %b \n", nth, schedulability)
 	}
 
@@ -65,6 +67,7 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 		wcd_sum += wcd
 		schedulability := schedulability(wcd, S.AVBFlows[nth], path, linkmap, network.Bandwidth, network.HyperPeriod)
 		avb_failed_count += 1 - schedulability
+		avb_count ++
 		// fmt.Printf("Input AVB route%d: %b \n", nth, schedulability)
 	}
 
@@ -76,9 +79,9 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 
 	// fmt.Printf("method=%s, used links=%d, totalBytes=%d\n", m, len(linkmap), bandwidth_userate)
 	// fmt.Println(linkmap)
-	obj[0] = float64(tsn_can_failed_count)       // O1
-	obj[1] = float64(avb_failed_count)           		// O2
-	obj[2] = bandwidth_userate   // O3 
+	obj[0] = float64(tsn_can_failed_count)       		// O1
+	obj[1] = float64(float64(avb_failed_count)/avb_count)           		// O2
+	obj[2] = bandwidth_userate   						// O3 
 	obj[3] = float64(wcd_sum / time.Microsecond) 		// O4
 
 
@@ -86,6 +89,8 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 	cost += int(wcd_sum/time.Microsecond) * 1
 	cost += avb_failed_count * 1000000
 	cost += tsn_can_failed_count * 100000000
+	// fmt.Println("avb: ",(avb_count-obj[1])/avb_count)
+
 	// fmt.Println(linkmap)
 	return obj, cost
 }

@@ -14,6 +14,8 @@ func SaveExcel(file string, encaps []*Method) {
     var f *excelize.File
     var err error
 
+    
+
     // 確保 output 資料夾存在
 	outputDir := "En_output"
 	if _, err := os.Stat(outputDir); os.IsNotExist(err) {

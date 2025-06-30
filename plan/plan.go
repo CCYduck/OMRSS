@@ -2,10 +2,11 @@ package plan
 
 import (
 	"src/network"
+	"src/plan/algo"
 )
 
 type Plans interface {
-	Initiate_Plan()
+	Initiate_Plan()(sp []*algo.Result, kp []*algo.Result)
 	Show_Plan()
 }
 

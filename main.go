@@ -3,10 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
+	"time"
 	// "path"
 	// "src/memorizer"
 	"src/network"
 	"src/plan"
+	"src/plan/algo"
 )
 
 var (
@@ -97,12 +99,18 @@ func main() {
 
 		// 3. Initiate plan
 		// cost_setting1 := [4]int{o1_cost, o2_cost, o3_cost, o4_cost}
-		Plan.Initiate_Plan()
+		sp, kp := Plan.Initiate_Plan()
+		
 		if show_plan {
 			Plan.Show_Plan()
 		}
 
-		
+		md := time.Now().Format("0102")
+		file_osro := fmt.Sprintf("%v --important_can %v --unimportant_can %v --input_tsn %v --input_avb %v.xlsx", 
+		md ,*&important_can, *&unimportant_can, *&input_tsn, *&input_avb)
+
+		algo.SaveOSROExcel(file_osro, sp, kp)
+
 		// 4. Cumulative quantity
 		// ------------------------------------------
 		// Memorizer.M_Cumulative(Plan)
