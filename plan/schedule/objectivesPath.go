@@ -18,11 +18,11 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 	var (
 		obj                  		[4]float64
 		cost                 		int		
-		avb_count					float64	  =0.
-		tsn_can_failed_count		int           = 0
-		avb_failed_count     		int           = 0 // O2
-		bandwidth_userate    		float64           = 0. // O3 ... pass
-		wcd_sum              		time.Duration     // O4
+		avb_count					float64	  			=0.
+		tsn_can_failed_count		int           		= 0
+		avb_failed_count     		int           		= 0 // O2
+		bandwidth_userate    		float64           	= 0. // O3 ... pass
+		wcd_sum              		time.Duration     	// O4
 	)
 	linkmap := map[string]float64{}
 
@@ -77,21 +77,20 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 	}
 	
 
-	// fmt.Printf("method=%s, used links=%d, totalBytes=%d\n", m, len(linkmap), bandwidth_userate)
+	// fmt.Printf("method=%s, used links=%d, totalBytes=%v \n", m, len(linkmap), bandwidth_userate)
 	// fmt.Println(linkmap)
-	obj[0] = float64(tsn_can_failed_count)       		// O1
-	obj[1] = float64(float64(avb_failed_count)/avb_count)           		// O2
-	obj[2] = bandwidth_userate   						// O3 
-	obj[3] = float64(wcd_sum / time.Microsecond) 		// O4
+	obj[0] = float64(tsn_can_failed_count+method_flow.CAN_Area_O1_Drop)       						// O1
+	obj[1] = float64(avb_failed_count)/avb_count          				// O2
+	obj[2] = float64(bandwidth_userate)									// O3 
+	obj[3] = float64(wcd_sum / time.Microsecond) 						// O4
 
 
 
 	cost += int(wcd_sum/time.Microsecond) * 1
 	cost += avb_failed_count * 1000000
 	cost += tsn_can_failed_count * 100000000
-	// fmt.Println("avb: ",(avb_count-obj[1])/avb_count)
-
-	// fmt.Println(linkmap)
+	// cost += len(linkmap) *1000
+	// cost += int(bandwidth_userate)
 	return obj, cost
 }
 
@@ -127,8 +126,8 @@ func schedulable(node *path.Node, parentID int, flow *flow.Flow, route *path.Pat
 			continue
 
 		} else {
+
 			// Duplex
-			
 			if !(link.FromNodeID == flow.Source || link.ToNodeID == flow.Destination) {
 				key := fmt.Sprintf("%d>%d", link.FromNodeID, link.ToNodeID)
 				for _,stream := range flow.Streams{

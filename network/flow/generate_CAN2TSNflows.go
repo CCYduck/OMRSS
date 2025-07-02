@@ -115,7 +115,7 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 			// fmt.Println(method, dst, len(sq.Streams))
 			// fmt.Println("Before ",can2tsnFlowSet.O1_Decap_Drop)
 			for currentTime := 0; currentTime < hyperperiod; currentTime += step {
-				// sq.sortQueue(method, currentTime)
+				sq.sortQueue(method, currentTime)
 				remaining := bytesPerStep
 				
 				i := 0
@@ -232,7 +232,7 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 			// fmt.Println(method, dst, len(sq.Streams))
 			// fmt.Println("Before ",can2tsnFlowSet.O1_Decap_Drop)
 			for currentTime := 0; currentTime < hyperperiod; currentTime += step {
-				// sq.sortQueue(method, currentTime)
+				sq.sortQueue(method, currentTime)
 				remaining := bytesPerStep
 				
 				i := 0
@@ -374,7 +374,7 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 			// fmt.Println(method, dst, len(sq.Streams))
 			// fmt.Println("Before ",can2tsnFlowSet.O1_Decap_Drop)
 			for currentTime := 0; currentTime < hyperperiod; currentTime += step {
-				// sq.sortQueue(method, currentTime)
+				sq.sortQueue(method, currentTime)
 				remaining := bytesPerStep
 				
 				i := 0
@@ -486,7 +486,7 @@ func (can2tsnFlowSet *CAN2TSN_Flow_Set) EncapsulateCAN2TSN(hyperperiod int, meth
 			// fmt.Println(method, dst, len(sq.Streams))
 			// fmt.Println("Before ",can2tsnFlowSet.O1_Decap_Drop)
 			for currentTime := 0; currentTime < hyperperiod; currentTime += step {
-				// sq.sortQueue("fifo", currentTime)
+				sq.sortQueue(method, currentTime)
 				remaining := bytesPerStep
 
 				i := 0
@@ -685,7 +685,17 @@ func (q *Queue) sortQueue(method string, current_time int) {
 			tj := q.Streams[j].FinishTime - current_time
 			return ti < tj
 		})
-
+	case "mat":
+		// WAT 根據剩餘時間
+		sort.SliceStable(q.Streams, func(i, j int) bool {
+			ti := q.Streams[i].FinishTime - current_time
+			tj := q.Streams[j].FinishTime - current_time
+			return ti < tj
+		})
+		// 2. 再按到达时间排（较早到达的放前面）
+		sort.SliceStable(q.Streams, func(i, j int) bool {
+			return q.Streams[i].ArrivalTime < q.Streams[j].ArrivalTime
+		})
 	default:
 		// 預設 FIFO
 		sort.Slice(q.Streams, func(i, j int) bool {
