@@ -80,9 +80,9 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 	// fmt.Printf("method=%s, used links=%d, totalBytes=%v \n", m, len(linkmap), bandwidth_userate)
 	// fmt.Println(linkmap)
 	obj[0] = float64(tsn_can_failed_count + method_flow.CAN_Area_O1_Drop)       						// O1
-	obj[1] = float64(avb_failed_count)          				// O2
-	obj[2] = float64(bandwidth_userate)									// O3 
-	obj[3] = float64(wcd_sum / time.Microsecond) 						// O4
+	obj[1] = float64(avb_failed_count)          								// O2
+	obj[2] = float64(bandwidth_userate/1e6)											// O3 
+	obj[3] = float64(wcd_sum / time.Microsecond) 								// O4
 
 
 
@@ -90,7 +90,7 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 	cost += avb_failed_count * 1000000
 	cost += tsn_can_failed_count * 100000000000
 	// cost += len(linkmap) *1000
-	cost += int(bandwidth_userate/1e6)
+	cost += int(bandwidth_userate/1e6)*1000
 	return obj, cost
 }
 

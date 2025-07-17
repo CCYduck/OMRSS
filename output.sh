@@ -7,10 +7,33 @@ for i in $(seq 1 1); do
     # go run main.go --topology_name typical_complex --plan_name osro --test_case 100 --important_can 20 --unimportant_can 100 --input_tsn 15 --input_avb 35
     # go run main.go --topology_name typical_complex --plan_name osro --test_case 100 --important_can 20 --unimportant_can 100 --input_tsn 18 --input_avb 42
 
-    go run main.go --topology_name typical_complex --plan_name osro --test_case 100 --important_can 20 --unimportant_can 100 --input_tsn 21 --input_avb 49
-    go run main.go --topology_name typical_complex --plan_name osro --test_case 100 --important_can 20 --unimportant_can 100 --input_tsn 24 --input_avb 56
     go run main.go --topology_name typical_complex --plan_name osro --test_case 100 --important_can 20 --unimportant_can 100 --input_tsn 27 --input_avb 63
     go run main.go --topology_name typical_complex --plan_name osro --test_case 100 --important_can 20 --unimportant_can 100 --input_tsn 30 --input_avb 70
     go run main.go --topology_name typical_complex --plan_name osro --test_case 100 --important_can 20 --unimportant_can 100 --input_tsn 33 --input_avb 77
     go run main.go --topology_name typical_complex --plan_name osro --test_case 100 --important_can 20 --unimportant_can 100 --input_tsn 36 --input_avb 84
+
+    go run main.go --topology_name typical_complex --plan_name osro --test_case 100 --important_can 30 --unimportant_can 150 --input_tsn 27 --input_avb 63
+    go run main.go --topology_name typical_complex --plan_name osro --test_case 100 --important_can 30 --unimportant_can 150 --input_tsn 30 --input_avb 70
+    go run main.go --topology_name typical_complex --plan_name osro --test_case 100 --important_can 30 --unimportant_can 150 --input_tsn 33 --input_avb 77
+    go run main.go --topology_name typical_complex --plan_name osro --test_case 100 --important_can 30 --unimportant_can 150 --input_tsn 36 --input_avb 84
+
+    go run main.go --topology_name typical_complex --plan_name osro --test_case 100 --important_can 40 --unimportant_can 200 --input_tsn 27 --input_avb 63
+    go run main.go --topology_name typical_complex --plan_name osro --test_case 100 --important_can 40 --unimportant_can 200 --input_tsn 30 --input_avb 70
+    go run main.go --topology_name typical_complex --plan_name osro --test_case 100 --important_can 40 --unimportant_can 200 --input_tsn 33 --input_avb 77
+    go run main.go --topology_name typical_complex --plan_name osro --test_case 100 --important_can 40 --unimportant_can 200 --input_tsn 36 --input_avb 84
+
+    go run main.go --topology_name typical_complex --plan_name osro --test_case 100 --important_can 50 --unimportant_can 250 --input_tsn 27 --input_avb 63
+    go run main.go --topology_name typical_complex --plan_name osro --test_case 100 --important_can 50 --unimportant_can 250 --input_tsn 30 --input_avb 70
+    go run main.go --topology_name typical_complex --plan_name osro --test_case 100 --important_can 50 --unimportant_can 250 --input_tsn 33 --input_avb 77
+    go run main.go --topology_name typical_complex --plan_name osro --test_case 100 --important_can 50 --unimportant_can 250 --input_tsn 36 --input_avb 84
+
+    go run main.go --topology_name typical_complex --plan_name osro --test_case 100 --important_can 60 --unimportant_can 300 --input_tsn 27 --input_avb 63
+    go run main.go --topology_name typical_complex --plan_name osro --test_case 100 --important_can 60 --unimportant_can 300 --input_tsn 30 --input_avb 70
+    go run main.go --topology_name typical_complex --plan_name osro --test_case 100 --important_can 60 --unimportant_can 300 --input_tsn 33 --input_avb 77
+    go run main.go --topology_name typical_complex --plan_name osro --test_case 100 --important_can 60 --unimportant_can 300 --input_tsn 36 --input_avb 84
+
+    go run main.go --topology_name typical_complex --plan_name osro --test_case 100 --important_can 70 --unimportant_can 350 --input_tsn 27 --input_avb 63
+    go run main.go --topology_name typical_complex --plan_name osro --test_case 100 --important_can 70 --unimportant_can 350 --input_tsn 30 --input_avb 70
+    go run main.go --topology_name typical_complex --plan_name osro --test_case 100 --important_can 70 --unimportant_can 350 --input_tsn 33 --input_avb 77
+    go run main.go --topology_name typical_complex --plan_name osro --test_case 100 --important_can 70 --unimportant_can 350 --input_tsn 36 --input_avb 84
 done
