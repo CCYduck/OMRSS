@@ -90,7 +90,7 @@ func OBJ(network *network.Network, X *path.KPath_Set, II *path.Path_set, II_prim
 	cost += avb_failed_count * 1000000
 	cost += tsn_can_failed_count * 100000000000
 	// cost += len(linkmap) *1000
-	cost += int(bandwidth_userate/1e6)*1000
+	cost += int(bandwidth_userate/1e6)*100
 	return obj, cost
 }
 
