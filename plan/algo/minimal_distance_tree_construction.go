@@ -1,6 +1,5 @@
 package algo
 
-
 import (
 	// "fmt"
 	"src/network"
@@ -19,7 +18,7 @@ import (
 // }
 
 func (SP *SP) SP_Run(network *network.Network) {
-	// 5. DistanceTree
+	// 6. ShortestPath
 	SP.Timer = algo_timer.NewTimer()
 	SP.Timer.TimerStart()
 	// mtdc.Trees = routes.Get_DistanceTree_Routing(network)
@@ -29,12 +28,10 @@ func (SP *SP) SP_Run(network *network.Network) {
 }
 
 func (KP *KP) KP_Run(network *network.Network) {
-	// 5. DistanceTree
+	// 7. KShortestPath
 	KP.Timer = algo_timer.NewTimer()
 	KP.Timer.TimerStart()
-	// mtdc.Trees = routes.Get_DistanceTree_Routing(network)
-	
+
 	KP.KPath = path.KShortestPath(network)
 	KP.Timer.TimerStop()
 }
-

@@ -45,7 +45,7 @@ var (
 
 func init() {
 	// Define Parameters
-	flag.IntVar(&test_case, "test_case", 100, "Conducting 50 experiments.")
+	flag.IntVar(&test_case, "test_case", 1, "Conducting 50 experiments.")
 	flag.StringVar(&topology_name, "topology_name", "typical_complex", "Topology architecture has typical_complex, typical_simple, ring, layered_ring and industrial.")
 	flag.IntVar(&input_tsn, "input_tsn", 35, "Number of TSN input flows.")
 	flag.IntVar(&input_avb, "input_avb", 15, "Number of AVB input flows.")
@@ -56,7 +56,7 @@ func init() {
 	flag.IntVar(&hyperperiod, "hyperperiod", 300000, "Greatest Common Divisor of Simulated Time LCM.")
 	flag.Float64Var(&bandwidth, "bandwidth", 1e9, "1 Gbps.")
 
-	flag.StringVar(&plan_name, "plan_name", "omaco", "The plan comprises omaco and osro.")
+	flag.StringVar(&plan_name, "plan_name", "osro", "The plan comprises omaco and osro.")
 	flag.IntVar(&osaco_timeout, "osaco_timeout", 200, "Timeout in milliseconds")
 	flag.IntVar(&osaco_K, "osaco_K", 5, "Select K trees with different weights.")
 	flag.Float64Var(&osaco_P, "osaco_P", 0.6, "The pheromone value of each routing path starts to evaporate, where P is the given evaporation coefficient. (0 <= p <= 1)")

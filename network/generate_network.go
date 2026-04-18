@@ -36,7 +36,7 @@ func (network *Network) Generate_Network() {
 	fmt.Println()
 	md := time.Now().Format("0102")
 
-	name := fmt.Sprintf("%v can2tsn_history important_can %v unimportant_can %v .xlsx",md ,network.Important_CAN ,network.Unimportant_CAN)
+	name := fmt.Sprintf("%v can2tsn_history important_can %v unimportant_can %v .xlsx", md, network.Important_CAN, network.Unimportant_CAN)
 	flow.SaveExcel(name, network.Flow_Set.Encapsulate)
 }
 
