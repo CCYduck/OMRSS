@@ -3,8 +3,9 @@ Simulate TSN and AVB data streams to find the best path in the topology. <br />
 <br />
 Taking advantage of the distinctions between the Schedulability, AVB Worst Case Delay, and Computation Time statistical algorithms. <br />
 <br />
-System design from: https://miro.com/welcomeonboard/ZDI1dEJWWGtsTEhCbWMwSm9oTTVhMTk5Y3BaZE83U0hZVDA1S3ZacHJCUmFVaEhhTzhSV0dNTWNMUWU3Mk11YXwzNDU4NzY0NTc0MzMzMTc0Mjg2fDI=?share_link_id=247038481052 <br />
-
+| System design |
+| --- |
+|![alt text](https://github.com/CCYduck/OMRSS/blob/can-encap/img/system_design.jpg)|
 ## Installation
 * Clone this repo by `git clone https://github.com/helgesander02/OMRSS`
 * Env setting `docker build -t 'omrss' .`  `docker run omrss`
@@ -53,7 +54,6 @@ More options:
 | --bg_avb | Number of AVB BG flows |
 | --input_tsn | Number of TSN Input flows |
 | --input_avb | Number of AVB Input flows |
-| --bandwidth | 1 Gbps |
 | --plan_name | The plan comprises OSRO |
 | --important_can|Number of Important CAN Input flows|
 | --unimportant_can 100|Number of Unimportant CAN Input flows|
