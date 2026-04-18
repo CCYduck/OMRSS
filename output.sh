@@ -6,6 +6,7 @@ for i in $(seq 1 1); do
     # go run main.go --topology_name typical_complex --plan_name osro --test_case 100 --important_can 20 --unimportant_can 100 --input_tsn 12 --input_avb 28
     # go run main.go --topology_name typical_complex --plan_name osro --test_case 100 --important_can 20 --unimportant_can 100 --input_tsn 15 --input_avb 35
     # go run main.go --topology_name typical_complex --plan_name osro --test_case 100 --important_can 20 --unimportant_can 100 --input_tsn 18 --input_avb 42
+    # go run main.go --topology_name typical_complex --plan_name osro --test_case 1 --important_can 20 --unimportant_can 100 --input_tsn 3 --input_avb 7
 
     go run main.go --topology_name typical_complex --plan_name osro --test_case 100 --important_can 20 --unimportant_can 100 --input_tsn 3 --input_avb 7
     go run main.go --topology_name typical_complex --plan_name osro --test_case 100 --important_can 20 --unimportant_can 100 --input_tsn 6 --input_avb 14

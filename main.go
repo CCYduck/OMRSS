@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"time"
+
 	// "path"
 	// "src/memorizer"
 	"src/network"
@@ -92,7 +93,7 @@ func main() {
 		if show_network {
 			Network.Show_Network()
 		}
-		
+
 		// 2. Create new plans (a.OMACO ... )
 		Plans := plan.New_Plans(Network, osaco_timeout, osaco_K, osaco_P)
 		Plan := Plans[plan_name]
@@ -100,13 +101,15 @@ func main() {
 		// 3. Initiate plan
 		// cost_setting1 := [4]int{o1_cost, o2_cost, o3_cost, o4_cost}
 		sp, kp := Plan.Initiate_Plan()
-		
+
 		md := time.Now().Format("0102")
-		file_osro := fmt.Sprintf("%v --important_can %v --unimportant_can %v --input_tsn %v --input_avb %v.xlsx", 
-		md ,*&important_can, *&unimportant_can, *&input_tsn, *&input_avb)
+		fmt.Sprintf("%v --important_can %v --unimportant_can %v --input_tsn %v --input_avb %v.xlsx",
+			md, *&important_can, *&unimportant_can, *&input_tsn, *&input_avb)
+
+		file_osro := fmt.Sprintf("%v --important_can %v --unimportant_can %v --input_tsn %v --input_avb %v.xlsx",
+			md, *&important_can, *&unimportant_can, *&input_tsn, *&input_avb)
 
 		algo.SaveOSROExcel(file_osro, sp, kp)
-
 
 		if show_plan {
 			Plan.Show_Plan()
@@ -116,7 +119,7 @@ func main() {
 		// Memorizer.M_Cumulative(Plan)
 		fmt.Println("\n****************************************")
 	}
-	
+
 	// 5. Average statistical results
 	// ---------------------------------
 	//Memorizer.M_Average(test_case)
