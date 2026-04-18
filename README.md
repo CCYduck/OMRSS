@@ -27,7 +27,7 @@ We consider a typical topology for TSN-based industrial factories <br />
 Quickstart: `sh output.sh` <br />
 <br />
 More options:
-| Option | Description |
+| OMSAO Option | Description |
 | -------- | ---- | 
 | --test_case | Conducting n experiments |
 | --topology_name | Topology architecture has typical_complex, typical_simple, ring, layered_ring and industrial |
@@ -45,6 +45,20 @@ More options:
 | --show_plan | Provide a comprehensive display of all plan information |
 | --store_data | Store all statistical data |
 
+| OSRO Option | Description |
+| -------- | ---- | 
+| --test_case | Conducting n experiments |
+| --topology_name | Topology architecture has typical_complex, typical_simple, ring, layered_ring and industrial |
+| --bg_tsn | Number of TSN BG flows |
+| --bg_avb | Number of AVB BG flows |
+| --input_tsn | Number of TSN Input flows |
+| --input_avb | Number of AVB Input flows |
+| --bandwidth | 1 Gbps |
+| --plan_name | The plan comprises OSRO |
+| --important_can|Number of Important CAN Input flows|
+| --unimportant_can 100|Number of Unimportant CAN Input flows|
+
+
 
 ## Reference
 * [Bang Ye Wu, Kun-Mao Chao, "Steiner Minimal Trees"](https://www.csie.ntu.edu.tw/~kmchao/tree10spr/Steiner.pdf)
@@ -54,6 +68,12 @@ More options:
 * [QINGHAN YU et al., "Online Scheduling for Dynamic VM Migration in Multicast Time-Sensitive Networks"](https://ieeexplore.ieee.org/document/8747398)
 * [Jiachen Wen  et al., "Online Updating in Multicast Time-Sensitive Networking"](https://ieeexplore.ieee.org/document/10258186)
 * [Xingbo Feng  et al., "Advancing TSN flow scheduling: An efficient framework without flow isolation constraint"](https://www.sciencedirect.com/science/article/pii/S1389128624005206#:~:text=Central%20to%20our%20approach%20is%20a)
+* [WENYAN Yan et al., "A conflict-free CAN-to-TSN scheduler for CAN-TSN gateway"](https://www.sciencedirect.com/science/article/abs/pii/S1383762124001255?via%3Dihub)
+* [Guoqi Xie et al., "A High-Flexibility CAN-TSN Gateway With a Low-Congestion TSN-to-CAN Scheduler"](https://ieeexplore.ieee.org/document/10129084)
+* [N. D. Zervas et al., "Designing a CAN-to-TSN Ethernet gateway"](https://can-cia.org/fileadmin/cia/documents/proceedings/2020_zervas_sousek_vrbka.pdf)
+* [Aldin Berisa et al., "Investigating and Analyzing CAN-to-TSN Gateway Forwarding Techniques"](https://ieeexplore.ieee.org/document/10196908)
+* [Christian Herber et al., "Real-Time Capable CAN to AVB Ethernet GatewayUsing Frame Aggregation and Scheduling"](https://ieeexplore.ieee.org/document/7092359)
+* [Haibo Zeng et al.,"Using Statistical Methods to Compute the Probability Distribution of Message Response Time in Controller Area Network"](https://ieeexplore.ieee.org/document/5518341)
 
 ## TODO
 * UnitTesting
